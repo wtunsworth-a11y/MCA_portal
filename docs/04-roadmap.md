@@ -7,13 +7,16 @@ vision is a **3–6 month** build.
 ## Phase 1 — Public map MVP  ·  ~2–4 weeks
 **Goal:** a public web map of Managalas / Oro that anyone can open.
 - [x] Repo scaffold, docs, architecture
+- [x] Portal **front page** linking to datasets, live data and archives
 - [x] MapLibre front-end with basemap switching
-- [x] Managalas boundary overlay (replace placeholder with authoritative WDPA/PNG boundary)
+- [x] Managalas boundary (authoritative WDPA, WDPAID 555651673) + **Oro Province** boundary
 - [x] Live forest-loss layer (Hansen tiles — keyless, working today)
+- [x] **Low-bandwidth resilience:** self-hosted assets; UI/vector layers driven off `style.load`
+      so they never wait on a slow basemap
 - [ ] Wire GEE-served layers via a tile endpoint: Topography (JAXA), Forest Cover/Change (TMF), Fire (FIRMS)
 - [ ] Attribution, legend, layer panel polish
 - [ ] Deploy to Cloudflare Pages
-**Deliverable:** a public URL showing boundaries, terrain, forest cover/change and fires.
+**Deliverable:** a public URL with a front page, map (boundaries, terrain, forest cover/change, fires).
 
 ## Phase 2 — GEE data pipeline  ·  ~3–5 weeks
 **Goal:** all eleven layers available as clipped, styled tiles.
@@ -23,13 +26,24 @@ vision is a **3–6 month** build.
 - [ ] Ingest curated layers to PostGIS: Soil (PNGRIS), Ecosystem Services (LUMENS), Crop Suitability (PNGLES), BASINS flows
 **Deliverable:** every thematic layer visible and legible on the public/preview map.
 
-## Phase 3 — Accounts & tiered access  ·  ~3–4 weeks
-**Goal:** login and role-based visibility.
+## Phase 2b — Document archives  ·  ~2–4 weeks (parallelisable)
+**Goal:** searchable, protected historical archives read inside the portal
+([`06-document-archives.md`](06-document-archives.md)).
+- [x] Front-end: search-first archives page + in-portal reader (no browse, no bulk download)
+- [ ] Server-side **search endpoint** over the OCR index (index stays off the client)
+- [ ] Streaming page-by-page document viewer (download disabled)
+- [ ] Ingest pipeline per archive (Managalas indexed; CSIRO, Kokoda, QABB, … to follow)
+**Deliverable:** users find and read documents without exposing the collection or file structure.
+
+## Phase 3 — Accounts, tiered access & usage logging  ·  ~3–4 weeks
+**Goal:** login, role-based visibility, and M&E usage capture.
 - [ ] Auth (Supabase or in-house)
 - [ ] Roles: public / registered / partner / admin ([`05-access-tiers.md`](05-access-tiers.md))
 - [ ] Row-level security so private layers (biodiversity precise locations, DAL crop data) are gated
 - [ ] Admin upload flow for curated layers
-**Deliverable:** registered/partner users see richer data; sensitive layers protected.
+- [ ] **Usage logging by tier** feeding the M&E dashboard ([`07-monitoring-evaluation.md`](07-monitoring-evaluation.md)):
+      aggregate public totals; attributed named-user detail; CSV/PDF export
+**Deliverable:** registered/partner users see richer data; sensitive layers protected; usage reportable.
 
 ## Phase 4 — Automated change detection & reporting  ·  ~4–8 weeks
 **Goal:** the portal *tells you* what changed.
@@ -49,9 +63,10 @@ vision is a **3–6 month** build.
 
 | Phase | Focus | Effort |
 |---|---|---|
-| 1 | Public map MVP | 2–4 weeks |
+| 1 | Public map MVP + front page | 2–4 weeks |
 | 2 | GEE pipeline (11 layers) | 3–5 weeks |
-| 3 | Accounts & tiers | 3–4 weeks |
+| 2b | Document archives (parallel) | 2–4 weeks |
+| 3 | Accounts, tiers & usage logging | 3–4 weeks |
 | 4 | Automated reporting | 4–8 weeks |
 | 5 | Hardening & handover | 2–3 weeks |
 | **Total** | | **~3.5–6 months** |

@@ -11,15 +11,23 @@ on land-use change and conservation issues.
 
 ## What this is
 
-Three systems in one portal:
+A front page leading into several systems:
 
 1. **Map viewer** — a public web map of Managalas / Oro showing boundaries, forest
    cover and near-real-time deforestation alerts, plus tiered access to richer
    layers for registered users.
-2. **Secure data store** — the portal's own layers (community boundaries, tenure,
+2. **Document archives** — OCR'd historical collections (Managalas, CSIRO, Kokoda,
+   QABB, …) that are **searchable and read inside the portal**, not browsable or
+   bulk-downloadable. See [`docs/06-document-archives.md`](docs/06-document-archives.md).
+3. **Secure data store** — the portal's own layers (community boundaries, tenure,
    field surveys) held privately with role-based access.
-3. **Change detection & reporting** — scheduled jobs that pull new satellite alerts,
+4. **Change detection & reporting** — scheduled jobs that pull new satellite alerts,
    detect forest loss / encroachment inside Oro, and generate regular reports.
+5. **Usage & M&E** — access-tier usage reporting (aggregate public totals; named-user
+   detail) for project monitoring. See [`docs/07-monitoring-evaluation.md`](docs/07-monitoring-evaluation.md).
+
+Everything is built for **slow connections**: assets are self-hosted, data is streamed/
+tiled rather than downloaded, and the UI never blocks on a slow basemap.
 
 ## Repository layout
 
@@ -31,15 +39,20 @@ MCA_portal/
 │   ├── 02-data-sources.md    ← free data feeds and how to use them
 │   ├── 03-hosting.md         ← CIFOR-ICRAF vs commercial cloud, costs
 │   ├── 04-roadmap.md         ← phased delivery plan & effort estimate
-│   └── 05-access-tiers.md    ← public / registered / partner / admin tiers
+│   ├── 05-access-tiers.md    ← public / registered / partner / admin tiers
+│   ├── 06-document-archives.md ← archives, OCR pipeline & protection model
+│   └── 07-monitoring-evaluation.md ← usage/M&E reporting by tier
 ├── prototype/                ← clickable UI mockup (no build step)
 │   └── index.html
-└── app/                      ← the real Phase-1 MVP web map
-    ├── index.html
-    ├── css/style.css
+└── app/                      ← the real Phase-1 MVP
+    ├── index.html            ← portal front page (datasets · live · archives)
+    ├── map.html              ← the map viewer
+    ├── library.html          ← document archives (search-first + in-portal reader)
+    ├── analytics.html        ← usage & M&E dashboard
+    ├── css/{site,style}.css
     ├── js/config.js          ← all data layers & keys configured here
-    ├── js/app.js
-    └── data/managalas.geojson
+    ├── js/{app,home,library,archives,analytics}.js
+    └── data/{managalas,oro_province}.geojson
 ```
 
 ## Quick start (run the MVP locally)
@@ -49,13 +62,14 @@ The MVP is a static site — no server or build step required.
 ```bash
 cd app
 python3 -m http.server 8000
-# open http://localhost:8000
+# open http://localhost:8000  → front page (index.html)
 ```
 
-It loads a working basemap, the Managalas boundary, and **live Hansen global
-forest-loss tiles** (free, no API key). Layers that need a key (Planet NICFI,
-GFW/RADD alerts) are wired in `app/js/config.js` and activate as soon as a key
-is supplied.
+The front page links to the **map** (`map.html`), the **archives** (`library.html`) and
+the **usage dashboard** (`analytics.html`). The map loads a working basemap, the Oro
+Province and Managalas boundaries, and **live Hansen global forest-loss tiles** (free,
+no API key). Layers that need a key (Planet NICFI, GFW/RADD alerts) are wired in
+`app/js/config.js` and activate as soon as a key is supplied.
 
 ## Deploy (free)
 

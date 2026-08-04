@@ -29,18 +29,17 @@
       '<div class="foot">' + badge(t.tier) + '<span class="arrow">→</span></div></a>';
   }).join("");
 
-  // Document teaser — 3 most recent public/registered docs.
-  var docs = (window.PORTAL_DOCS || []).slice()
-    .sort(function (a, b) { return a.date < b.date ? 1 : -1; })
-    .filter(function (d) { return d.tier !== "partner"; })
-    .slice(0, 3);
+  // Archive cards — the historical document collections.
   var TIER_DOT = { public: "#3ddc84", reg: "#4aa8ff", partner: "#f5b301" };
-  document.getElementById("docTeaser").innerHTML = docs.map(function (d) {
+  var reg = (window.PORTAL_ARCHIVES && window.PORTAL_ARCHIVES.registry) || [];
+  document.getElementById("archiveCards").innerHTML = reg.map(function (a) {
+    var indexed = a.status === "indexed";
     return '<a class="card" href="library.html">' +
-      '<div class="top"><span class="dot" style="background:' + TIER_DOT[d.tier] + '"></span>' +
-      '<span class="nm">' + d.title + "</span></div>" +
-      '<div class="src">' + d.desc + "</div>" +
-      '<div class="foot"><span class="badge">' + d.category + " · " + d.type +
+      '<div class="top"><span class="dot" style="background:' + TIER_DOT[a.tier] + '"></span>' +
+      '<span class="nm">' + a.name + "</span></div>" +
+      '<div class="src">' + a.blurb + "</div>" +
+      '<div class="foot"><span class="badge">' +
+      (indexed ? a.docs + " docs · " + a.pages + " pp" : "planned") +
       '</span><span class="arrow">→</span></div></a>';
   }).join("");
 })();

@@ -3,8 +3,8 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Document library — Oro Data Portal</title>
-  <meta name="description" content="Management plans, reports, research and agreements for the Managalas Conservation Area and Oro Province." />
+  <title>Document archives — Oro Data Portal</title>
+  <meta name="description" content="Search the Managalas, CSIRO, Kokoda and QABB document archives and read documents inside the portal." />
   <link rel="stylesheet" href="css/site.css" />
 </head>
 <body>
@@ -15,8 +15,8 @@
         <a href="index.html">Home</a>
         <a href="map.html">Map</a>
         <a href="index.html#live">Live data</a>
-        <a href="library.html" class="active">Documents</a>
-        <a href="index.html#access">Access</a>
+        <a href="library.html" class="active">Archives</a>
+        <a href="analytics.html">Usage</a>
       </nav>
       <span class="spacer"></span>
       <a class="tier-chip" href="index.html#access">Public access · Sign in</a>
@@ -25,30 +25,59 @@
 
   <div class="wrap">
     <div class="lib-head">
-      <h1>Document library</h1>
-      <p>Management plans, reports, research, agreements and downloadable data for Managalas &amp; Oro Province.</p>
+      <h1>Document archives</h1>
+      <p>Search the historical document collections for Managalas and its partners.
+        Documents open and are read <b>inside the portal</b>.</p>
+
+      <div class="arch-tabs" id="tabs"></div>
 
       <div class="lib-controls">
         <label class="search">
           <span aria-hidden="true">🔎</span>
-          <input id="q" type="search" placeholder="Search documents…" aria-label="Search documents" />
+          <input id="q" type="search" placeholder="Search titles, keywords and full text…" aria-label="Search the archives" autofocus />
         </label>
       </div>
-      <div class="chips" id="chips"></div>
+
+      <div class="protect">
+        <span aria-hidden="true">🔒</span>
+        <div><b>Searchable, not browsable.</b> The archives can be searched by keyword and read here in the
+          portal, but the full collection and its file structure are not listed or downloadable in bulk.
+          Documents stream page-by-page, so they open quickly on slow connections without saving to your device.</div>
+      </div>
     </div>
 
     <div class="result-meta" id="meta"></div>
-    <div class="doc-list" id="list"></div>
+    <div id="list"></div>
+  </div>
+
+  <!-- in-portal reader -->
+  <div class="reader" id="reader" aria-hidden="true">
+    <div class="scrim" id="scrim"></div>
+    <div class="panel" role="dialog" aria-modal="true" aria-label="Document reader">
+      <div class="rhead">
+        <div>
+          <div class="rt" id="rTitle">Document</div>
+          <div class="rsub" id="rSub"></div>
+        </div>
+        <button class="x" id="rClose" aria-label="Close reader">✕</button>
+      </div>
+      <div class="stage" id="rStage"></div>
+      <div class="rfoot">
+        <span class="lock">🔒 In-portal viewer</span>
+        <span>·</span><span>Streamed, view-only — bulk download disabled</span>
+        <span id="rBand" style="margin-left:auto"></span>
+      </div>
+    </div>
   </div>
 
   <footer class="site">
     <div class="wrap row">
-      <div>Oro Data Portal · Document library · Phase 1 (public MVP)</div>
-      <div>Access to registered and partner documents requires sign-in.</div>
+      <div>Oro Data Portal · Document archives · Phase 1 (public MVP)</div>
+      <div>Archives: Managalas · CSIRO · Kokoda · QABB · more to come</div>
     </div>
   </footer>
 
-  <script src="js/documents.js"></script>
+  <script src="js/archives.js"></script>
   <script src="js/library.js"></script>
 </body>
 </html>

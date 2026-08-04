@@ -1,0 +1,80 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Usage &amp; M&amp;E — Oro Data Portal</title>
+  <meta name="description" content="Portal usage by access tier for monitoring and evaluation reporting: aggregate public totals and detailed named-user activity." />
+  <link rel="stylesheet" href="css/site.css" />
+</head>
+<body>
+  <div class="nav">
+    <div class="wrap row">
+      <a class="brand" href="index.html"><span class="globe"></span> Oro Data Portal</a>
+      <nav class="links">
+        <a href="index.html">Home</a>
+        <a href="map.html">Map</a>
+        <a href="index.html#live">Live data</a>
+        <a href="library.html">Archives</a>
+        <a href="analytics.html" class="active">Usage</a>
+      </nav>
+      <span class="spacer"></span>
+      <a class="tier-chip" href="index.html#access">Admin view · M&amp;E</a>
+    </div>
+  </div>
+
+  <div class="wrap">
+    <div class="an-head">
+      <h1>Usage &amp; monitoring</h1>
+      <p>Access-tier reporting for project monitoring &amp; evaluation (M&amp;E). Aggregate totals for the
+        public portal; named-user detail for registered and partner accounts.</p>
+    </div>
+
+    <div class="kpis" id="kpis"></div>
+
+    <div class="panel-h"><h2>Public portal</h2><span class="hint">aggregate only — no login, no personal data</span></div>
+    <div class="grid2">
+      <div class="card-p"><h3>Activity by month</h3><div id="monthChart"></div>
+        <div class="legend">
+          <span><span class="sw" style="background:#5f7a6c"></span>Public visits</span>
+          <span><span class="sw" style="background:#4aa8ff"></span>Registered</span>
+          <span><span class="sw" style="background:#f5b301"></span>Partner</span>
+        </div>
+      </div>
+      <div class="card-p"><h3>Most-viewed datasets</h3><div id="datasetBars"></div></div>
+    </div>
+
+    <div class="grid2" style="margin-top:16px">
+      <div class="card-p"><h3>Top archive searches</h3><div id="searchBars"></div></div>
+      <div class="card-p"><h3>Public totals (last 30 days)</h3><div id="pubTotals"></div></div>
+    </div>
+
+    <div class="panel-h"><h2>Named users</h2><span class="hint">registered &amp; partner — detailed for M&amp;E reporting</span></div>
+    <div class="table-wrap">
+      <table class="users">
+        <thead><tr><th>User</th><th>Tier</th><th>Organisation</th>
+          <th style="text-align:right">Sessions</th><th style="text-align:right">Datasets</th>
+          <th style="text-align:right">Docs read</th><th>Last active</th></tr></thead>
+        <tbody id="userRows"></tbody>
+      </table>
+    </div>
+
+    <div class="mnote">
+      <b>How this works.</b> Usage events are logged server-side against the access tier. The public portal records
+      only <b>aggregate counts</b> (visits, dataset views, searches, documents read) with no personal data.
+      Registered and partner sign-ins are attributed to the named account so partner and donor reporting can show
+      who used what, when. Figures on this page are illustrative; production feeds from the portal's event log and
+      exports to CSV/PDF for reporting periods.
+    </div>
+  </div>
+
+  <footer class="site">
+    <div class="wrap row">
+      <div>Oro Data Portal · Usage &amp; M&amp;E · Phase 1 (public MVP)</div>
+      <div>Access-tier reporting for project monitoring &amp; evaluation</div>
+    </div>
+  </footer>
+
+  <script src="js/analytics.js"></script>
+</body>
+</html>
