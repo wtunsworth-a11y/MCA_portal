@@ -41,7 +41,8 @@ MCA_portal/
 │   ├── 04-roadmap.md         ← phased delivery plan & effort estimate
 │   ├── 05-access-tiers.md    ← public / registered / partner / admin tiers
 │   ├── 06-document-archives.md ← archives, OCR pipeline & protection model
-│   └── 07-monitoring-evaluation.md ← usage/M&E reporting by tier
+│   ├── 07-monitoring-evaluation.md ← usage/M&E reporting by tier
+│   └── 08-it-requirements.md  ← hosting ask for CIFOR-ICRAF IT (SO1 1.1 1.1-4)
 ├── prototype/                ← clickable UI mockup (no build step)
 │   └── index.html
 └── app/                      ← the real Phase-1 MVP
