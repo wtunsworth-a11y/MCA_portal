@@ -1,97 +1,91 @@
-# 05 · Access Tiers
+# 05 · Access Groups
 
-The portal offers a **public option plus tiered access** to richer and more sensitive
-data. Tiers are enforced in the backend (row-level security in PostGIS/Supabase), not
-just hidden in the UI.
+The portal has a **public base** plus **verified organisational groups**. Access is granted
+by **group membership** and enforced in the backend (not just hidden in the UI). Membership
+is **additive** — a user can belong to several groups and receives the union of their access.
 
-## Tiers
+## Groups
 
-### 1. Public (no login)
-Open to anyone. Curated, non-sensitive layers only.
-- Topography (JAXA), Forest Cover & Change (TMF), Fire (FIRMS)
-- Oro Province and Managalas (MCA) boundaries, protected-area zones
-- Weather normals (WorldClim), SOI status
-- Water base (catchments/waterways)
-- **Generalised** biodiversity (richness/hotspots) — *not* precise at-risk species locations
-- Public summary reports
+### Public (no login)
+Open to anyone, **including researchers**.
+- **View public data** only.
+- Run **Site analysis** on public layers, with **PDF** export.
+- No restricted layers, no archives.
 
-### 2. Registered (free login)
-Verified users (researchers, NGO staff, students).
-- Everything public, plus:
-- Near-real-time deforestation alerts (RADD / GFW integrated)
-- Higher-resolution imagery (NICFI archive)
-- Downloadable clips of public layers
-- Full report archive & subscriptions
+### OPG staff — Oro Provincial Government (verified)
+Everything public, plus:
+- **Site analysis** with any restricted overlays the user's groups allow
+- **SLUP** data (documents + spatial)
+- **Mining** concessions — *provisional; depends where the data is sourced from*
 
-### 3. Partner (agreement required)
-Government (DAL, Provincial Government), CIFOR-ICRAF partners, MCA management.
-- Everything registered, plus:
-- Soil (PNGRIS), Ecosystem Services (LUMENS), Crop Suitability (PNGLES + DAL)
-- Precise biodiversity records (PSP/NFI, threatened-species locations)
-- BASINS-modelled water flows
-- Data upload / contribution
+### Protected-area staff (verified, scoped per PA)
+Everything public, plus:
+- **Their own protected area's** data and archive — scoped by **WDPA identifier**.
+  PA identifiers are sourced from **CEPA** using WDPA data.
+- Example: **MCF staff → Managalas (MCA) archive**. Staff of another PA see only theirs.
 
-### 4. Admin
-Portal operators.
-- Manage users, roles and data-sharing agreements
-- Publish/curate layers, configure the reporting engine
+### PFMC members & PNGFA staff (verified)
+Everything public, plus:
+- **PFMP** data (documents + spatial)
+
+### Admin (portal operators)
+- Manage users, **verify accounts**, assign groups and PA scope
+- Publish/curate layers, configure the site tool and reporting
 - Audit logs
 
-## Tier-by-layer matrix
+> **LUMENS** placement is **to be decided** once the final LUMENS data layers are produced.
 
-| Layer | Public | Registered | Partner | Admin |
-|---|:--:|:--:|:--:|:--:|
-| Topography (JAXA) | ✅ | ✅ | ✅ | ✅ |
-| Forest Cover/Change (TMF) | ✅ | ✅ | ✅ | ✅ |
-| Fire (FIRMS) | ✅ | ✅ | ✅ | ✅ |
-| Weather (WorldClim) / SOI | ✅ | ✅ | ✅ | ✅ |
-| Water base (catchments/waterways) | ✅ | ✅ | ✅ | ✅ |
-| Biodiversity — generalised | ✅ | ✅ | ✅ | ✅ |
-| NRT alerts (RADD/GFW) | — | ✅ | ✅ | ✅ |
-| NICFI hi-res archive | — | ✅ | ✅ | ✅ |
-| Soil (PNGRIS) | — | — | ✅ | ✅ |
-| Ecosystem Services (LUMENS) | — | — | ✅ | ✅ |
-| Crop Suitability (PNGLES/DAL) | — | — | ✅ | ✅ |
-| Biodiversity — precise locations | — | — | ✅ | ✅ |
-| Water — BASINS flows | — | — | ✅ | ✅ |
+## Group-by-data matrix
 
-## Restricted access groups (compartments)
+| Data | Public | OPG | PA staff *(own PA)* | PFMC / PNGFA | Admin |
+|---|:--:|:--:|:--:|:--:|:--:|
+| Public layers (topography, forest cover/change, fire, weather, water base, generalised biodiversity) | ✅ | ✅ | ✅ | ✅ | ✅ |
+| Site analysis tool (public layers) | ✅ | ✅ | ✅ | ✅ | ✅ |
+| SLUP (docs + spatial) | — | ✅ | — | — | ✅ |
+| PFMP (docs + spatial) | — | — | — | ✅ | ✅ |
+| PA archive & data | — | — | ✅ *(own PA)* | — | ✅ |
+| Mining concessions | — | ✅ *(provisional)* | — | — | ✅ |
+| LUMENS | — | *TBD* | — | *TBD* | ✅ |
+| Precise / sensitive biodiversity locations | — | *per source* | *own PA* | — | ✅ |
 
-Tiers above are a **ladder** — each step includes the one below. Some datasets don't fit
-a ladder: they are **need-to-know compartments** granted per group, independent of tier. A
-user may belong to one compartment and not another, and membership controls **both the
-documents and the spatial layers** for that theme. Someone can hold the SLUP compartment
-but not PFMP, or the document archive for a theme but not its spatial layer.
+Refine the biodiversity and LUMENS rows once data sources are settled.
 
-| Compartment | Covers (documents **and** spatial) | Source / becomes available when | Granted to |
-|---|---|---|
-| **SLUP** | Sustainable Land Use Plan working data — incl. any SABL / customary-lease boundaries surfaced during planning | Produced during SLUP preparation | SLUP team + named partners |
-| **PFMP** | Provincial Forest Management Plan data — incl. logging concession boundaries | Produced when the PFMP is written | PFMP team + named partners |
-| **LUMENS** | LUMENS model inputs/outputs (ecosystem-service & carbon layers, working files) | ICRAF LUMENS workflow | LUMENS modellers + named partners |
-| **Mining** | Mining concession / tenement boundaries | May become available via the Provincial Government | Named partners |
+## Verification
 
-Principles for compartments:
+- **Admin verification (default).** Admin approves each account and assigns its group(s) and
+  any PA scope.
+- **Self-verification by trusted email domain (where available).** A person signing up with an
+  **OPG-domain email** confirms it via a link and is **auto-assigned the OPG group** — no
+  manual step. The same pattern extends to any organisation with a controlled domain (PNGFA;
+  MCF → MCA scope; etc.): *domain → group* (and → PA scope where relevant).
+  - Guardrails: verify by **confirmation link** (proves mailbox control, not just a typed
+    address); Admin can override/revoke; handle shared mailboxes and departed staff via
+    periodic re-verification/review; orgs without a clean domain fall back to manual Admin
+    verification.
+- This is part of the **DICT** rollout liaison.
 
-- **Orthogonal to tiers.** Compartment membership is granted explicitly per user, not
-  earned by climbing the tier ladder. Even a Partner-tier user sees a compartment only if
-  added to that group.
-- **Documents and spatial together.** A compartment gates its whole theme — the archive
-  documents *and* the map layers — so access stays consistent across the portal.
-- **Per-archive granularity.** Membership is per compartment, so one user may have several
-  archives open and another just one.
-- **Least privilege by default.** New users get none of these; they are added deliberately,
-  with the grant recorded against the relevant data-sharing agreement.
+## Data handling — nothing stored per user
 
-> **Rollout note — DICT.** We will need to **liaise with the Department of Information &
-> Communications Technology (DICT)** on the rollout of this access model (user provisioning,
-> data-sharing governance and any hosting/security requirements on the PNG side).
+- **No per-user data is stored.** Uploaded polygons and generated maps/reports are
+  **transient**: created in memory per request, delivered, then discarded. There is **no
+  server-side history** — a user re-runs an analysis to regenerate it (cheap, live compute,
+  deterministic for the same AOI).
+- **Processing runs in Google Earth Engine** (not on CIFOR-ICRAF infrastructure). AOI
+  geometry is sent to GEE transiently for computation and is **not persisted** by the portal.
+
+## Report delivery (Site analysis)
+
+- **PDF** for everyone (public + verified).
+- **DOCX** additionally for **registered (verified) users**.
+- Delivered by **download** (streamed, nothing kept) or **email to the verified account**
+  (institutional SMTP) — email suits slow connections. Screenshot is the informal fallback.
 
 ## Sensitivity principles
 
-- **Protect at-risk species.** Precise locations of threatened or harvestable species
-  are partner-tier only; the public sees generalised richness. This prevents the portal
-  from becoming a targeting tool for poaching or unauthorised harvest.
-- **Respect data agreements.** National/partner datasets (PNGRIS, PNGLES, NFI, DAL)
-  are shared under agreements; tiering enforces those terms.
-- **Community data.** Community boundaries and tenure are sensitive; expose only with
-  consent and at the appropriate tier.
+- **Protect at-risk species / sensitive locations.** Precise locations remain restricted to
+  the appropriate group; the public sees generalised richness/hotspots.
+- **Respect data agreements.** National/partner datasets are shared under agreement; group
+  membership enforces the terms.
+- **Community & tenure data.** Sensitive; exposed only to the appropriate group and with consent.
+- **Least privilege.** New users start with public access only; groups are added deliberately
+  and recorded against the relevant data-sharing agreement.
