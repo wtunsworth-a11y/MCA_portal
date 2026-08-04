@@ -1,0 +1,54 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Document library — Oro Data Portal</title>
+  <meta name="description" content="Management plans, reports, research and agreements for the Managalas Conservation Area and Oro Province." />
+  <link rel="stylesheet" href="css/site.css" />
+</head>
+<body>
+  <div class="nav">
+    <div class="wrap row">
+      <a class="brand" href="index.html"><span class="globe"></span> Oro Data Portal</a>
+      <nav class="links">
+        <a href="index.html">Home</a>
+        <a href="map.html">Map</a>
+        <a href="index.html#live">Live data</a>
+        <a href="library.html" class="active">Documents</a>
+        <a href="index.html#access">Access</a>
+      </nav>
+      <span class="spacer"></span>
+      <a class="tier-chip" href="index.html#access">Public access · Sign in</a>
+    </div>
+  </div>
+
+  <div class="wrap">
+    <div class="lib-head">
+      <h1>Document library</h1>
+      <p>Management plans, reports, research, agreements and downloadable data for Managalas &amp; Oro Province.</p>
+
+      <div class="lib-controls">
+        <label class="search">
+          <span aria-hidden="true">🔎</span>
+          <input id="q" type="search" placeholder="Search documents…" aria-label="Search documents" />
+        </label>
+      </div>
+      <div class="chips" id="chips"></div>
+    </div>
+
+    <div class="result-meta" id="meta"></div>
+    <div class="doc-list" id="list"></div>
+  </div>
+
+  <footer class="site">
+    <div class="wrap row">
+      <div>Oro Data Portal · Document library · Phase 1 (public MVP)</div>
+      <div>Access to registered and partner documents requires sign-in.</div>
+    </div>
+  </footer>
+
+  <script src="js/documents.js"></script>
+  <script src="js/library.js"></script>
+</body>
+</html>

@@ -3,40 +3,131 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Oro Data Portal — Managalas Conservation Area</title>
-  <link rel="stylesheet" href="vendor/maplibre-gl.css" />
-  <link rel="stylesheet" href="css/style.css" />
+  <title>Oro Data Portal — Managalas Conservation Area &amp; Oro Province</title>
+  <meta name="description" content="Land use and conservation data for the Managalas Conservation Area and Oro Province, Papua New Guinea: interactive maps, live monitoring, and a document library." />
+  <link rel="stylesheet" href="css/site.css" />
 </head>
 <body>
-  <div id="app">
-    <aside id="sidebar">
-      <header>
-        <h1>Oro Data Portal</h1>
-        <p>Managalas Conservation Area &amp; Oro Province — land use and conservation data.</p>
-        <span class="pill">Phase 1 · Public MVP</span>
-      </header>
-
-      <div class="controls">
-        <label for="basemap">Basemap</label>
-        <select id="basemap"></select>
-        <button id="boundary-btn" title="Zoom to Managalas">⌖ Managalas</button>
-      </div>
-
-      <div id="layers"></div>
-
-      <footer>
-        Data: Hansen/UMD/Google/USGS/NASA · JRC · JAXA · NASA FIRMS · Planet NICFI ·
-        WWF HydroSHEDS · WorldClim · Esri/OSM.<br />
-        Boundary shown is indicative until the authoritative WDPA/PNG boundary is loaded.
-        Keyed layers (NICFI, RADD) and GEE endpoints are configured in
-        <code>js/config.js</code>.
-      </footer>
-    </aside>
-    <div id="map"></div>
+  <!-- NAV -->
+  <div class="nav">
+    <div class="wrap row">
+      <a class="brand" href="index.html"><span class="globe"></span> Oro Data Portal</a>
+      <nav class="links">
+        <a href="index.html" class="active">Home</a>
+        <a href="map.html">Map</a>
+        <a href="index.html#live">Live data</a>
+        <a href="library.html">Documents</a>
+        <a href="index.html#access">Access</a>
+      </nav>
+      <span class="spacer"></span>
+      <a class="tier-chip" href="index.html#access">Public access · Sign in</a>
+    </div>
   </div>
 
-  <script src="vendor/maplibre-gl.js"></script>
-  <script src="js/config.js"></script>
-  <script src="js/app.js"></script>
+  <!-- HERO -->
+  <header class="hero">
+    <div class="wrap">
+      <div class="eyebrow">Managalas Conservation Area · Oro Province · Papua New Guinea</div>
+      <h1>Conservation &amp; land-use data for Managalas and Oro Province</h1>
+      <p class="lede">One place to explore forests, water, biodiversity and change over time —
+        drawing on free satellite data and the region's own datasets, with live monitoring
+        and a shared document library.</p>
+      <div class="cta-row">
+        <a class="btn primary" href="map.html">Open the map →</a>
+        <a class="btn ghost" href="library.html">Browse documents</a>
+      </div>
+      <div class="statbar">
+        <div class="s"><div class="n">2,147 km²</div><div class="l">Managalas Conservation Area</div></div>
+        <div class="s"><div class="n">11</div><div class="l">thematic datasets</div></div>
+        <div class="s"><div class="n">Live</div><div class="l">fire &amp; deforestation alerts</div></div>
+        <div class="s"><div class="n">2017</div><div class="l">MCA designated</div></div>
+      </div>
+    </div>
+  </header>
+
+  <!-- DATASETS -->
+  <section class="blk" id="data">
+    <div class="wrap">
+      <div class="sec-h">
+        <div><h2>Explore the data</h2><p>Eleven themes, most served free via Google Earth Engine. Open any one in the map.</p></div>
+        <a class="more" href="map.html">Open full map →</a>
+      </div>
+      <div class="cards" id="datasetCards"></div>
+    </div>
+  </section>
+
+  <!-- LIVE -->
+  <section class="blk" id="live">
+    <div class="wrap">
+      <div class="sec-h">
+        <div><h2>Live monitoring</h2><p>Near-real-time signals for the Managalas boundary and Oro Province.</p></div>
+        <a class="more" href="map.html">See on map →</a>
+      </div>
+      <div class="live-cards">
+        <div class="live-card">
+          <div class="lh"><span class="blip"></span> Deforestation alerts</div>
+          <div class="big" style="color:var(--loss)">31</div>
+          <div class="sub">RADD radar alerts · last 30 days · MCA + 5 km</div>
+          <a class="lnk" href="map.html">Open forest-change layers →</a>
+        </div>
+        <div class="live-card">
+          <div class="lh"><span class="blip"></span> Fire reports</div>
+          <div class="big" style="color:var(--fire)">7</div>
+          <div class="sub">VIIRS/MODIS active fires · last 30 days (NASA FIRMS)</div>
+          <a class="lnk" href="map.html">Open fire layer →</a>
+        </div>
+        <div class="live-card">
+          <div class="lh"><span class="blip"></span> Southern Oscillation Index</div>
+          <div class="big" style="color:var(--water)">−8.2</div>
+          <div class="sub">El Niño watch · drier-phase fire risk (Australian BoM)</div>
+          <svg class="spark" viewBox="0 0 260 40" preserveAspectRatio="none" aria-hidden="true">
+            <line x1="0" y1="20" x2="260" y2="20" stroke="#24352c" stroke-dasharray="3 3"/>
+            <polyline fill="none" stroke="#4aa8ff" stroke-width="1.6"
+              points="0,12 22,9 44,16 66,14 88,20 110,18 132,24 154,22 176,28 198,26 220,32 242,31 260,35"/>
+          </svg>
+        </div>
+      </div>
+      <p class="sub" style="color:var(--faint);font-size:12.5px;margin-top:12px">
+        Figures are illustrative in this Phase-1 build. In production they are refreshed by a scheduled
+        Google Earth Engine job and the FIRMS / RADD / BoM feeds.
+      </p>
+    </div>
+  </section>
+
+  <!-- DOCUMENTS -->
+  <section class="blk" id="docs">
+    <div class="wrap">
+      <div class="sec-h">
+        <div><h2>Document library</h2><p>Management plans, reports, research and agreements for Managalas &amp; Oro.</p></div>
+        <a class="more" href="library.html">Open library →</a>
+      </div>
+      <div class="cards" id="docTeaser"></div>
+    </div>
+  </section>
+
+  <!-- ACCESS -->
+  <section class="blk" id="access">
+    <div class="wrap">
+      <div class="sec-h"><div><h2>Access tiers</h2><p>Public data is open to all; richer and sensitive layers sit behind sign-in.</p></div></div>
+      <div class="tiers-grid">
+        <div class="tier-box"><h3>Public</h3><div class="who">No login</div>
+          <ul><li>Topography, forest cover &amp; change</li><li>Fire, weather, water base</li><li>Generalised biodiversity</li><li>Summary reports</li></ul></div>
+        <div class="tier-box"><h3>Registered</h3><div class="who">Free account</div>
+          <ul><li>Near-real-time alerts (RADD)</li><li>Hi-res NICFI imagery</li><li>Layer downloads</li><li>Report subscriptions</li></ul></div>
+        <div class="tier-box"><h3>Partner</h3><div class="who">Agreement required</div>
+          <ul><li>Soil (PNGRIS), LUMENS</li><li>Crop suitability (PNGLES/DAL)</li><li>Precise species records</li><li>Data contribution</li></ul></div>
+      </div>
+    </div>
+  </section>
+
+  <footer class="site">
+    <div class="wrap row">
+      <div>Oro Data Portal · Managalas Conservation Area &amp; Oro Province, PNG · Phase 1 (public MVP)</div>
+      <div>Data: WDPA · JRC · JAXA · Hansen/UMD · NASA FIRMS · Planet NICFI · WorldClim · WWF HydroSHEDS · BoM</div>
+    </div>
+  </footer>
+
+  <script src="js/documents.js"></script>
+  <script src="js/home.js"></script>
 </body>
 </html>

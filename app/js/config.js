@@ -48,6 +48,13 @@ window.PORTAL_CONFIG = {
   // `requiresKey` / `requiresEndpoint` → wired but inactive until configured
   layers: [
     {
+      id: "province", theme: "Boundaries", name: "Oro (Northern) Province",
+      kind: "geojson", url: "data/oro_province.geojson", live: true, visible: true,
+      style: { color: "#7fd1ff", weight: 1.6, dash: [5, 4], fill: "rgba(127,209,255,0.04)" },
+      attribution: "Oro Province administrative boundary",
+      note: "Provincial extent — the portal's wider Oro Province coverage."
+    },
+    {
       id: "boundary", theme: "Boundaries", name: "Managalas Conservation Area",
       kind: "geojson", url: "data/managalas.geojson", live: true, visible: true,
       style: { color: "#ffd54a", weight: 2.5, fill: "rgba(255,213,74,0.08)" },

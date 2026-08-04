@@ -56,9 +56,10 @@
         map.addLayer({ id: "lyr-" + l.id + "-fill", type: "fill", source: "src-" + l.id,
           paint: { "fill-color": l.style.fill, "fill-outline-color": l.style.color },
           layout: { visibility: l.visible ? "visible" : "none" } });
+        var linePaint = { "line-color": l.style.color, "line-width": l.style.weight };
+        if (l.style.dash) linePaint["line-dasharray"] = l.style.dash;
         map.addLayer({ id: "lyr-" + l.id, type: "line", source: "src-" + l.id,
-          paint: { "line-color": l.style.color, "line-width": l.style.weight },
-          layout: { visibility: l.visible ? "visible" : "none" } });
+          paint: linePaint, layout: { visibility: l.visible ? "visible" : "none" } });
       });
     }
   }
@@ -109,12 +110,27 @@
     });
   }
 
-  map.on("load", function () {
+  // Add data layers once the style is parsed. We key off "style.load" rather
+  // than "load": "load" waits for the first full tile render, so on a slow or
+  // unreachable basemap it can stall for a long time — we never want the layer
+  // panel or the vector boundaries to wait on basemap tiles (important for the
+  // low-bandwidth connections this portal must serve).
+  function addDataLayers() {
     CFG.layers.forEach(function (l) { if (layerState(l).usable) addLayer(l); });
-    buildPanel();
-    buildBasemapSwitch();
-    document.getElementById("boundary-btn").addEventListener("click", function () {
-      map.flyTo({ center: CFG.view.center, zoom: CFG.view.zoom });
-    });
+  }
+  if (map.isStyleLoaded && map.isStyleLoaded()) addDataLayers();
+  else map.on("style.load", addDataLayers);
+
+  // The sidebar UI only reads config + the DOM, so build it immediately —
+  // it must be usable even if the basemap never finishes loading.
+  buildPanel();
+  buildBasemapSwitch();
+  document.getElementById("boundary-btn").addEventListener("click", function () {
+    map.flyTo({ center: CFG.view.center, zoom: CFG.view.zoom });
+  });
+  var provBtn = document.getElementById("province-btn");
+  if (provBtn) provBtn.addEventListener("click", function () {
+    // Oro (Northern) Province bounds [SW, NE]
+    map.fitBounds([[147.00, -9.98], [149.44, -8.00]], { padding: 30 });
   });
 })();
