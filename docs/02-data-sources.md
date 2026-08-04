@@ -126,6 +126,34 @@ Used as basemaps and to power the reporting engine, in addition to the eleven la
 - **RADD / GFW integrated / GLAD-S2 alerts** — free near-real-time deforestation
   alerts; RADD's radar basis is the key advantage under PNG's persistent cloud.
 
+## Additional & candidate layers
+
+Beyond the eleven commissioned layers, these are proposed additions. Free/GEE-served ones
+fit the zero-cost in-house model with no new procurement.
+
+### Roads — OpenStreetMap
+- **Source:** OpenStreetMap road & track network. Free, continuously updated.
+- **Access:** OSM extracts (Geofabrik / Overpass) clipped to Oro, served as a vector layer.
+- **Why:** new/logging roads are the leading indicator of encroachment. The reporting
+  engine already reasons about "near roads"; OSM supplies the actual network to measure
+  against. **Confirmed as a wanted addition.**
+
+### Conservation threat layers (compartmentalised)
+
+These are high-value for a conservation portal but are **sensitive and not openly published**.
+Each maps to a restricted access group in [`05-access-tiers.md`](05-access-tiers.md), and
+each becomes available through a specific project process rather than a public feed.
+
+| Layer | Availability | Provenance notes | Access group |
+|---|---|---|---|
+| **SABL / customary-lease boundaries** | Not usually public; expected to surface during **SLUP** preparation | No authoritative open GIS layer. Indicative sources only: PNG Forests Portal (`pngforests.com/sabl`, advocacy), Global Forest Watch PNG land-use layers, PNG Environment Data Portal (`png-data.sprep.org`), SABL Commission of Inquiry reports. Treat as approximate until SLUP field-verifies. | **SLUP** |
+| **Logging concessions** | Becomes available when the **PFMP** is written | GFW carries a derived PNG logging-concession layer; authoritative boundaries come with the Provincial Forest Management Plan. | **PFMP** |
+| **Mining concessions / tenements** | May become available via the **Provincial Government** | Source and licensing to be confirmed with the Province. | **Mining** |
+
+> **Rollout note — DICT.** Provisioning these restricted layers and their user groups will
+> require liaison with the **Department of Information & Communications Technology (DICT)**.
+> See [`05-access-tiers.md`](05-access-tiers.md).
+
 ## Access summary
 
 | Access method | Layers |
