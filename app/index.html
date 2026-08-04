@@ -1,0 +1,42 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Oro Data Portal — Managalas Conservation Area</title>
+  <link rel="stylesheet" href="vendor/maplibre-gl.css" />
+  <link rel="stylesheet" href="css/style.css" />
+</head>
+<body>
+  <div id="app">
+    <aside id="sidebar">
+      <header>
+        <h1>Oro Data Portal</h1>
+        <p>Managalas Conservation Area &amp; Oro Province — land use and conservation data.</p>
+        <span class="pill">Phase 1 · Public MVP</span>
+      </header>
+
+      <div class="controls">
+        <label for="basemap">Basemap</label>
+        <select id="basemap"></select>
+        <button id="boundary-btn" title="Zoom to Managalas">⌖ Managalas</button>
+      </div>
+
+      <div id="layers"></div>
+
+      <footer>
+        Data: Hansen/UMD/Google/USGS/NASA · JRC · JAXA · NASA FIRMS · Planet NICFI ·
+        WWF HydroSHEDS · WorldClim · Esri/OSM.<br />
+        Boundary shown is indicative until the authoritative WDPA/PNG boundary is loaded.
+        Keyed layers (NICFI, RADD) and GEE endpoints are configured in
+        <code>js/config.js</code>.
+      </footer>
+    </aside>
+    <div id="map"></div>
+  </div>
+
+  <script src="vendor/maplibre-gl.js"></script>
+  <script src="js/config.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>

@@ -1,0 +1,344 @@
+<meta charset="utf-8" />
+<title>Oro Data Portal — Prototype</title>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<style>
+  /* Deliberate single-theme "operations console": forest-monitoring tools
+     (Global Forest Watch, Earth Engine) live in a dark satellite world, so
+     this mockup commits to it rather than inventing a light variant. */
+  :root {
+    --ground: #0c1310;      /* forest-biased near-black, not pure grey */
+    --panel:  #121c17;
+    --panel2: #182620;
+    --line:   #24352c;
+    --ink:    #e9f1ec;
+    --muted:  #8ba597;
+    --faint:  #5f7a6c;
+    --amber:  #f5b301;      /* MCA boundary / field signal (accent) */
+    --canopy: #2ea56b;      /* forest cover */
+    --loss:   #ff4d4d;      /* forest loss */
+    --radd:   #e05cff;      /* RADD radar alerts */
+    --fire:   #ff8c42;      /* active fire */
+    --water:  #4aa8ff;      /* hydrology */
+    --good:   #3ddc84; --warn: #ffb43d; --crit: #ff5470;
+    --mono: ui-monospace, "SF Mono", "Cascadia Code", Menlo, Consolas, monospace;
+    --sans: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; height: 100%; }
+  body {
+    font-family: var(--sans); color: var(--ink); background: var(--ground);
+    font-size: 14px; line-height: 1.5; -webkit-font-smoothing: antialiased;
+  }
+  .app { display: grid; grid-template-columns: 288px 1fr 320px; grid-template-rows: auto 1fr; height: 100vh; }
+
+  /* ---- top bar ---- */
+  .top { grid-column: 1 / -1; display: flex; align-items: center; gap: 18px;
+    padding: 10px 18px; background: var(--panel); border-bottom: 1px solid var(--line); }
+  .brand { display: flex; align-items: baseline; gap: 10px; }
+  .brand b { font-size: 15px; letter-spacing: .01em; }
+  .brand .sub { color: var(--muted); font-size: 12px; }
+  .tiers { display: flex; gap: 4px; margin-left: 8px; background: var(--ground);
+    border: 1px solid var(--line); border-radius: 999px; padding: 3px; }
+  .tier { border: 0; background: transparent; color: var(--muted); font: inherit;
+    font-size: 12px; padding: 4px 12px; border-radius: 999px; cursor: pointer; display: flex; align-items: center; gap: 5px; }
+  .tier[aria-pressed="true"] { background: var(--amber); color: #221a00; font-weight: 600; }
+  .top .spacer { flex: 1; }
+  .top .who { font-size: 12px; color: var(--muted); font-family: var(--mono); }
+  .top .who b { color: var(--ink); }
+
+  /* ---- left rail: layers ---- */
+  .rail { background: var(--panel); border-right: 1px solid var(--line); overflow-y: auto; }
+  .rail-h { padding: 12px 16px 6px; font-size: 11px; letter-spacing: .08em;
+    text-transform: uppercase; color: var(--faint); position: sticky; top: 0; background: var(--panel); }
+  .theme { padding: 3px 10px; }
+  .theme > .th { display: flex; align-items: center; gap: 7px; padding: 6px 6px 4px;
+    font-size: 11px; letter-spacing: .05em; text-transform: uppercase; color: var(--muted); }
+  .theme > .th .dot { width: 7px; height: 7px; border-radius: 50%; }
+  .lyr { display: flex; align-items: center; gap: 9px; padding: 6px 8px; border-radius: 7px; cursor: pointer; }
+  .lyr:hover { background: var(--panel2); }
+  .lyr input { accent-color: var(--amber); width: 15px; height: 15px; cursor: pointer; }
+  .lyr .nm { flex: 1; font-size: 13px; }
+  .lyr .sw { width: 12px; height: 12px; border-radius: 3px; border: 1px solid rgba(255,255,255,.18); }
+  .lyr.locked { color: var(--faint); cursor: not-allowed; }
+  .lyr.locked .nm { color: var(--faint); }
+  .lyr .lock { font-size: 11px; color: var(--faint); }
+  .lyr .tierbadge { font-size: 9.5px; font-family: var(--mono); color: var(--muted);
+    border: 1px solid var(--line); border-radius: 4px; padding: 0 4px; }
+
+  /* ---- center: map ---- */
+  .map { position: relative; background:
+      radial-gradient(120% 90% at 30% 10%, #16261d 0%, #0b1410 55%, #08100c 100%); overflow: hidden; }
+  .map svg { position: absolute; inset: 0; width: 100%; height: 100%; }
+  .grp { transition: opacity .25s ease; }
+  .grp.off { opacity: 0; pointer-events: none; }
+  .boundary { fill: rgba(245,179,1,.06); stroke: var(--amber); stroke-width: 2.2; }
+  .canopy-fill { fill: url(#canopy); }
+  .river { fill: none; stroke: var(--water); stroke-width: 1.6; opacity: .8; }
+  .catch { fill: none; stroke: var(--water); stroke-width: 1; stroke-dasharray: 4 4; opacity: .4; }
+  .loss { fill: var(--loss); }
+  .radd { fill: none; stroke: var(--radd); stroke-width: 1.6; }
+  .fire { fill: var(--fire); filter: drop-shadow(0 0 4px var(--fire)); }
+  .mk { cursor: pointer; transition: r .1s; }
+
+  .hud { position: absolute; pointer-events: none; font-family: var(--mono); font-size: 11px; color: var(--muted); }
+  .hud.tl { top: 12px; left: 14px; display: flex; gap: 8px; align-items: center; pointer-events: auto; }
+  .live { display: inline-flex; align-items: center; gap: 6px; background: rgba(8,16,12,.7);
+    border: 1px solid var(--line); border-radius: 999px; padding: 3px 9px; color: var(--ink); }
+  .live .blip { width: 7px; height: 7px; border-radius: 50%; background: var(--good); box-shadow: 0 0 0 0 var(--good); animation: pulse 2s infinite; }
+  @keyframes pulse { 0%{box-shadow:0 0 0 0 rgba(61,220,132,.5)} 70%{box-shadow:0 0 0 7px rgba(61,220,132,0)} 100%{box-shadow:0 0 0 0 rgba(61,220,132,0)} }
+  .hud.br { bottom: 12px; right: 14px; text-align: right; background: rgba(8,16,12,.6); padding: 5px 9px; border-radius: 6px; }
+  .hud.bl { bottom: 12px; left: 14px; display: flex; align-items: center; gap: 8px; }
+  .scale { width: 90px; height: 6px; border: 1px solid var(--muted); border-top: 0; }
+  .tip { position: absolute; z-index: 5; pointer-events: none; background: #060c09; border: 1px solid var(--line);
+    border-radius: 6px; padding: 6px 9px; font-family: var(--mono); font-size: 11px; color: var(--ink);
+    opacity: 0; transform: translate(-50%, -120%); transition: opacity .12s; white-space: nowrap; }
+  .legend { position: absolute; left: 14px; bottom: 44px; background: rgba(8,16,12,.72);
+    border: 1px solid var(--line); border-radius: 8px; padding: 8px 11px; font-size: 11px; }
+  .legend .row { display: flex; align-items: center; gap: 7px; padding: 2px 0; color: var(--muted); }
+  .legend .row i { width: 11px; height: 11px; border-radius: 3px; }
+
+  /* ---- right rail: reports ---- */
+  .reports { background: var(--panel); border-left: 1px solid var(--line); overflow-y: auto; padding: 14px; }
+  .reports h3 { margin: 2px 0 3px; font-size: 13px; }
+  .reports .period { color: var(--muted); font-size: 11.5px; font-family: var(--mono); margin-bottom: 12px; }
+  .stat { background: var(--panel2); border: 1px solid var(--line); border-radius: 10px; padding: 11px 12px; margin-bottom: 8px; }
+  .stat .k { font-size: 11px; color: var(--muted); text-transform: uppercase; letter-spacing: .05em; }
+  .stat .v { font-family: var(--mono); font-size: 22px; font-variant-numeric: tabular-nums; margin-top: 2px; }
+  .stat .v small { font-size: 12px; color: var(--muted); }
+  .stat .v.crit { color: var(--crit); } .stat .v.warn { color: var(--warn); } .stat .v.good { color: var(--good); }
+  .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+  .grid2 .stat { margin-bottom: 0; }
+
+  .soi { background: var(--panel2); border: 1px solid var(--line); border-radius: 10px; padding: 11px 12px; margin: 8px 0; }
+  .soi .hd { display: flex; justify-content: space-between; align-items: baseline; }
+  .soi .hd .val { font-family: var(--mono); font-size: 16px; }
+  .soi .state { font-size: 11px; padding: 1px 7px; border-radius: 999px; }
+
+  .issues { margin-top: 6px; }
+  .issues .ih { font-size: 11px; letter-spacing: .06em; text-transform: uppercase; color: var(--faint); margin: 10px 2px 6px; }
+  .issue { display: flex; gap: 9px; padding: 9px 8px; border-radius: 8px; border: 1px solid transparent; }
+  .issue:hover { background: var(--panel2); border-color: var(--line); }
+  .issue .sev { width: 3px; border-radius: 3px; flex: none; }
+  .issue .body .t { font-size: 12.5px; }
+  .issue .body .m { font-size: 11px; color: var(--muted); font-family: var(--mono); margin-top: 2px; }
+  .btn { width: 100%; margin-top: 10px; background: var(--amber); color: #221a00; border: 0; border-radius: 8px;
+    padding: 9px; font: inherit; font-weight: 600; cursor: pointer; }
+  .btn.ghost { background: transparent; color: var(--muted); border: 1px solid var(--line); font-weight: 500; }
+  .note { font-size: 10.5px; color: var(--faint); margin-top: 10px; line-height: 1.5; }
+
+  @media (max-width: 1000px) {
+    .app { grid-template-columns: 1fr; grid-template-rows: auto 260px 320px auto; }
+    .rail { max-height: 260px; } .map { min-height: 320px; }
+  }
+  @media (prefers-reduced-motion: reduce) { * { animation: none !important; transition: none !important; } }
+</style>
+
+<div class="app">
+  <div class="top">
+    <div class="brand"><b>Oro Data Portal</b><span class="sub">Managalas Conservation Area · Oro Province, PNG</span></div>
+    <div class="tiers" id="tiers" role="group" aria-label="Access tier">
+      <button class="tier" data-tier="0" aria-pressed="true">Public</button>
+      <button class="tier" data-tier="1" aria-pressed="false">Registered</button>
+      <button class="tier" data-tier="2" aria-pressed="false">🔑 Partner</button>
+    </div>
+    <div class="spacer"></div>
+    <div class="who">access: <b id="whoTier">Public</b> · <span id="whoLayers">0</span> layers</div>
+  </div>
+
+  <!-- LEFT: layers -->
+  <nav class="rail" id="rail"><div class="rail-h">Data layers · 11 themes</div><div id="layers"></div></nav>
+
+  <!-- CENTER: map -->
+  <div class="map" id="map">
+    <svg id="svg" viewBox="0 0 760 720" preserveAspectRatio="xMidYMid meet" aria-label="Managalas map">
+      <defs>
+        <radialGradient id="canopy" cx="45%" cy="35%" r="75%">
+          <stop offset="0%" stop-color="#2ea56b" stop-opacity=".38"/>
+          <stop offset="70%" stop-color="#1c6b45" stop-opacity=".28"/>
+          <stop offset="100%" stop-color="#0f3a26" stop-opacity=".18"/>
+        </radialGradient>
+      </defs>
+      <g id="g_forest_cover" class="grp"><path id="canopyPath" class="canopy-fill"></path></g>
+      <g id="g_water" class="grp off">
+        <path class="catch" d="M120,300 Q220,360 300,330 T520,300"></path>
+        <path class="river" d="M180,210 Q260,330 300,430 T360,560"></path>
+        <path class="river" d="M520,200 Q470,320 430,420 T410,540"></path>
+        <path class="river" d="M300,430 Q360,450 430,420"></path>
+      </g>
+      <g id="g_boundary" class="grp"><path id="boundaryPath" class="boundary"></path></g>
+      <g id="g_forest_loss" class="grp"></g>
+      <g id="g_radd" class="grp off"></g>
+      <g id="g_fire" class="grp off"></g>
+    </svg>
+
+    <div class="hud tl">
+      <span class="live"><span class="blip"></span>Live monitoring</span>
+      <span id="mosaic">NICFI mosaic · Jul 2026</span>
+    </div>
+    <div class="legend" id="legend"></div>
+    <div class="hud bl"><div class="scale"></div><span>0&nbsp;&nbsp;&nbsp;10&nbsp;km</span></div>
+    <div class="hud br">9.17°S 148.31°E · WDPA 555651673<br/>MCA area 2,147 km² · designated 2017</div>
+    <div class="tip" id="tip"></div>
+  </div>
+
+  <!-- RIGHT: reports -->
+  <aside class="reports">
+    <h3>Change detection &amp; reports</h3>
+    <div class="period">Automated digest · 01–31 Jul 2026 · MCA + 5 km buffer</div>
+
+    <div class="grid2">
+      <div class="stat"><div class="k">Forest loss</div><div class="v crit" id="s_loss">18.4 <small>ha</small></div></div>
+      <div class="stat"><div class="k">RADD alerts</div><div class="v warn" id="s_radd">31</div></div>
+    </div>
+    <div class="grid2" style="margin-top:8px">
+      <div class="stat"><div class="k">Active fires</div><div class="v" id="s_fire">7</div></div>
+      <div class="stat"><div class="k">Inside core zone</div><div class="v crit">3</div></div>
+    </div>
+
+    <div class="soi">
+      <div class="hd"><div class="k" style="font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.05em">Southern Oscillation Index</div></div>
+      <div class="hd" style="margin-top:4px">
+        <div class="val" id="soiVal">−8.2</div>
+        <span class="state" id="soiState">El Niño watch</span>
+      </div>
+      <svg viewBox="0 0 260 46" width="100%" height="40" style="margin-top:6px" preserveAspectRatio="none">
+        <polyline fill="none" stroke="#4aa8ff" stroke-width="1.6"
+          points="0,14 20,10 40,18 60,16 80,22 100,20 120,26 140,24 160,30 180,28 200,34 220,33 240,38 260,40"/>
+        <line x1="0" y1="23" x2="260" y2="23" stroke="#24352c" stroke-dasharray="3 3"/>
+      </svg>
+      <div class="note" style="margin-top:2px">Drier ENSO phase — elevated fire &amp; drought-stress risk flagged to the reporting engine.</div>
+    </div>
+
+    <div class="issues">
+      <div class="ih">Detected issues · this period</div>
+      <div class="issue"><div class="sev" style="background:var(--crit)"></div><div class="body">
+        <div class="t">Forest loss cluster — SE plateau</div><div class="m">6.1 ha · inside boundary · RADD ×9</div></div></div>
+      <div class="issue"><div class="sev" style="background:var(--crit)"></div><div class="body">
+        <div class="t">New clearing near access track</div><div class="m">3.4 ha · 1.2 km from road head</div></div></div>
+      <div class="issue"><div class="sev" style="background:var(--warn)"></div><div class="body">
+        <div class="t">Fire detections — NW catchment</div><div class="m">4 VIIRS hotspots · 24–27 Jul</div></div></div>
+      <div class="issue"><div class="sev" style="background:var(--warn)"></div><div class="body">
+        <div class="t">Degradation signal — TMF</div><div class="m">canopy thinning · 5.9 ha</div></div></div>
+    </div>
+
+    <button class="btn" id="genBtn">Generate July report (PDF)</button>
+    <button class="btn ghost" style="margin-top:6px">Subscribe to email digest</button>
+    <div class="note">Prototype mockup. Figures are illustrative. In production these are computed by a scheduled Google&nbsp;Earth&nbsp;Engine job intersecting RADD / FIRMS / TMF with the WDPA boundary and zones. See <code>docs/04-roadmap.md</code>.</div>
+  </aside>
+</div>
+
+<script>
+const DATA = {"path":"M450.2,40.0 L471.2,42.5 L488.6,47.1 L506.9,54.2 L516.9,59.0 L520.5,72.3 L521.0,91.7 L521.1,107.1 L526.8,127.9 L526.8,157.4 L529.4,176.7 L555.6,191.7 L594.5,210.6 L603.2,208.8 L609.4,214.9 L615.2,218.9 L634.0,239.2 L642.4,259.1 L664.2,269.0 L679.2,298.7 L693.9,334.8 L712.7,357.7 L718.1,374.0 L700.4,370.5 L677.5,366.4 L663.1,375.8 L653.0,402.8 L637.0,422.0 L627.2,425.6 L616.0,442.8 L592.9,445.1 L568.4,458.8 L534.9,463.6 L514.2,474.4 L493.8,478.0 L478.5,484.0 L477.2,498.6 L474.8,509.9 L461.4,521.0 L432.0,527.7 L405.6,531.1 L387.1,548.5 L357.1,556.7 L335.1,568.6 L325.0,575.2 L308.4,576.2 L283.1,573.0 L271.4,576.2 L239.8,596.1 L225.1,605.0 L209.9,620.5 L188.7,636.3 L176.1,651.2 L153.5,671.5 L129.6,672.2 L110.2,656.2 L91.4,657.8 L73.4,665.6 L69.4,655.7 L68.7,647.2 L68.8,635.0 L68.2,623.6 L62.2,619.7 L56.1,614.2 L49.7,608.3 L47.1,591.5 L44.9,575.9 L57.4,541.2 L89.0,501.4 L128.2,458.8 L141.3,431.1 L150.8,385.6 L170.1,352.5 L202.5,317.5 L199.0,307.4 L174.7,297.8 L151.3,293.9 L128.2,274.2 L126.3,248.8 L154.9,224.4 L170.9,213.7 L179.6,198.5 L205.5,180.9 L208.2,167.2 L221.8,151.2 L250.2,138.8 L257.5,130.8 L258.0,120.1 L278.2,101.5 L306.5,82.8 L323.4,68.6 L322.0,53.0 L337.0,45.0 L372.9,45.3 L396.3,45.0 L412.1,44.3 L438.3,40.5 Z",
+"loss":[[260.2,136.5],[482.6,86.4],[404.4,274.0],[328.7,569.2],[432.4,293.9],[623.8,225.3],[249.8,562.3],[162.9,412.2],[474.5,278.3],[412.5,80.2],[502.7,313.7],[253.6,414.8],[348.2,231.9],[206.0,407.6],[536.0,224.3],[324.3,524.6],[559.9,406.7],[512.8,420.4],[434.3,332.0],[362.4,465.1],[598.9,222.1],[302.3,467.9],[80.1,531.7],[229.3,305.8]],
+"fire":[[198.7,350.4],[440.6,208.2],[291.1,402.5],[390.5,435.3],[499.8,74.6],[306.8,295.3],[57.3,599.6]]};
+
+// The eleven thematic layers + imagery/alert feeds. minTier: 0 public,1 registered,2 partner.
+const LAYERS = [
+  {theme:"Boundaries", dot:"var(--amber)", items:[
+    {id:"boundary", nm:"Managalas boundary (WDPA)", sw:"var(--amber)", minTier:0, on:true, grp:"g_boundary"}]},
+  {theme:"Imagery", dot:"var(--muted)", items:[
+    {id:"nicfi", nm:"Planet NICFI basemap", sw:"#6b7f74", minTier:1, on:false}]},
+  {theme:"Forest cover", dot:"var(--canopy)", items:[
+    {id:"forest_cover", nm:"Forest cover (JRC TMF)", sw:"var(--canopy)", minTier:0, on:true, grp:"g_forest_cover"}]},
+  {theme:"Forest change", dot:"var(--loss)", items:[
+    {id:"forest_loss", nm:"Forest loss (Hansen/TMF)", sw:"var(--loss)", minTier:0, on:true, grp:"g_forest_loss"},
+    {id:"radd", nm:"RADD alerts (near-real-time)", sw:"var(--radd)", minTier:1, on:false, grp:"g_radd"}]},
+  {theme:"Topography", dot:"#9c8b6b", items:[
+    {id:"topo", nm:"Terrain / hillshade (JAXA)", sw:"#9c8b6b", minTier:0, on:false}]},
+  {theme:"Fire", dot:"var(--fire)", items:[
+    {id:"fire", nm:"Active fires (NASA FIRMS)", sw:"var(--fire)", minTier:0, on:false, grp:"g_fire"}]},
+  {theme:"Water", dot:"var(--water)", items:[
+    {id:"water", nm:"Catchments & waterways", sw:"var(--water)", minTier:0, on:false, grp:"g_water"},
+    {id:"flows", nm:"Modelled flows (BASINS)", sw:"#2f7fbf", minTier:2, on:false}]},
+  {theme:"Weather", dot:"#7fb0c9", items:[
+    {id:"weather", nm:"Climate normals (WorldClim)", sw:"#7fb0c9", minTier:0, on:false}]},
+  {theme:"Biodiversity", dot:"#c98bd8", items:[
+    {id:"bio_gen", nm:"Richness / hotspots (generalised)", sw:"#8b6b9c", minTier:0, on:false},
+    {id:"bio_pt", nm:"Species records (precise)", sw:"#c98bd8", minTier:2, on:false}]},
+  {theme:"Soil", dot:"#c0895f", items:[
+    {id:"soil", nm:"Soil (PNGRIS)", sw:"#c0895f", minTier:2, on:false}]},
+  {theme:"Ecosystem services", dot:"#5fc0a0", items:[
+    {id:"ecoserv", nm:"Ecosystem services (LUMENS)", sw:"#5fc0a0", minTier:2, on:false}]},
+  {theme:"Crop suitability", dot:"#d8c15f", items:[
+    {id:"crop", nm:"Crop suitability (PNGLES/DAL)", sw:"#d8c15f", minTier:2, on:false}]},
+];
+const TIER_NAMES = ["Public","Registered","Partner"];
+let tier = 0;
+
+// ---- draw map ----
+const svg = document.getElementById("svg");
+document.getElementById("boundaryPath").setAttribute("d", DATA.path);
+document.getElementById("canopyPath").setAttribute("d", DATA.path);
+const tip = document.getElementById("tip"), map = document.getElementById("map");
+function showTip(e,t){ const r=map.getBoundingClientRect(); tip.textContent=t;
+  tip.style.left=(e.clientX-r.left)+"px"; tip.style.top=(e.clientY-r.top)+"px"; tip.style.opacity=1; }
+function hideTip(){ tip.style.opacity=0; }
+function mk(g,x,y,cls,r,label){ const c=document.createElementNS("http://www.w3.org/2000/svg","circle");
+  c.setAttribute("cx",x);c.setAttribute("cy",y);c.setAttribute("r",r);c.setAttribute("class",cls+" mk");
+  c.addEventListener("mousemove",e=>showTip(e,label)); c.addEventListener("mouseleave",hideTip);
+  document.getElementById(g).appendChild(c); }
+DATA.loss.forEach((p,i)=>mk("g_forest_loss",p[0],p[1],"loss",3.4,"Forest loss · "+(0.4+((i*7)%22)/10).toFixed(1)+" ha · Jul 2026"));
+DATA.loss.slice(0,14).forEach((p,i)=>mk("g_radd",p[0]+2,p[1]+2,"radd",5,"RADD alert · confidence high · "+(3+i)+" Jul"));
+DATA.fire.forEach((p,i)=>mk("g_fire",p[0],p[1],"fire",4,"VIIRS fire · "+(24+(i%4))+" Jul 2026"));
+
+// ---- legend ----
+const legendRows=[["var(--amber)","MCA boundary"],["var(--canopy)","Forest cover"],["var(--loss)","Forest loss"],["var(--radd)","RADD alert"],["var(--fire)","Active fire"],["var(--water)","Waterways"]];
+document.getElementById("legend").innerHTML = legendRows.map(r=>`<div class="row"><i style="background:${r[0]}"></i>${r[1]}</div>`).join("");
+
+// ---- build layer panel ----
+const layerHost = document.getElementById("layers");
+const state = {};
+function render(){
+  layerHost.innerHTML="";
+  LAYERS.forEach(th=>{
+    const box=document.createElement("div"); box.className="theme";
+    box.innerHTML=`<div class="th"><span class="dot" style="background:${th.dot}"></span>${th.theme}</div>`;
+    th.items.forEach(it=>{
+      if(state[it.id]===undefined) state[it.id]=it.on;
+      const locked = it.minTier>tier;
+      const row=document.createElement("label"); row.className="lyr"+(locked?" locked":"");
+      const badge = it.minTier===0?"":(it.minTier===1?"REG":"PARTNER");
+      row.innerHTML =
+        `<input type="checkbox" ${state[it.id]&&!locked?"checked":""} ${locked?"disabled":""}>`+
+        `<span class="nm">${it.nm}</span>`+
+        (locked?`<span class="lock">🔒</span>`:"")+
+        (badge?`<span class="tierbadge">${badge}</span>`:"")+
+        `<span class="sw" style="background:${it.sw}"></span>`;
+      const cb=row.querySelector("input");
+      cb.addEventListener("change",()=>{ state[it.id]=cb.checked; applyLayer(it); updateCount(); });
+      layerHost.appendChild(row);
+      applyLayer(it);
+    });
+    layerHost.appendChild(box);
+  });
+  updateCount();
+}
+function applyLayer(it){
+  if(!it.grp) return;
+  const g=document.getElementById(it.grp);
+  const locked = it.minTier>tier;
+  g.classList.toggle("off", !(state[it.id] && !locked));
+}
+function updateCount(){
+  const n = LAYERS.flatMap(t=>t.items).filter(it=>state[it.id] && it.minTier<=tier).length;
+  document.getElementById("whoLayers").textContent=n;
+  // recompute headline loss stat from visible loss markers (illustrative)
+  const lossOn = state["forest_loss"] && 0<=tier;
+  document.getElementById("s_loss").innerHTML = (lossOn? "18.4":"0.0")+' <small>ha</small>';
+  document.getElementById("s_radd").textContent = (state["radd"]&&tier>=1)? "31":"—";
+  document.getElementById("s_fire").textContent = state["fire"]? "7":"7";
+}
+
+// ---- tier switch ----
+document.getElementById("tiers").addEventListener("click",e=>{
+  const b=e.target.closest(".tier"); if(!b) return;
+  tier=+b.dataset.tier;
+  [...document.querySelectorAll(".tier")].forEach(t=>t.setAttribute("aria-pressed", t===b));
+  document.getElementById("whoTier").textContent=TIER_NAMES[tier];
+  render();
+});
+document.getElementById("genBtn").addEventListener("click",e=>{
+  e.target.textContent="✓ Report queued — check your digest"; setTimeout(()=>e.target.textContent="Generate July report (PDF)",1800);
+});
+render();
+</script>

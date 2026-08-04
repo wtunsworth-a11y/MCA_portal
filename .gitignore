@@ -1,0 +1,11 @@
+# OS / editor
+.DS_Store
+Thumbs.db
+*.swp
+
+# Node (only used for local tooling, never required to run the static app)
+node_modules/
+
+# Local secrets — never commit API keys (NICFI / GFW live in js/config.js locally)
+.env
+*.local
