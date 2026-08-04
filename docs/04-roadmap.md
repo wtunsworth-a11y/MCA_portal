@@ -53,6 +53,19 @@ vision is a **3–6 month** build.
 - [ ] Generate periodic **PDF report + email digest**; store history in DB
 **Deliverable:** regular automated reports of changes and potential issues in Oro.
 
+## Phase 4b — On-demand site analysis ("mini-MLA")  ·  ~2–4 weeks (parallelisable)
+**Goal:** a user picks any site and the portal generates a short landscape profile — a
+series of maps + summary stats ([`09-site-analysis.md`](09-site-analysis.md)).
+- [ ] AOI input: draw (point/line/polygon) or upload (GeoJSON/KML/GPX/shapefile)
+- [ ] Point/line **buffer** (default 500 m, user-adjustable)
+- [ ] Per-theme zonal analysis via GEE (or in-house Python): topography, land cover,
+      forest cover/loss, canopy/carbon, fire, climate, hydrology, accessibility/population,
+      and overlaps (MCA / KBA / protected areas / compartments)
+- [ ] Async job + progress; **site report** on screen and **PDF/DOCX** export
+- [ ] Tiering, rate limits, max-AOI cap; AOIs stored transiently / per account
+**Deliverable:** "tell me about *this* site" — an on-demand mini-MLA for any AOI in Oro.
+Reuses the Phase-2 GEE endpoints and the MCA_MLA analysis recipe.
+
 ## Phase 5 — Hardening & handover  ·  ~2–3 weeks
 - [ ] Backups, monitoring, uptime
 - [ ] Documentation & admin training
@@ -68,8 +81,9 @@ vision is a **3–6 month** build.
 | 2b | Document archives (parallel) | 2–4 weeks |
 | 3 | Accounts, tiers & usage logging | 3–4 weeks |
 | 4 | Automated reporting | 4–8 weeks |
+| 4b | On-demand site analysis (mini-MLA, parallel) | 2–4 weeks |
 | 5 | Hardening & handover | 2–3 weeks |
-| **Total** | | **~3.5–6 months** |
+| **Total** | | **~4–6.5 months** |
 
 ## Difficulty & risk
 

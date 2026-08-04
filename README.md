@@ -13,9 +13,9 @@ land-use change and conservation issues across the Province.
 
 A front page leading into several systems:
 
-1. **Map viewer** — a public web map of Managalas / Oro showing boundaries, forest
-   cover and near-real-time deforestation alerts, plus tiered access to richer
-   layers for registered users.
+1. **Map viewer** — a public web map of Oro Province (with the Managalas / MCA area
+   highlighted) showing boundaries, forest cover and near-real-time deforestation
+   alerts, plus tiered access to richer layers for registered users.
 2. **Document archives** — OCR'd historical collections (Managalas, CSIRO, Kokoda,
    QABB, …) that are **searchable and read inside the portal**, not browsable or
    bulk-downloadable. See [`docs/06-document-archives.md`](docs/06-document-archives.md).
@@ -23,7 +23,10 @@ A front page leading into several systems:
    field surveys) held privately with role-based access.
 4. **Change detection & reporting** — scheduled jobs that pull new satellite alerts,
    detect forest loss / encroachment inside Oro, and generate regular reports.
-5. **Usage & M&E** — access-tier usage reporting (aggregate public totals; named-user
+5. **On-demand site analysis ("mini-MLA")** — a user draws or uploads a site (a point
+   gets a buffer) and the portal generates a short landscape profile of maps and stats.
+   See [`docs/09-site-analysis.md`](docs/09-site-analysis.md).
+6. **Usage & M&E** — access-tier usage reporting (aggregate public totals; named-user
    detail) for project monitoring. See [`docs/07-monitoring-evaluation.md`](docs/07-monitoring-evaluation.md).
 
 Everything is built for **slow connections**: assets are self-hosted, data is streamed/
@@ -42,7 +45,8 @@ MCA_portal/
 │   ├── 05-access-tiers.md    ← public / registered / partner / admin tiers
 │   ├── 06-document-archives.md ← archives, OCR pipeline & protection model
 │   ├── 07-monitoring-evaluation.md ← usage/M&E reporting by tier
-│   └── 08-it-requirements.md  ← hosting ask for CIFOR-ICRAF IT (SO1 1.1 1.1-4)
+│   ├── 08-it-requirements.md  ← hosting ask for CIFOR-ICRAF IT (SO1 1.1 1.1-4)
+│   └── 09-site-analysis.md    ← on-demand "mini-MLA" for a user-drawn site
 ├── prototype/                ← clickable UI mockup (no build step)
 │   └── index.html
 └── app/                      ← the real Phase-1 MVP
