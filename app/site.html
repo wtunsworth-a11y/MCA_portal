@@ -1,0 +1,117 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Site analysis — Oro Data Portal</title>
+  <meta name="description" content="Draw or upload a site in Oro Province and generate a short landscape profile — a series of maps and statistics (a 'mini-MLA')." />
+  <link rel="stylesheet" href="css/site.css" />
+</head>
+<body>
+  <!-- NAV -->
+  <div class="nav">
+    <div class="wrap row">
+      <a class="brand" href="index.html"><span class="globe"></span> Oro Data Portal</a>
+      <nav class="links">
+        <a href="index.html">Home</a>
+        <a href="map.html">Map</a>
+        <a href="site.html" class="active">Site analysis</a>
+        <a href="index.html#live">Live data</a>
+        <a href="library.html">Archives</a>
+        <a href="analytics.html">Usage</a>
+      </nav>
+      <span class="spacer"></span>
+      <a class="tier-chip" href="index.html#access">Public access · Sign in</a>
+    </div>
+  </div>
+
+  <!-- HERO -->
+  <header class="hero">
+    <div class="wrap">
+      <div class="eyebrow">Tool · Oro Province · <span class="badge planned">Planned — Phase 4b</span></div>
+      <h1>Site analysis</h1>
+      <p class="lede">Pick any site in Oro Province — draw it on the map or upload a boundary — and the
+        portal generates a short landscape profile: a series of maps and summary statistics.
+        A point becomes an area with a buffer. Think of it as a <b>mini-MLA</b> for your site.</p>
+      <div class="cta-row">
+        <a class="btn primary" href="map.html">Draw a site on the map →</a>
+        <a class="btn ghost" href="#how">How it works</a>
+      </div>
+    </div>
+  </header>
+
+  <!-- HOW IT WORKS -->
+  <section class="blk" id="how">
+    <div class="wrap">
+      <div class="sec-h"><div><h2>How it works</h2><p>Four steps, from an area of interest to a site report.</p></div></div>
+      <div class="cards">
+        <div class="card">
+          <h3>1 · Define the site</h3>
+          <p>Draw a <b>point, line or polygon</b> on the map, or upload a boundary
+            (GeoJSON, KML, GPX or shapefile).</p>
+        </div>
+        <div class="card">
+          <h3>2 · Buffer a point</h3>
+          <p>A point or line is buffered to an area — default <b>500 m</b>, adjustable
+            (about 250 m – 5 km). Polygons are used as drawn.</p>
+        </div>
+        <div class="card">
+          <h3>3 · Analyse</h3>
+          <p>The portal computes each theme over the site and returns a
+            <b>map plus a statistic or two</b>. Runs as a background job.</p>
+        </div>
+        <div class="card">
+          <h3>4 · Site report</h3>
+          <p>Maps and stat cards on screen, plus an exportable <b>PDF / DOCX</b>
+            for registered and partner users.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- THEMES -->
+  <section class="blk" id="themes">
+    <div class="wrap">
+      <div class="sec-h">
+        <div><h2>What you get for a site</h2><p>A map and summary for each theme, clipped to your area of interest.</p></div>
+      </div>
+      <div class="cards">
+        <div class="card"><h3>Topography</h3><p>Elevation, slope &amp; hillshade — min / mean / max.</p></div>
+        <div class="card"><h3>Land cover</h3><p>Land-cover map and the % in each class.</p></div>
+        <div class="card"><h3>Forest cover &amp; loss</h3><p>Forest extent and <b>ha / % lost</b> over time.</p></div>
+        <div class="card"><h3>Canopy &amp; carbon</h3><p>Canopy height, biomass and <b>carbon stock</b>.</p></div>
+        <div class="card"><h3>Fire history</h3><p>Active-fire detections, counted by year.</p></div>
+        <div class="card"><h3>Climate</h3><p>Rainfall and temperature summary for the site.</p></div>
+        <div class="card"><h3>Hydrology</h3><p>Catchments and rivers within and around the site.</p></div>
+        <div class="card"><h3>Access &amp; people</h3><p>Travel time and population near the site.</p></div>
+        <div class="card"><h3>Overlaps</h3><p>Does the site intersect the <b>MCA, a KBA or a protected area</b>?
+          Restricted overlaps (SABL / PFMP / mining) show only for authorised users.</p></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- NOTE -->
+  <section class="blk" id="note">
+    <div class="wrap">
+      <div class="protect">
+        <span aria-hidden="true">🔒</span>
+        <div><b>Access &amp; privacy.</b> Public users get the public theme set over a capped area;
+          registered and partner users get the full set and report export. Sensitive overlaps appear only
+          for users who hold that access group. A site you draw or upload is your own — it is kept to your
+          session or account and never shown to other users.</div>
+      </div>
+      <p class="sub" style="color:var(--faint);font-size:12.5px;margin-top:12px">
+        This tool is planned for Phase 4b. It reuses the portal's Earth Engine layers and the project's
+        landscape-analysis method, so nothing new needs to be downloaded or stored to run it.
+      </p>
+    </div>
+  </section>
+
+  <footer class="site">
+    <div class="wrap row">
+      <div>Oro Data Portal · Site analysis · Phase 1 (public MVP)</div>
+      <div>A mini-MLA for any site in Oro Province</div>
+    </div>
+  </footer>
+</body>
+</html>

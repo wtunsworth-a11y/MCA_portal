@@ -1,9 +1,9 @@
 # Oro Data Portal — Oro (Northern) Province, PNG
 
-An online data-access portal for **Oro (Northern) Province, Papua New Guinea**, with the
-**Managalas Conservation Area (MCA)** as a highlighted area within it — bringing together
-free satellite and spatial data, secure in-house data layers, and automated reporting on
-land-use change and conservation issues across the Province.
+An online data-access portal for **Oro (Northern) Province, Papua New Guinea** — bringing
+together free satellite and spatial data, secure in-house data layers, and automated
+reporting on land-use change and conservation issues across the Province. The Managalas
+Conservation Area appears as one highlighted area on the map.
 
 > **Status:** Phase 1 (public web map MVP). See [`docs/04-roadmap.md`](docs/04-roadmap.md).
 

@@ -4,7 +4,7 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Oro Data Portal — Oro (Northern) Province, PNG</title>
-  <meta name="description" content="Land use and conservation data for Oro (Northern) Province, Papua New Guinea — with the Managalas Conservation Area highlighted: interactive maps, live monitoring, and a document library." />
+  <meta name="description" content="Land use and conservation data for Oro (Northern) Province, Papua New Guinea: interactive maps, live monitoring, site analysis, and a document library." />
   <link rel="stylesheet" href="css/site.css" />
 </head>
 <body>
@@ -15,6 +15,7 @@
       <nav class="links">
         <a href="index.html" class="active">Home</a>
         <a href="map.html">Map</a>
+        <a href="site.html">Site analysis</a>
         <a href="index.html#live">Live data</a>
         <a href="library.html">Archives</a>
         <a href="analytics.html">Usage</a>
@@ -27,7 +28,7 @@
   <!-- HERO -->
   <header class="hero">
     <div class="wrap">
-      <div class="eyebrow">Oro (Northern) Province · Papua New Guinea · incl. Managalas Conservation Area</div>
+      <div class="eyebrow">Oro (Northern) Province · Papua New Guinea</div>
       <h1>Conservation &amp; land-use data for Oro Province</h1>
       <p class="lede">One place to explore forests, water, biodiversity and change over time —
         drawing on free satellite data and the region's own datasets, with live monitoring
@@ -53,6 +54,27 @@
         <a class="more" href="map.html">Open full map →</a>
       </div>
       <div class="cards" id="datasetCards"></div>
+    </div>
+  </section>
+
+  <!-- SITE ANALYSIS -->
+  <section class="blk" id="site">
+    <div class="wrap">
+      <div class="sec-h">
+        <div><h2>Analyse a site <span class="badge planned">Planned — Phase 4b</span></h2>
+          <p>Draw or upload any site in Oro Province and generate a short landscape profile — a mini-MLA.</p></div>
+        <a class="more" href="site.html">About this tool →</a>
+      </div>
+      <div class="cards">
+        <div class="card"><h3>1 · Define the site</h3><p>Draw a point, line or polygon, or upload a boundary (GeoJSON / KML / GPX / shapefile).</p></div>
+        <div class="card"><h3>2 · Buffer a point</h3><p>A point becomes an area — default 500 m, adjustable.</p></div>
+        <div class="card"><h3>3 · Get maps + stats</h3><p>Forest loss, canopy &amp; carbon, fire, climate, hydrology, overlaps — a map and a number each.</p></div>
+        <div class="card"><h3>4 · Site report</h3><p>On screen, plus PDF / DOCX export for registered and partner users.</p></div>
+      </div>
+      <div class="cta-row" style="margin-top:16px">
+        <a class="btn primary" href="site.html">Open site analysis →</a>
+        <a class="btn ghost" href="map.html">Draw on the map</a>
+      </div>
     </div>
   </section>
 
@@ -122,7 +144,7 @@
 
   <footer class="site">
     <div class="wrap row">
-      <div>Oro Data Portal · Oro (Northern) Province, PNG · incl. Managalas Conservation Area · Phase 1 (public MVP)</div>
+      <div>Oro Data Portal · Oro (Northern) Province, PNG · Phase 1 (public MVP)</div>
       <div>Data: WDPA · JRC · JAXA · Hansen/UMD · NASA FIRMS · Planet NICFI · WorldClim · WWF HydroSHEDS · BoM</div>
     </div>
   </footer>
