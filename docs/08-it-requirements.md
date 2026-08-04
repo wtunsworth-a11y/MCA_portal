@@ -6,92 +6,118 @@ A short, forwarding-ready summary of what the Oro Data Portal needs in order to 
 It is written for the CIFOR-ICRAF IT team. The fuller technical detail lives in
 [`01-architecture.md`](01-architecture.md) and [`03-hosting.md`](03-hosting.md).
 
+> **Hosting model:** this version assumes **all hosting is provided by CIFOR-ICRAF** —
+> no commercial cloud, no external hosting services, everything on institutional
+> infrastructure and under institutional control.
+
 ---
 
 ## The one-sentence version
 
-> Most of the portal is a static website plus free satellite-data feeds, which we can
-> host externally at no cost. What we'd like from CIFOR-ICRAF is a home for the
-> **sensitive data** (a small PostgreSQL/PostGIS database) and a way to **run a
-> scheduled Python job** that pulls satellite alerts and emails reports. Both are
-> modest — a single small Linux VM would cover it.
+> The whole portal — public website, private database, scheduled reporting and the
+> document archive — runs on **CIFOR-ICRAF infrastructure**. The entire ask is one
+> modest Linux server (or VM) with a database, plus a public web address and outbound
+> internet access so it can read free satellite data. There are **no external hosting
+> requirements and no recurring cloud costs.**
 
 ---
 
-## What needs hosting, and by whom
+## What runs where — all in-house
 
-| Component | Needs a server? | Where it can live | Cost |
-|---|---|---|---|
-| Public web map + portal pages | No — static files | External CDN (Cloudflare Pages) | $0 |
-| Public satellite / deforestation layers | No — pulled from free services | Google Earth Engine / free tiles | $0 |
-| **Private data + logins** (tenure, community boundaries, partner data) | **Yes** — small database | **CIFOR-ICRAF** or managed cloud | ~$0–25/mo |
-| **Scheduled processing & reporting** | Runs on a schedule, not 24/7 | **CIFOR-ICRAF** or GitHub Actions | ~$0 |
-| Document archives (OCR search + reader) | Yes — search index stays server-side | Same box as the database | included |
+| Component | Runs on | Notes |
+|---|---|---|
+| Public web map + portal pages | CIFOR-ICRAF web server | Static files served behind nginx / Apache |
+| Private data + logins (tenure, community boundaries, partner data) | CIFOR-ICRAF database | PostgreSQL + PostGIS, role-based access |
+| Scheduled processing & reporting | CIFOR-ICRAF server | Python job on server cron; no always-on load |
+| Document archives (OCR search + in-portal reader) | CIFOR-ICRAF server + storage | Search index and scanned originals stay in-house |
+| Satellite / deforestation source data | Read over the internet | Free public feeds — **data pulled in, nothing to host** |
 
-The only two rows that involve CIFOR-ICRAF IT are the **private database** and the
-**scheduled processing** — and both can sit on a single machine.
+Everything the project controls is hosted by CIFOR-ICRAF. The only thing that comes
+from outside is the raw satellite imagery itself, which is **downloaded** from free
+public providers — it needs no hosting, no contract and, for the core feeds, no account.
 
 ---
 
 ## What to ask CIFOR-ICRAF IT for
 
-### A. One small Linux VM (or container) — this is the whole ask
+### A. One Linux server (or VM) that hosts the whole portal
 - **OS:** Linux (Ubuntu / Debian LTS preferred)
-- **Size:** ~2 vCPU, 4 GB RAM, 40–80 GB disk to start (easily scaled later)
-- **Software:** PostgreSQL with the **PostGIS** extension; ability to run **Python 3**
-  and Docker (helpful, not required)
-- **Network:** outbound HTTPS to reach Google Earth Engine and free tile services;
-  **HTTPS (443) inbound** for the API, ideally behind their reverse proxy with a TLS cert
-- **A subdomain** under a CIFOR-ICRAF or project domain (e.g. `portal-api.…` / `maps.…`)
-- **Backups:** their standard nightly DB backup + snapshot policy
-- **Maintenance:** confirm whether IT handles OS / security patching, or we do
+- **Size:** ~4 vCPU, 8 GB RAM, 100+ GB disk to start (disk grows with the scanned
+  archive; all figures easily scaled later)
+- **Software:** a web server (nginx / Apache) for the static site; **PostgreSQL with the
+  PostGIS extension**; **Python 3**; Docker helpful but not required
+- **Scheduling:** server cron (or systemd timers) to run the reporting job on a schedule
+- **A public web address:** a subdomain under a CIFOR-ICRAF or project domain
+  (e.g. `oro-portal.…`) with a **TLS certificate** and **HTTPS (443) inbound**, ideally
+  behind their standard reverse proxy
+- **Outbound internet (HTTPS):** so the server can pull free satellite data feeds
+- **Backups:** their standard nightly database backup + file/snapshot policy
+- **Maintenance:** confirm IT owns OS / security patching and uptime, or that we do
+
+A single machine covers all five components above. It can later be split (web server
+separate from database) if load ever requires it, but that is not needed to start.
 
 ### B. Storage for the document-archive originals
-- Scanned collections (Managalas, CSIRO, Kokoda, QABB, …). The OCR text index is small;
-  the scanned PDFs / images are the bulk. Estimate total GB once digitised. Can live on
-  the same VM's disk or an object / file store they already run.
+The scanned PDFs / images are the bulk of the disk need (the OCR text index itself is
+small). Current estimates:
 
-### C. Google Earth Engine access
-- Ask whether CIFOR-ICRAF already holds an **Earth Engine** account / service credential
-  we can use (many research institutions do). This runs the satellite analysis for free
-  and saves us provisioning our own.
+| Archive | Estimated size |
+|---|---|
+| Managalas (MCA) | 1 GB |
+| QABB | 1 GB |
+| Kokoda | 1 GB |
+| CSIRO | 100 MB |
+| Allowance for other / future archives | 5 GB |
+| **Total to plan for** | **~8 GB** |
 
-### D. Two policy questions for them
-1. **Data sovereignty:** is IT comfortable that sensitive PNG / partner layers (PNGRIS,
-   PNGLES, NFI, biodiversity, tenure) stay on their infrastructure? This is the main
-   reason to host in-house rather than in commercial cloud.
-2. **Email sending:** can the reporting job send outbound email digests via an
-   institutional SMTP relay, or should we use an external mail service?
+So ~8 GB of scanned originals today, comfortably inside the 100 GB disk above (which also
+holds the OS, database, working space and generated reports). Can live on the server's own
+disk or on an institutional file / object store IT already runs.
+
+### C. Satellite processing — one decision for IT to note
+The heavy satellite analysis can be done either way; either keeps hosting in-house:
+- **Preferred (simplest):** use a **free Google Earth Engine research account** to run the
+  analysis and pull back only the *results*. Earth Engine is an external *compute service*
+  we send jobs to — it hosts nothing of ours and costs nothing. If CIFOR-ICRAF already
+  holds an Earth Engine credential, we can use it.
+- **Fully self-contained alternative:** if IT prefers **zero external services**, the same
+  analysis can run on the CIFOR-ICRAF server with open-source tools (GDAL / rasterio /
+  Sentinel downloads). This needs a little more disk and CPU but removes the last outside
+  dependency entirely.
+
+Flag which of these CIFOR-ICRAF prefers — it is the only open choice in this setup.
+
+### D. One policy question
+- **Email sending:** the reporting job sends periodic email digests. Can it relay through an
+  **institutional SMTP server**? (Keeps mail in-house too.)
 
 ---
 
-## What they do *not* need to provide
+## Cost
 
-Worth stating explicitly, to keep the ask small:
-
-- **No GIS server** (ArcGIS / GeoServer) — heavy satellite processing is offloaded to
-  Google Earth Engine.
-- **No always-on compute** for processing — it runs on a schedule (cron) and is idle
-  the rest of the time.
-- **No hosting for the public website** — that is free external static hosting and can
-  go live before any procurement.
+- **No recurring hosting cost** beyond CIFOR-ICRAF's own infrastructure — no cloud bills,
+  no per-service subscriptions.
+- Only possible small item: a **custom domain name** (~US$10–15/yr) *if* a suitable
+  CIFOR-ICRAF domain isn't used.
+- Core satellite feeds are free; the standard Planet NICFI programme tier is free for this
+  use.
 
 ---
 
-## Recommended framing: the hybrid model
+## What this model gives you
 
-Ship the **public map on free external hosting now** (no procurement, no waiting), and
-ask CIFOR-ICRAF only for the **one small VM** that holds the sensitive database and runs
-the scheduled reporting. Sensitive data stays under institutional control while
-everything public moves immediately.
+- **Full data sovereignty** — every layer, document and log stays on institutional
+  infrastructure; nothing sensitive leaves CIFOR-ICRAF control.
+- **No third-party accounts or contracts** for hosting.
+- **A single, well-understood machine** to provision, back up and patch.
 
-**Running cost in this model: roughly $0–25/month**, none of which falls on CIFOR-ICRAF
-beyond the VM itself.
+The trade-off versus a commercial-cloud setup is that CIFOR-ICRAF owns uptime, backups and
+security patching for that server — which is exactly the point of an in-house model.
 
 ---
 
 ## One-line summary for the activity list
 
-> **`SO1 1.1 1.1-4 Develop data sharing portals`** — Public portal hosted externally at
-> no cost; CIFOR-ICRAF to provide one small Linux VM (PostGIS + scheduled Python
-> reporting) for sensitive data and change-detection reports.
+> **`SO1 1.1 1.1-4 Develop data sharing portals`** — Entire portal (public site, PostGIS
+> database, scheduled reporting and document archive) hosted in-house on one CIFOR-ICRAF
+> Linux server; no external hosting and no recurring cloud costs.
