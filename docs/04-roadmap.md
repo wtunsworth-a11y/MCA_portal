@@ -5,7 +5,7 @@ forest-monitoring map is a matter of weeks; the full tiered + automated-reportin
 vision is a **3–6 month** build.
 
 ## Phase 1 — Public map MVP  ·  ~2–4 weeks
-**Goal:** a public web map of Managalas / Oro that anyone can open.
+**Goal:** a public web map of Oro Province (with the Managalas / MCA area highlighted) that anyone can open.
 - [x] Repo scaffold, docs, architecture
 - [x] Portal **front page** linking to datasets, live data and archives
 - [x] MapLibre front-end with basemap switching
@@ -19,8 +19,8 @@ vision is a **3–6 month** build.
 **Deliverable:** a public URL with a front page, map (boundaries, terrain, forest cover/change, fires).
 
 ## Phase 2 — GEE data pipeline  ·  ~3–5 weeks
-**Goal:** all eleven layers available as clipped, styled tiles.
-- [ ] Earth Engine app/service account; publish TMF, JAXA, FIRMS, WorldClim, HydroSHEDS as tile layers clipped to Oro
+**Goal:** all eleven layers available as live, styled tiles, framed on Oro Province.
+- [ ] Earth Engine app/service account; publish TMF, JAXA, FIRMS, WorldClim, HydroSHEDS as live tile layers (served as-is, framed on Oro — not clipped)
 - [ ] Add near-real-time alerts (RADD / GFW integrated) for the "recent change" story
 - [ ] SOI (BoM) context chart + ENSO status indicator
 - [ ] Ingest curated layers to PostGIS: Soil (PNGRIS), Ecosystem Services (LUMENS), Crop Suitability (PNGLES), BASINS flows

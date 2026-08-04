@@ -1,13 +1,18 @@
 # 02 · Data Sources
 
-This portal is organised around the **eleven thematic data layers** identified for
-Oro Province / Managalas, plus the free near-real-time feeds that keep them current.
+This portal covers **Oro (Northern) Province** as its primary extent, with the **Managalas
+Conservation Area (MCA)** as a highlighted area within it. It is organised around the
+**eleven thematic data layers** identified for Oro Province, plus the free near-real-time
+feeds that keep them current.
 Each layer below lists the **requested source**, how it's **accessed**, whether
 **Google Earth Engine (GEE)** can serve it directly, the **access tier**, and any
 **suggested modification with justification**.
 
-Leaning on GEE for processing (as agreed) means most of these layers can be pulled,
-clipped to the Oro/MCA boundary, and served as tiles without us running a GIS server.
+Leaning on GEE for processing (as agreed) means most of these layers can be streamed live
+and served as tiles — displayed in a map framed on Oro Province — without us running a GIS
+server. Layers are shown as served, not clipped; masking to a boundary is an exception used
+only for reporting statistics or curated layers (see the *Data access model* in
+[`01-architecture.md`](01-architecture.md)).
 
 ## The eleven layers
 
@@ -111,8 +116,10 @@ clipped to the Oro/MCA boundary, and served as tiles without us running a GIS se
 ### 11. Fire occurrences — NASA FIRMS
 - **Source:** NASA **FIRMS** active-fire detections (MODIS + VIIRS). Free,
   near-real-time (often < 3 h).
-- **Access:** `FIRMS` in GEE, or the FIRMS REST API for point detections. Clip to
-  Oro, show recent fire points, and count/report fires inside the MCA boundary.
+- **Access:** `FIRMS` in GEE, or the FIRMS REST API for point detections. Show recent fire
+  points in the view; **count/report** fires across Oro Province (and within the MCA and
+  other sub-areas) — the reporting count is one of the exception cases where a boundary
+  mask is applied.
 
 ---
 
@@ -133,7 +140,8 @@ fit the zero-cost in-house model with no new procurement.
 
 ### Roads — OpenStreetMap
 - **Source:** OpenStreetMap road & track network. Free, continuously updated.
-- **Access:** OSM extracts (Geofabrik / Overpass) clipped to Oro, served as a vector layer.
+- **Access:** stream OSM as vector tiles for the map view (or use a Geofabrik Oro extract if
+  a self-hosted vector source is preferred).
 - **Why:** new/logging roads are the leading indicator of encroachment. The reporting
   engine already reasons about "near roads"; OSM supplies the actual network to measure
   against. **Confirmed as a wanted addition.**
@@ -156,13 +164,15 @@ each becomes available through a specific project process rather than a public f
 
 ## Access summary
 
-**Principle:** stream live from the source, clip to the boundary on the fly, store no local
-copies unless a layer is sensitive/curated or has no live endpoint. See the *Data access
-model* in [`01-architecture.md`](01-architecture.md). This keeps ongoing updates zero-cost.
+**Principle:** stream live from the source and display as served (framed on Oro Province);
+store no local copies and don't clip, unless a layer is sensitive/curated or has no live
+endpoint. Boundary masking is an exception, used mainly for reporting statistics. See the
+*Data access model* in [`01-architecture.md`](01-architecture.md). This keeps ongoing updates
+zero-cost.
 
 | Access method | Stored locally? | Layers |
 |---|---|---|
-| **GEE-served (free, clipped server-side)** | No | Topography, Forest Cover, Forest Change, Weather, Fire, Water base (HydroSHEDS), biodiversity refs (Red List/GBIF) |
+| **GEE-served (free, tiled)** | No | Topography, Forest Cover, Forest Change, Weather, Fire, Water base (HydroSHEDS), biodiversity refs (Red List/GBIF) |
 | **Tiled / COG+STAC streamed** | No | NICFI basemaps, GFW/RADD alerts, ESA WorldCover, canopy height, biomass, Open Buildings, OSM roads |
 | **External API (bbox query)** | Cache only | SOI (BoM), GBIF, IUCN, FIRMS |
 | **Curated / own store — exceptions** | **Yes** | Biodiversity composite, Soil (PNGRIS), Ecosystem Services (LUMENS), Crop Suitability (PNGLES), BASINS-modelled flows, SLUP/PFMP/Mining compartments, document archives |

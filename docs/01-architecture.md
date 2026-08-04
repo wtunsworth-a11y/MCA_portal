@@ -9,11 +9,12 @@
 - **Low maintenance** — offload heavy satellite processing to Google Earth Engine so
   we don't run a GIS server.
 - **Live data, not local copies** — the portal is an *access layer*, not a data
-  warehouse. It streams each dataset directly from its online source and clips to the
-  Oro/MCA boundary **on the fly**; we do **not** download, clip and store copies unless a
-  dataset has no live endpoint or is sensitive/curated. When a source updates, the portal
-  reflects it automatically — so ongoing data updates are **zero-cost** with no
-  re-download or re-processing. See *Data access model* below.
+  warehouse. It streams each dataset directly from its online source and **displays it in
+  the map**, framed on Oro Province; we do **not** download, clip or store copies unless a
+  dataset has no live endpoint or is sensitive/curated. Clipping/masking is the
+  **exception**, not the norm. When a source updates, the portal reflects it
+  automatically — so ongoing data updates are **zero-cost** with no re-download or
+  re-processing. See *Data access model* below.
 - **Incremental** — a useful public map ships first; tiers and reporting are added on
   top without re-architecting.
 - **Works on slow connections** — the portal must be usable on the intermittent, low-
@@ -24,14 +25,25 @@
 
 ## Data access model — stream live, don't warehouse
 
-The default for **every** layer is live streaming from the source, clipped to the
-Oro/MCA boundary at request time. Nothing is copied or clipped into local storage unless
-it has to be. This is what makes ongoing updates free: the source maintains the data, and
-the portal is always current without a re-download/re-clip pipeline to run.
+**Spatial scope:** the portal covers **Oro (Northern) Province** as its primary extent.
+The **Managalas Conservation Area (MCA)** is an important area *within* Oro, shown as a
+highlighted overlay — not the boundary of the portal. The Oro Province and MCA outlines are
+**overlay boundary layers** and serve as **areas of interest for reporting**; the map is
+simply *framed* on Oro Province. They are **not** used to clip the data layers.
+
+The default for **every** layer is live streaming from the source, **displayed as served** —
+tiled services render whatever falls in the map view, with no per-layer clipping. Nothing is
+copied into local storage. This is what makes ongoing updates free: the source maintains the
+data, and the portal is always current without any pipeline to run.
+
+**Clipping/masking is an exception**, applied only where it is actually required — for
+example to compute a **zonal statistic** for a report (fires or forest loss *within* Oro or
+the MCA), or to mask a **curated/downloaded** layer. It is never a routine step for
+displaying a layer.
 
 | Source type | Examples | How it streams | Stored locally? |
 |---|---|---|---|
-| **Google Earth Engine** | JRC TMF, Hansen, FIRMS, WorldClim, SRTM/ALOS | GEE clips server-side to the boundary and returns map tiles | No |
+| **Google Earth Engine** | JRC TMF, Hansen, FIRMS, WorldClim, SRTM/ALOS | GEE returns map tiles for the view (masking only where a report needs it) | No |
 | **Tiled web services (XYZ / WMS / WMTS)** | NICFI basemaps, GFW/RADD alerts, ESA WorldCover | tiles stream straight into the map | No |
 | **Cloud-Optimised GeoTIFF + STAC** | ETH canopy height, biomass, Open Buildings | HTTP range requests read only the pixels in view | No |
 | **APIs (bbox query)** | GBIF, IUCN Red List, NASA FIRMS, BoM SOI | queried live by bounding box | No (cache only) |
@@ -41,10 +53,12 @@ Only the last row is warehoused — because those datasets either have **no live
 endpoint** or **must be access-controlled**. That is also why the in-house storage ask
 stays small (≈8 GB, archives only — see [`08-it-requirements.md`](08-it-requirements.md)).
 
-> **On MCA_MLA:** the companion analysis repo *downloaded and clipped* everything because
-> it was a one-off study. The portal does the opposite — it streams the **same sources**
-> live. From MCA_MLA we reuse the **source list / queries** (which services and collections
-> to point at) and the small **WDPA boundary polygon**, not its clipped raster copies.
+> **On MCA_MLA:** the companion analysis repo *downloaded and clipped* everything (to the
+> MCA) because it was a one-off study of that area. The portal does the opposite — it
+> streams the **same sources** live and just frames the view on **Oro Province**. From
+> MCA_MLA we reuse the **source list / queries** (which services and collections to point
+> at) and the small boundary vectors — the **Oro Province** polygon and the **MCA (WDPA
+> 555651673)** polygon, used as overlays and reporting areas — not its clipped raster copies.
 
 ## System overview
 

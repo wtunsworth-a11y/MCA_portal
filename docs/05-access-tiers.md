@@ -9,7 +9,7 @@ just hidden in the UI.
 ### 1. Public (no login)
 Open to anyone. Curated, non-sensitive layers only.
 - Topography (JAXA), Forest Cover & Change (TMF), Fire (FIRMS)
-- Managalas / Oro boundaries, protected-area zones
+- Oro Province and Managalas (MCA) boundaries, protected-area zones
 - Weather normals (WorldClim), SOI status
 - Water base (catchments/waterways)
 - **Generalised** biodiversity (richness/hotspots) — *not* precise at-risk species locations
