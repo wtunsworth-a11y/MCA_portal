@@ -156,11 +156,16 @@ each becomes available through a specific project process rather than a public f
 
 ## Access summary
 
-| Access method | Layers |
-|---|---|
-| **GEE-served (free, no local processing)** | Topography, Forest Cover, Forest Change, Weather, Fire, Water base (HydroSHEDS), biodiversity refs (Red List/GBIF) |
-| **Curated / own store** | Biodiversity composite, Soil (PNGRIS), Ecosystem Services (LUMENS), Crop Suitability (PNGLES), BASINS-modelled flows |
-| **External API (non-map)** | SOI (BoM) |
+**Principle:** stream live from the source, clip to the boundary on the fly, store no local
+copies unless a layer is sensitive/curated or has no live endpoint. See the *Data access
+model* in [`01-architecture.md`](01-architecture.md). This keeps ongoing updates zero-cost.
+
+| Access method | Stored locally? | Layers |
+|---|---|---|
+| **GEE-served (free, clipped server-side)** | No | Topography, Forest Cover, Forest Change, Weather, Fire, Water base (HydroSHEDS), biodiversity refs (Red List/GBIF) |
+| **Tiled / COG+STAC streamed** | No | NICFI basemaps, GFW/RADD alerts, ESA WorldCover, canopy height, biomass, Open Buildings, OSM roads |
+| **External API (bbox query)** | Cache only | SOI (BoM), GBIF, IUCN, FIRMS |
+| **Curated / own store — exceptions** | **Yes** | Biodiversity composite, Soil (PNGRIS), Ecosystem Services (LUMENS), Crop Suitability (PNGLES), BASINS-modelled flows, SLUP/PFMP/Mining compartments, document archives |
 
 ## Licensing & attribution
 

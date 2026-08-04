@@ -8,6 +8,12 @@
   stay under institutional control (CIFOR-ICRAF or a controlled database).
 - **Low maintenance** — offload heavy satellite processing to Google Earth Engine so
   we don't run a GIS server.
+- **Live data, not local copies** — the portal is an *access layer*, not a data
+  warehouse. It streams each dataset directly from its online source and clips to the
+  Oro/MCA boundary **on the fly**; we do **not** download, clip and store copies unless a
+  dataset has no live endpoint or is sensitive/curated. When a source updates, the portal
+  reflects it automatically — so ongoing data updates are **zero-cost** with no
+  re-download or re-processing. See *Data access model* below.
 - **Incremental** — a useful public map ships first; tiers and reporting are added on
   top without re-architecting.
 - **Works on slow connections** — the portal must be usable on the intermittent, low-
@@ -15,6 +21,30 @@
   data is streamed/tiled from the server and the UI never blocks on a slow basemap.
 - **Keep users in the portal** — documents are read *inside* the portal, not handed out
   as bulk files or links to external drives.
+
+## Data access model — stream live, don't warehouse
+
+The default for **every** layer is live streaming from the source, clipped to the
+Oro/MCA boundary at request time. Nothing is copied or clipped into local storage unless
+it has to be. This is what makes ongoing updates free: the source maintains the data, and
+the portal is always current without a re-download/re-clip pipeline to run.
+
+| Source type | Examples | How it streams | Stored locally? |
+|---|---|---|---|
+| **Google Earth Engine** | JRC TMF, Hansen, FIRMS, WorldClim, SRTM/ALOS | GEE clips server-side to the boundary and returns map tiles | No |
+| **Tiled web services (XYZ / WMS / WMTS)** | NICFI basemaps, GFW/RADD alerts, ESA WorldCover | tiles stream straight into the map | No |
+| **Cloud-Optimised GeoTIFF + STAC** | ETH canopy height, biomass, Open Buildings | HTTP range requests read only the pixels in view | No |
+| **APIs (bbox query)** | GBIF, IUCN Red List, NASA FIRMS, BoM SOI | queried live by bounding box | No (cache only) |
+| **Sensitive / curated — the exceptions** | PNGRIS, PNGLES, LUMENS, precise biodiversity, SLUP/PFMP/Mining compartments, document archives | held in the in-house PostGIS store / file store | **Yes** |
+
+Only the last row is warehoused — because those datasets either have **no live public
+endpoint** or **must be access-controlled**. That is also why the in-house storage ask
+stays small (≈8 GB, archives only — see [`08-it-requirements.md`](08-it-requirements.md)).
+
+> **On MCA_MLA:** the companion analysis repo *downloaded and clipped* everything because
+> it was a one-off study. The portal does the opposite — it streams the **same sources**
+> live. From MCA_MLA we reuse the **source list / queries** (which services and collections
+> to point at) and the small **WDPA boundary polygon**, not its clipped raster copies.
 
 ## System overview
 
