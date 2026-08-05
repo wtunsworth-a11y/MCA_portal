@@ -53,6 +53,37 @@ Rules the portal enforces:
 > anyone who opens it. For the portal, the index moves server-side and is reached only through
 > the search endpoint above.
 
+## Interim implementation (current) — accepted, to be made compliant later
+
+**Decision:** the Managalas archive is wired up now with a **client-side** index, and the
+server-side compliance work is **deferred**. This is a knowing trade-off to get real
+full-text search working immediately.
+
+What's live today:
+
+- The real **229-document Managalas index** is loaded from `app/data/mca_archive.json` and
+  searched **in the browser** over title + keywords + **full OCR text**.
+- The in-portal reader embeds each document's **Google Drive preview** (view-only).
+
+How this **differs from the target protection model** (the compliance backlog):
+
+- ⚠️ **Full OCR text is shipped to the client** (and currently committed to a public repo),
+  rather than staying server-side. Acceptable for the *public* Managalas archive; **not**
+  acceptable for restricted archives (QABB/partner, SLUP/PFMP compartments).
+- ⚠️ **Drive preview allows download** and needs files shared to render for other users —
+  so "no bulk download / no exposed source" is not yet enforced.
+- ⚠️ **No per-tier gating** on the client index.
+
+To make it compliant later:
+
+1. Move the index behind a **server-side search endpoint** (or proxy Drive's full-text search).
+2. Replace the Drive-preview reader with a **backend streaming route** that blocks download and
+   hides the source.
+3. Enforce **access groups** so restricted archives never ship to unauthorised clients.
+
+Restricted archives (QABB and the SLUP/PFMP compartments) should wait for the server-side
+path before going live.
+
 ## Low-bandwidth handling
 
 - Search returns small JSON (a page of matches), not the whole index.
@@ -62,6 +93,7 @@ Rules the portal enforces:
 ## Client structure (this repo)
 
 - `app/library.html` — the archives page: archive tabs, search box, results, in-portal reader.
-- `app/js/archives.js` — a small **representative sample** so the UI works offline; production
-  is served by the search API. Deliberately contains **no** file paths, source names or URLs.
-- `app/js/library.js` — search-first rendering + the in-portal reader modal.
+- `app/data/mca_archive.json` — the real Managalas index (229 docs, full OCR text, Drive
+  ids/urls). **Interim, client-side** — see *Interim implementation* above.
+- `app/js/archives.js` — the archive registry (doc counts, tiers, status).
+- `app/js/library.js` — loads the index, full-text search, and the in-portal Drive-preview reader.
