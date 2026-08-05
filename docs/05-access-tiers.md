@@ -54,10 +54,18 @@ Refine the biodiversity and LUMENS rows once data sources are settled.
 
 - **Admin verification (default).** Admin approves each account and assigns its group(s) and
   any PA scope.
-- **Self-verification by trusted email domain (where available).** A person signing up with an
-  **OPG-domain email** confirms it via a link and is **auto-assigned the OPG group** — no
-  manual step. The same pattern extends to any organisation with a controlled domain (PNGFA;
-  MCF → MCA scope; etc.): *domain → group* (and → PA scope where relevant).
+- **Self-verification by trusted email domain (where available).** A person signing up with a
+  recognised organisational domain confirms it via a link and is **auto-assigned that group**
+  — no manual step. Confirmed mappings:
+
+  | Email domain | Auto-assigned group |
+  |---|---|
+  | `@oro.gov.pg` | **OPG staff** |
+  | `@pngfa.gov.pg` | **PNGFA staff** (→ PFMP access) |
+
+  - **Manual verification (for now):** **PA staff** (e.g. MCF → MCA scope) and **PFMC
+    members** — no single trusted domain yet, so Admin verifies and sets the PA scope /
+    membership. Add domains here as they're confirmed.
   - Guardrails: verify by **confirmation link** (proves mailbox control, not just a typed
     address); Admin can override/revoke; handle shared mailboxes and departed staff via
     periodic re-verification/review; orgs without a clean domain fall back to manual Admin
