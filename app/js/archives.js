@@ -28,23 +28,7 @@ window.PORTAL_ARCHIVES = {
       docs: 0, pages: 0, indexed: null, tier: "partner", status: "planned" }
   ],
 
-  // representative searchable records (no file paths / source names / URLs by design)
-  records: [
-    { ref: "mgl-0001", archive: "managalas", title: "Managalas Plateau Conservation Area — proposal and background",
-      date: "1995", pages: 42, tier: "public",
-      keywords: ["conservation area", "plateau", "customary land", "proposal"],
-      snippet: "…the Managalas Plateau supports montane rainforest and the customary landowners of the …clans have sought protection of the area under the Conservation Areas Act…" },
-    { ref: "mgl-0002", archive: "managalas", title: "Partners With Melanesians — community engagement report",
-      date: "2004", pages: 28, tier: "public",
-      keywords: ["community", "engagement", "awareness", "landowners"],
-      snippet: "…awareness patrols visited villages across the plateau to explain the boundaries and the benefits of the proposed conservation area to resource owners…" },
-    { ref: "mgl-0003", archive: "managalas", title: "Biodiversity notes — birds and mammals of the plateau",
-      date: "2008", pages: 16, tier: "public",
-      keywords: ["biodiversity", "birds", "mammals", "survey"],
-      snippet: "…records include several bird of paradise species and cuscus; the montane forest is largely intact above 800 m elevation…" },
-    { ref: "mgl-0004", archive: "managalas", title: "Gazettal correspondence — Conservation Areas Act",
-      date: "2017", pages: 9, tier: "public",
-      keywords: ["gazettal", "designation", "2017", "legal"],
-      snippet: "…formal designation of the Managalas Conservation Area was gazetted in 2017, making it one of the largest community-led conservation areas in Papua New Guinea…" }
-  ]
+  // The real Managalas records (229 docs, full OCR text) are loaded at runtime
+  // from data/mca_archive.json by library.js. This array is a fallback only.
+  records: []
 };
