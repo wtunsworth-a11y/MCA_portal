@@ -3,7 +3,7 @@
 the static site can load same-origin (avoids the browser CORS block on the FIRMS
 API). Runs in GitHub Actions on a schedule. Reads the FIRMS key from config.js so
 no separate secret is required."""
-import json, re, os, datetime, urllib.request
+import json, re, os, datetime, urllib.request, urllib.error
 
 ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 CONFIG = os.path.join(ROOT, "app", "js", "config.js")
@@ -22,8 +22,17 @@ def firms_key():
 
 def fetch(src, key):
     url = "https://firms.modaps.eosdis.nasa.gov/api/area/csv/%s/%s/%s/%s" % (key, src, AREA, DAYS)
-    with urllib.request.urlopen(url, timeout=90) as r:
-        return r.read().decode("utf-8", "replace")
+    try:
+        with urllib.request.urlopen(url, timeout=90) as r:
+            return r.read().decode("utf-8", "replace")
+    except urllib.error.HTTPError as e:
+        body = ""
+        try:
+            body = e.read().decode("utf-8", "replace")
+        except Exception:
+            pass
+        # surface FIRMS's own explanation (e.g. "Invalid MAP_KEY", "Invalid day range")
+        raise RuntimeError("HTTP %s — %s" % (e.code, (body or e.reason).strip().replace("\n", " ")[:240]))
 
 def main():
     key = firms_key()
@@ -35,7 +44,7 @@ def main():
         try:
             csv = fetch(src, key)
         except Exception as e:
-            status[src] = "error: " + str(e)[:120]; print("fetch failed for", src, ":", e); continue
+            status[src] = "error: " + str(e)[:240]; print("fetch failed for", src, ":", e); continue
         lines = csv.strip().splitlines()
         head = lines[0].split(",") if lines else []
         if "latitude" not in head or "longitude" not in head:
