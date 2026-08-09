@@ -1,1 +1,10 @@
-{"updated":null,"project":"orodataportal","layers":{},"status":{}}
+{
+"updated": "2026-08-09T14:04:39Z",
+"project": "orodataportal",
+"layers": {},
+"status": {
+"treecover2000": "error: Permission 'earthengine.maps.create' denied on resource 'projects/orodataportal' (or it may not exist).",
+"defor_year": "error: Permission 'earthengine.maps.create' denied on resource 'projects/orodataportal' (or it may not exist).",
+"worldclim_precip": "error: Permission 'earthengine.maps.create' denied on resource 'projects/orodataportal' (or it may not exist)."
+}
+}
