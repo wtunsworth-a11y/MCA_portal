@@ -23,7 +23,7 @@ window.PORTAL_CONFIG = {
   keys: {
     nicfi: "",   // Planet NICFI basemap key  (free programme)
     gfw: "",     // Global Forest Watch API key (RADD / integrated alerts)
-    firms: "",   // NASA FIRMS MAP_KEY (free) — https://firms.modaps.eosdis.nasa.gov/api/
+    firms: "4097eae22be74ed776d4676c626e91bc",   // NASA FIRMS MAP_KEY (free) — https://firms.modaps.eosdis.nasa.gov/api/
     // The GEE-served layers (TMF, JAXA, FIRMS, WorldClim, HydroSHEDS) are
     // published from your Earth Engine project as XYZ tile endpoints; paste
     // those endpoints into the matching layers below when ready.
