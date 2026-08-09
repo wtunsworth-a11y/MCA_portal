@@ -1,0 +1,35 @@
+name: Update fire data (FIRMS)
+
+# Fetches NASA FIRMS active fires for Oro server-side (no browser CORS) and
+# commits app/data/fires.geojson so the static site can load it same-origin.
+
+on:
+  schedule:
+    - cron: "0 */6 * * *"   # every 6 hours
+  workflow_dispatch: {}       # allow manual "Run workflow"
+
+permissions:
+  contents: write
+
+concurrency:
+  group: update-fires
+  cancel-in-progress: false
+
+jobs:
+  fires:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Fetch FIRMS and build GeoJSON
+        run: python3 .github/scripts/update_fires.py
+      - name: Commit if changed
+        run: |
+          if ! git diff --quiet -- app/data/fires.geojson; then
+            git config user.name "fire-bot"
+            git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+            git add app/data/fires.geojson
+            git commit -m "chore: refresh FIRMS fire data [skip ci]"
+            git push
+          else
+            echo "No change in fire data."
+          fi

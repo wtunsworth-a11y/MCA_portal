@@ -119,12 +119,11 @@ window.PORTAL_CONFIG = {
       note: "Live keyless stand-in (Esri World Hillshade). To be replaced by JAXA AW3D30 via GEE."
     },
     {
-      id: "fire", theme: "Fire", name: "Active fires (NASA FIRMS VIIRS, last 7 days)",
-      kind: "firms", requiresKey: "firms", visible: false,
-      api: { source: "VIIRS_SNPP_NRT", area: "146.8,-9.9,149.6,-8.0", days: 7 },
-      attribution: "NASA FIRMS (VIIRS SNPP)",
-      legend: [{ color: "#ff3b30", label: "Active fire (VIIRS, 7d)" }],
-      note: "Fire detections for Oro from the FIRMS API (last 7 days). Needs a free FIRMS MAP_KEY in keys.firms."
+      id: "fire", theme: "Fire", name: "Active fires (NASA FIRMS, last 7 days)",
+      kind: "points", url: "data/fires.geojson", live: true, visible: false,
+      style: { color: "#ff3b30" }, attribution: "NASA FIRMS (VIIRS / MODIS)",
+      legend: [{ color: "#ff3b30", label: "Active fire (last 7 days)" }],
+      note: "Refreshed ~every 6h by a GitHub Action (.github/workflows/update-fires.yml) that reads keys.firms and writes data/fires.geojson — avoids the browser CORS block on the FIRMS API."
     },
     {
       id: "water", theme: "Water", name: "Catchments & waterways (HydroSHEDS)",
