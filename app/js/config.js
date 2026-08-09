@@ -47,6 +47,10 @@ window.PORTAL_CONFIG = {
       tiles: ["https://a.tile.opentopomap.org/{z}/{x}/{y}.png",
               "https://b.tile.opentopomap.org/{z}/{x}/{y}.png"],
       attribution: "© OpenTopoMap (CC-BY-SA), © OpenStreetMap contributors"
+    },
+    {
+      id: "none", name: "No basemap", type: "none"
+      // Data layers only, on a plain background — useful for printing / focus.
     }
   ],
 
@@ -67,6 +71,14 @@ window.PORTAL_CONFIG = {
       style: { color: "#ffd54a", weight: 2.5, fill: "rgba(255,213,74,0.08)" },
       attribution: "Boundary © WDPA / Protected Planet (Oct 2023)",
       note: "Authoritative WDPA boundary (WDPAID 555651673, designated 2017)."
+    },
+    {
+      id: "protected_areas", theme: "Protected Areas", name: "Other protected areas (WDPA / interim)",
+      kind: "geojson", url: "data/oro_pas.geojson", live: true, visible: true,
+      style: { color: "#57c98a", weight: 1.8, dash: [4, 3], fill: "rgba(87,201,138,0.07)" },
+      attribution: "WDPA / Protected Planet (Jun 2026)",
+      legend: [{ color: "#57c98a", label: "Protected area (WDPA / interim)" }],
+      note: "Oro PAs beyond the MCA (e.g. Inaina WMA). Interim/partial areas are added to data/oro_pas.geojson with ptype:'interim'."
     },
     {
       id: "forest_loss", theme: "Forest Change", name: "Forest loss (Hansen, 2001–2023)",

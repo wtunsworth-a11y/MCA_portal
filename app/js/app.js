@@ -11,6 +11,7 @@
   var sources = {};
   var baseLayers = [];
   CFG.basemaps.forEach(function (b) {
+    if (!b.tiles || !b.tiles.length) return;  // e.g. the "No basemap" option
     sources[b.id] = { type: "raster", tiles: b.tiles, tileSize: 256, attribution: b.attribution };
     baseLayers.push({
       id: "base-" + b.id, type: "raster", source: b.id,
@@ -137,7 +138,8 @@
     });
     sel.addEventListener("change", function () {
       CFG.basemaps.forEach(function (b) {
-        map.setLayoutProperty("base-" + b.id, "visibility", b.id === sel.value ? "visible" : "none");
+        var id = "base-" + b.id;
+        if (map.getLayer(id)) map.setLayoutProperty(id, "visibility", b.id === sel.value ? "visible" : "none");
       });
     });
   }

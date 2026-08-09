@@ -85,7 +85,7 @@
 
   // ---- state ---------------------------------------------------------------
   var map, mode = null, verts = [], lastPoint = null, aoiRing = null;
-  var mcaPolys = [], oroPolys = [];
+  var oroPolys = [], paList = [];  // paList: [{ name, polys }] — MCA + other Oro PAs
 
   var esri = "https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}";
   try {
@@ -107,21 +107,34 @@
   function emptyFC() { return { type: "FeatureCollection", features: [] }; }
 
   map.on("load", function () {
-    ["oro_province", "managalas"].forEach(function (name) {
-      fetch("data/" + name + ".geojson").then(function (r) { return r.json(); }).then(function (gj) {
-        var g = gj.features[0].geometry;
-        if (name === "managalas") mcaPolys = polysOf(g); else oroPolys = polysOf(g);
-        map.addSource(name, { type: "geojson", data: gj });
-        map.addLayer({ id: name + "-line", type: "line", source: name,
-          paint: { "line-color": name === "managalas" ? "#ffd54a" : "#7fd1ff",
-                   "line-width": name === "managalas" ? 2.4 : 1.6,
-                   "line-dasharray": name === "managalas" ? [1, 0] : [5, 4] } });
-        if (name === "oro_province") {
-          try { var bb = bboxOf(g.type === "Polygon" ? g.coordinates[0] : g.coordinates[0][0]);
-                map.fitBounds([[bb[0], bb[1]], [bb[2], bb[3]]], { padding: 30 }); } catch (e) {}
-        }
-      });
+    // Oro Province boundary (also the clip reference for "within Oro")
+    fetch("data/oro_province.geojson").then(function (r) { return r.json(); }).then(function (gj) {
+      var g = gj.features[0].geometry;
+      oroPolys = polysOf(g);
+      map.addSource("oro_province", { type: "geojson", data: gj });
+      map.addLayer({ id: "oro_province-line", type: "line", source: "oro_province",
+        paint: { "line-color": "#7fd1ff", "line-width": 1.6, "line-dasharray": [5, 4] } });
+      try { var bb = bboxOf(g.type === "Polygon" ? g.coordinates[0] : g.coordinates[0][0]);
+            map.fitBounds([[bb[0], bb[1]], [bb[2], bb[3]]], { padding: 30 }); } catch (e) {}
     });
+    // Managalas Conservation Area (a protected area, styled as the flagship)
+    fetch("data/managalas.geojson").then(function (r) { return r.json(); }).then(function (gj) {
+      var g = gj.features[0].geometry;
+      paList.push({ name: "Managalas Conservation Area", polys: polysOf(g) });
+      map.addSource("managalas", { type: "geojson", data: gj });
+      map.addLayer({ id: "managalas-line", type: "line", source: "managalas",
+        paint: { "line-color": "#ffd54a", "line-width": 2.4 } });
+    });
+    // Other Oro protected areas (WDPA + interim), all counted in overlap
+    fetch("data/oro_pas.geojson").then(function (r) { return r.json(); }).then(function (gj) {
+      (gj.features || []).forEach(function (f) {
+        paList.push({ name: (f.properties && f.properties.name) || "Protected area", polys: polysOf(f.geometry) });
+      });
+      map.addSource("oro_pas", { type: "geojson", data: gj });
+      map.addLayer({ id: "oro_pas-fill", type: "fill", source: "oro_pas", paint: { "fill-color": "#57c98a", "fill-opacity": 0.08 } });
+      map.addLayer({ id: "oro_pas-line", type: "line", source: "oro_pas", paint: { "line-color": "#57c98a", "line-width": 1.8, "line-dasharray": [4, 3] } });
+      if (aoiRing) analyse(aoiRing);  // refresh if a site was drawn before PAs loaded
+    }).catch(function () {});
     // AOI layers
     map.addSource("aoi", { type: "geojson", data: emptyFC() });
     map.addLayer({ id: "aoi-fill", type: "fill", source: "aoi", paint: { "fill-color": "#2c6cf0", "fill-opacity": 0.18 } });
@@ -215,33 +228,58 @@
   function emptyReport() {
     return '<div class="sa-empty">Define a site to see its report — draw a polygon, drop a point, or upload a boundary.</div>';
   }
+  function rel(pct, name) {
+    if (pct > 0.995) return "entirely within " + name;
+    if (pct > 0.005) return fmt(pct * 100, 1) + "% within " + name;
+    return "outside " + name;
+  }
   function analyse(ring) {
     var areaM2 = ringAreaM2(ring), ha = areaM2 / 1e4, km2 = areaM2 / 1e6;
     var c = centroidOf(ring);
-    var oroPct = oroPolys.length ? coverage(ring, oroPolys) : 0;
-    var mcaPct = mcaPolys.length ? coverage(ring, mcaPolys) : 0;
-    function rel(pct, name) {
-      if (pct > 0.995) return "entirely within " + name;
-      if (pct > 0.005) return fmt(pct * 100, 1) + "% within " + name;
-      return "outside " + name;
+    // one grid-sampling pass: Oro Province + every protected area
+    var bb = bboxOf(ring), N = 64, inAoi = 0, inOro = 0, inAnyPA = 0;
+    paList.forEach(function (pa) { pa._c = 0; });
+    for (var i = 0; i <= N; i++) {
+      for (var j = 0; j <= N; j++) {
+        var pt = [bb[0] + (bb[2] - bb[0]) * i / N, bb[1] + (bb[3] - bb[1]) * j / N];
+        if (!pointInRing(pt, ring)) continue;
+        inAoi++;
+        if (oroPolys.length && pointInPolys(pt, oroPolys)) inOro++;
+        var any = false;
+        paList.forEach(function (pa) { if (pointInPolys(pt, pa.polys)) { pa._c++; any = true; } });
+        if (any) inAnyPA++;
+      }
     }
+    var oroPct = inAoi ? inOro / inAoi : 0, anyPct = inAoi ? inAnyPA / inAoi : 0;
+    var per = paList.map(function (pa) { return { name: pa.name, pct: inAoi ? pa._c / inAoi : 0 }; })
+      .filter(function (p) { return p.pct > 0.005; }).sort(function (a, b) { return b.pct - a.pct; });
+
     var tiles =
       tile(ha >= 100 ? fmt(km2, 1) + " km²" : fmt(ha, 1) + " ha", "Site area") +
       tile(rel(oroPct, "Oro Province"), "Oro Province") +
-      tile(mcaPct > 0.005 ? fmt(mcaPct * 100, 1) + "%" : "—", "Overlap with MCA") +
-      tile(fmt(ha * mcaPct, 1) + " ha", "Area inside MCA") +
+      tile(anyPct > 0.005 ? fmt(anyPct * 100, 1) + "%" : "—", "Within a protected area") +
+      tile(fmt(ha * anyPct, 1) + " ha", "Area inside PAs") +
       tile(c[1].toFixed(3) + ", " + c[0].toFixed(3), "Centroid (lat, lng)");
+
+    var breakdown = per.length
+      ? '<div class="sa-note"><b>Protected-area overlap</b><ul class="sa-pa">' +
+          per.map(function (p) {
+            return "<li>" + escapeHtml(p.name) + " — <b>" + fmt(p.pct * 100, 1) + "%</b> (" + fmt(ha * p.pct, 1) + " ha)</li>";
+          }).join("") + "</ul></div>"
+      : '<div class="sa-note"><b>Does not overlap any mapped protected area.</b></div>';
+
     var pending = ["Forest cover & loss", "Land cover", "Canopy & carbon", "Fire history", "Climate", "Accessibility & population"]
       .map(function (t) { return "<li>" + t + "</li>"; }).join("");
+
     el("sa-report").innerHTML =
-      '<div class="sa-tiles">' + tiles + "</div>" +
-      '<div class="sa-note"><b>' + rel(mcaPct, "the Managalas Conservation Area").replace(/^outside/, "Outside") +
-        (mcaPct > 0.005 ? " — about " + fmt(ha * mcaPct, 1) + " ha of this site" : "") + ".</b></div>" +
+      '<div class="sa-tiles">' + tiles + "</div>" + breakdown +
       '<div class="sa-pending"><div class="sa-pending-h">Satellite themes — available once Earth Engine is connected</div><ul>' +
         pending + "</ul></div>" +
       '<div class="sa-actions"><button id="sa-print" class="btn ghost">Print / Save as PDF</button></div>';
     el("sa-print").addEventListener("click", function () { window.print(); });
   }
+  function escapeHtml(s) { return (s || "").replace(/[&<>"]/g, function (c) {
+    return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]; }); }
   function tile(v, l) { return '<div class="sa-tile"><div class="v">' + v + '</div><div class="l">' + l + "</div></div>"; }
 
   // ---- wire controls -------------------------------------------------------
