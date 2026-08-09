@@ -1,7 +1,30 @@
 {
-"updated": null,
+"updated": "2026-08-09T15:32:52Z",
 "project": "orodataportal",
-"bbox": [146.8, -10.0, 149.7, -7.9],
-"layers": {},
-"status": {}
+"bbox": [
+146.8,
+-10.0,
+149.7,
+-7.9
+],
+"layers": {
+"treecover2000": {
+"png": "data/gee_treecover2000.png"
+},
+"defor_year": {
+"png": "data/gee_defor_year.png"
+},
+"worldclim_precip": {
+"png": "data/gee_worldclim_precip.png"
+},
+"landcover": {
+"png": "data/gee_landcover.png"
+}
+},
+"status": {
+"treecover2000": "ok",
+"defor_year": "ok",
+"worldclim_precip": "ok",
+"landcover": "ok"
+}
 }
