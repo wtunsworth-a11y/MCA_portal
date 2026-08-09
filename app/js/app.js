@@ -46,7 +46,11 @@
   function addLayer(l) {
     if (map.getSource("src-" + l.id)) return;
     if (l.kind === "raster") {
-      map.addSource("src-" + l.id, { type: "raster", tiles: l.tiles, tileSize: 256, attribution: l.attribution });
+      var tiles = l.tiles;
+      if (l.requiresKey && CFG.keys[l.requiresKey]) {
+        tiles = l.tiles.map(function (t) { return t.replace(/{key}/g, CFG.keys[l.requiresKey]); });
+      }
+      map.addSource("src-" + l.id, { type: "raster", tiles: tiles, tileSize: 256, attribution: l.attribution });
       map.addLayer({ id: "lyr-" + l.id, type: "raster", source: "src-" + l.id,
         paint: { "raster-opacity": l.opacity != null ? l.opacity : 1 },
         layout: { visibility: l.visible ? "visible" : "none" } });

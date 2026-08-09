@@ -23,6 +23,7 @@ window.PORTAL_CONFIG = {
   keys: {
     nicfi: "",   // Planet NICFI basemap key  (free programme)
     gfw: "",     // Global Forest Watch API key (RADD / integrated alerts)
+    firms: "",   // NASA FIRMS MAP_KEY (free) — https://firms.modaps.eosdis.nasa.gov/api/
     // The GEE-served layers (TMF, JAXA, FIRMS, WorldClim, HydroSHEDS) are
     // published from your Earth Engine project as XYZ tile endpoints; paste
     // those endpoints into the matching layers below when ready.
@@ -40,6 +41,12 @@ window.PORTAL_CONFIG = {
       id: "esri", name: "Satellite (Esri)", type: "raster", default: true,
       tiles: ["https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}"],
       attribution: "Imagery © Esri, Maxar, Earthstar Geographics"
+    },
+    {
+      id: "topo_osm", name: "Topographic (OpenTopoMap)", type: "raster", default: false,
+      tiles: ["https://a.tile.opentopomap.org/{z}/{x}/{y}.png",
+              "https://b.tile.opentopomap.org/{z}/{x}/{y}.png"],
+      attribution: "© OpenTopoMap (CC-BY-SA), © OpenStreetMap contributors"
     }
   ],
 
@@ -85,16 +92,28 @@ window.PORTAL_CONFIG = {
       note: "Publish projects/JRC/TMF DeforestationYear from GEE and paste the tile URL."
     },
     {
-      id: "topo", theme: "Topography", name: "Terrain / hillshade (JAXA AW3D30)",
-      kind: "raster", requiresEndpoint: true, opacity: 0.6,
-      tiles: [""], attribution: "JAXA ALOS AW3D30",
-      note: "Publish JAXA/ALOS/AW3D30 hillshade from GEE and paste the tile URL."
+      id: "landcover", theme: "Land Cover", name: "Land cover (ESA WorldCover 2021, 10 m)",
+      kind: "raster", live: true, visible: false, opacity: 0.75,
+      tiles: ["https://services.terrascope.be/wmts/v2?SERVICE=WMTS&REQUEST=GetTile&VERSION=1.0.0&LAYER=WORLDCOVER_2021_MAP&STYLE=&FORMAT=image/png&TILEMATRIXSET=EPSG:3857&TILEMATRIX=EPSG:3857:{z}&TILEROW={y}&TILECOL={x}"],
+      attribution: "ESA WorldCover 2021 © ESA / Terrascope",
+      legend: [{ color: "#009900", label: "Tree cover" }, { color: "#ffff4c", label: "Cropland" },
+               { color: "#fa0000", label: "Built-up" }, { color: "#0064c8", label: "Water" }],
+      note: "Live, keyless (Terrascope WMTS). Global 10 m land cover — a useful public layer today."
     },
     {
-      id: "fire", theme: "Fire", name: "Active fires (NASA FIRMS)",
-      kind: "raster", requiresEndpoint: true, opacity: 0.9,
-      tiles: [""], attribution: "NASA FIRMS (MODIS/VIIRS)",
-      note: "Publish FIRMS recent detections from GEE, or load points via the FIRMS API."
+      id: "topo", theme: "Topography", name: "Terrain / hillshade (Esri stand-in)",
+      kind: "raster", live: true, visible: false, opacity: 0.9,
+      tiles: ["https://server.arcgisonline.com/ArcGIS/rest/services/Elevation/World_Hillshade/MapServer/tile/{z}/{y}/{x}"],
+      attribution: "Hillshade © Esri",
+      note: "Live keyless stand-in (Esri World Hillshade). To be replaced by JAXA AW3D30 via GEE."
+    },
+    {
+      id: "fire", theme: "Fire", name: "Active fires (NASA FIRMS, VIIRS)",
+      kind: "raster", requiresKey: "firms", opacity: 0.95,
+      tiles: ["https://firms.modaps.eosdis.nasa.gov/mapserver/wms/fires/{key}/?SERVICE=WMS&VERSION=1.1.1&REQUEST=GetMap&LAYERS=fires_viirs_snpp&SRS=EPSG:3857&BBOX={bbox-epsg-3857}&WIDTH=256&HEIGHT=256&FORMAT=image/png&TRANSPARENT=true"],
+      attribution: "NASA FIRMS (VIIRS)",
+      legend: [{ color: "#ff3b30", label: "Active fire" }],
+      note: "One free key from live: register a NASA FIRMS MAP_KEY (firms.modaps.eosdis.nasa.gov/api/) and paste into keys.firms. Verify the VIIRS layer name on the live map."
     },
     {
       id: "water", theme: "Water", name: "Catchments & waterways (HydroSHEDS)",
