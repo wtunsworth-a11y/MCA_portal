@@ -90,11 +90,10 @@ window.PORTAL_CONFIG = {
     },
     {
       id: "forest_cover", theme: "Forest Cover", name: "Tree cover 2000 (Hansen)",
-      kind: "raster", live: true, visible: false, opacity: 0.7,
-      tiles: ["https://storage.googleapis.com/earthenginepartners-hansen/tiles/gfc_v1.11/tree_alpha/{z}/{x}/{y}.png"],
-      attribution: "Hansen/UMD/Google/USGS/NASA",
+      kind: "raster", requiresEndpoint: true, opacity: 0.7,
+      tiles: [""], attribution: "Hansen/UMD/Google/USGS/NASA",
       legend: [{ color: "#1b7837", label: "Tree cover" }],
-      note: "Live stand-in for JRC TMF Forest Cover (to be served via GEE)."
+      note: "Static Hansen tree-cover tiles are not hosted for v1.11 (404). Serve via GEE, or use ESA WorldCover for current cover."
     },
     // ---- GEE-served layers: paste XYZ endpoints from your Earth Engine app ----
     {
@@ -120,12 +119,12 @@ window.PORTAL_CONFIG = {
       note: "Live keyless stand-in (Esri World Hillshade). To be replaced by JAXA AW3D30 via GEE."
     },
     {
-      id: "fire", theme: "Fire", name: "Active fires (NASA FIRMS, VIIRS)",
-      kind: "raster", requiresKey: "firms", opacity: 0.95,
-      tiles: ["https://firms.modaps.eosdis.nasa.gov/mapserver/wms/fires/{key}/?SERVICE=WMS&VERSION=1.1.1&REQUEST=GetMap&LAYERS=fires_viirs_snpp&SRS=EPSG:3857&BBOX={bbox-epsg-3857}&WIDTH=256&HEIGHT=256&FORMAT=image/png&TRANSPARENT=true"],
-      attribution: "NASA FIRMS (VIIRS)",
-      legend: [{ color: "#ff3b30", label: "Active fire" }],
-      note: "One free key from live: register a NASA FIRMS MAP_KEY (firms.modaps.eosdis.nasa.gov/api/) and paste into keys.firms. Verify the VIIRS layer name on the live map."
+      id: "fire", theme: "Fire", name: "Active fires (NASA FIRMS VIIRS, last 7 days)",
+      kind: "firms", requiresKey: "firms", visible: false,
+      api: { source: "VIIRS_SNPP_NRT", area: "146.8,-9.9,149.6,-8.0", days: 7 },
+      attribution: "NASA FIRMS (VIIRS SNPP)",
+      legend: [{ color: "#ff3b30", label: "Active fire (VIIRS, 7d)" }],
+      note: "Fire detections for Oro from the FIRMS API (last 7 days). Needs a free FIRMS MAP_KEY in keys.firms."
     },
     {
       id: "water", theme: "Water", name: "Catchments & waterways (HydroSHEDS)",

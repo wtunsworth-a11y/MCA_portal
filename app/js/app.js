@@ -66,7 +66,40 @@
         map.addLayer({ id: "lyr-" + l.id, type: "line", source: "src-" + l.id,
           paint: linePaint, layout: { visibility: l.visible ? "visible" : "none" } });
       });
+    } else if (l.kind === "firms") {
+      var key = CFG.keys[l.requiresKey];
+      if (!key) return;
+      var a = l.api;
+      var url = "https://firms.modaps.eosdis.nasa.gov/api/area/csv/" + key + "/" + a.source + "/" + a.area + "/" + a.days;
+      fetch(url).then(function (r) { return r.text(); }).then(function (csv) {
+        var feats = parseFirmsCsv(csv);
+        map.addSource("src-" + l.id, { type: "geojson", data: { type: "FeatureCollection", features: feats } });
+        map.addLayer({ id: "lyr-" + l.id, type: "circle", source: "src-" + l.id,
+          paint: { "circle-radius": 4, "circle-color": "#ff3b30", "circle-stroke-color": "#fff", "circle-stroke-width": 0.6, "circle-opacity": 0.9 },
+          layout: { visibility: visibleIds[l.id] ? "visible" : "none" } });
+        l._count = feats.length;
+        updateLegend();
+      }).catch(function () {});
     }
+  }
+
+  // Parse a FIRMS area CSV (header row + rows) into GeoJSON point features.
+  function parseFirmsCsv(csv) {
+    var lines = (csv || "").trim().split(/\r?\n/);
+    if (lines.length < 2) return [];
+    var head = lines[0].split(",");
+    var la = head.indexOf("latitude"), lo = head.indexOf("longitude"),
+        dt = head.indexOf("acq_date"), tm = head.indexOf("acq_time"), fr = head.indexOf("frp");
+    if (la < 0 || lo < 0) return [];
+    var out = [];
+    for (var i = 1; i < lines.length; i++) {
+      var c = lines[i].split(",");
+      var lat = parseFloat(c[la]), lng = parseFloat(c[lo]);
+      if (!isFinite(lat) || !isFinite(lng)) continue;
+      out.push({ type: "Feature", geometry: { type: "Point", coordinates: [lng, lat] },
+        properties: { date: dt >= 0 ? c[dt] : "", time: tm >= 0 ? c[tm] : "", frp: fr >= 0 ? c[fr] : "" } });
+    }
+    return out;
   }
 
   var visibleIds = {};
