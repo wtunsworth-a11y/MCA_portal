@@ -155,31 +155,37 @@
   }
 
   function addDataLayers() { CFG.layers.forEach(function (l) { if (layerState(l).usable) addLayer(l); }); }
+  function markVisible() { CFG.layers.forEach(function (l) { if (l.visible && layerState(l).usable) visibleIds[l.id] = true; }); }
 
-  // Build the UI once we know which GEE layers are available. We key data-layer
-  // adding off "style.load" (not "load") so a slow/unreachable basemap never
-  // stalls the vector boundaries or the panel — important for low-bandwidth Oro.
-  function startUI() {
-    CFG.layers.forEach(function (l) { if (l.visible && layerState(l).usable) visibleIds[l.id] = true; });
-    if (map.isStyleLoaded && map.isStyleLoaded()) addDataLayers();
-    else map.on("style.load", addDataLayers);
-    buildPanel();
-    buildBasemapSwitch();
-    updateLegend();
-    document.getElementById("boundary-btn").addEventListener("click", function () {
-      map.flyTo({ center: CFG.view.center, zoom: CFG.view.zoom });
-    });
-    var provBtn = document.getElementById("province-btn");
-    if (provBtn) provBtn.addEventListener("click", function () {
-      map.fitBounds([[147.00, -9.98], [149.44, -8.00]], { padding: 30 });
-    });
-  }
+  // --- Synchronous init: boundaries, fire and all non-GEE layers must NEVER
+  // wait on the GEE fetch. We key data-layer adding off "style.load" (not
+  // "load") so a slow/unreachable basemap never stalls the vector boundaries or
+  // the panel — important for low-bandwidth Oro. addLayer is idempotent.
+  markVisible();
+  map.on("style.load", addDataLayers);
+  if (map.isStyleLoaded && map.isStyleLoaded()) addDataLayers();
+  buildPanel();
+  buildBasemapSwitch();
+  updateLegend();
+  document.getElementById("boundary-btn").addEventListener("click", function () {
+    map.flyTo({ center: CFG.view.center, zoom: CFG.view.zoom });
+  });
+  var provBtn = document.getElementById("province-btn");
+  if (provBtn) provBtn.addEventListener("click", function () {
+    map.fitBounds([[147.00, -9.98], [149.44, -8.00]], { padding: 30 });
+  });
 
-  // Load the Earth Engine tile URLs (refreshed by the update-gee Action), then
-  // build the UI. Always resolves — a missing/failed file just means GEE layers
-  // show as "awaiting the GEE update job".
+  // --- GEE tile URLs arrive asynchronously (refreshed by the update-gee Action);
+  // enable those layers when they land. Always resolves — a missing file just
+  // leaves the GEE layers showing "awaiting the GEE update job".
   fetch("data/gee_tiles.json?t=" + Date.now())
     .then(function (r) { return r.ok ? r.json() : {}; })
     .catch(function () { return {}; })
-    .then(function (j) { GEE = (j && j.layers) || {}; startUI(); });
+    .then(function (j) {
+      GEE = (j && j.layers) || {};
+      markVisible();
+      if (map.isStyleLoaded && map.isStyleLoaded()) addDataLayers();  // add now-usable GEE layers (idempotent)
+      buildPanel();     // rebuild so GEE rows switch from "awaiting" to enabled
+      updateLegend();
+    });
 })();
