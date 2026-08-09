@@ -28,7 +28,7 @@ jobs:
             git config user.name "fire-bot"
             git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
             git add app/data/fires.geojson
-            git commit -m "chore: refresh FIRMS fire data [skip ci]"
+            git commit -m "chore: refresh FIRMS fire data"
             git push
           else
             echo "No change in fire data."
