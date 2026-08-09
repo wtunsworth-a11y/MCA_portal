@@ -67,7 +67,9 @@
           paint: linePaint, layout: { visibility: l.visible ? "visible" : "none" } });
       });
     } else if (l.kind === "points") {
-      fetch(l.url).then(function (r) { return r.json(); }).then(function (gj) {
+      // cache-bust: this file is refreshed every ~6h, so always fetch the latest
+      var bust = l.url + (l.url.indexOf("?") < 0 ? "?" : "&") + "t=" + Date.now();
+      fetch(bust).then(function (r) { return r.json(); }).then(function (gj) {
         map.addSource("src-" + l.id, { type: "geojson", data: gj });
         map.addLayer({ id: "lyr-" + l.id, type: "circle", source: "src-" + l.id,
           paint: { "circle-radius": 4, "circle-color": (l.style && l.style.color) || "#ff3b30",
