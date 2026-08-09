@@ -86,14 +86,21 @@ window.PORTAL_CONFIG = {
       tiles: ["https://storage.googleapis.com/earthenginepartners-hansen/tiles/gfc_v1.11/loss_alpha/{z}/{x}/{y}.png"],
       attribution: "Hansen/UMD/Google/USGS/NASA",
       legend: [{ color: "#ff3b30", label: "Tree cover loss" }],
-      note: "Live now (keyless). To be superseded by JRC TMF DeforestationYear via GEE."
+      note: "Live now (keyless), single colour. See 'Deforestation year' for the year-coloured version."
+    },
+    {
+      id: "defor_year", theme: "Forest Change", name: "Deforestation year (Hansen 2001–2023)",
+      kind: "gee", geeKey: "defor_year", visible: false, opacity: 0.9,
+      attribution: "Hansen/UMD/Google/USGS/NASA",
+      legend: [{ color: "#fff5b1", label: "2001" }, { color: "#f46d43", label: "~2012" }, { color: "#7a0177", label: "2023" }],
+      note: "Year of tree-cover loss, coloured by year (Earth Engine). A year slider is the next step."
     },
     {
       id: "forest_cover", theme: "Forest Cover", name: "Tree cover 2000 (Hansen)",
-      kind: "raster", requiresEndpoint: true, opacity: 0.7,
-      tiles: [""], attribution: "Hansen/UMD/Google/USGS/NASA",
-      legend: [{ color: "#1b7837", label: "Tree cover" }],
-      note: "Static Hansen tree-cover tiles are not hosted for v1.11 (404). Serve via GEE, or use ESA WorldCover for current cover."
+      kind: "gee", geeKey: "treecover2000", visible: false, opacity: 0.8,
+      attribution: "Hansen/UMD/Google/USGS/NASA",
+      legend: [{ color: "#cfe8cf", label: "Low cover" }, { color: "#1b7837", label: "Dense forest" }],
+      note: "Served from Earth Engine (Hansen treecover2000) by the update-gee Action."
     },
     // ---- GEE-served layers: paste XYZ endpoints from your Earth Engine app ----
     {
@@ -132,10 +139,11 @@ window.PORTAL_CONFIG = {
       note: "Publish WWF/HydroSHEDS basins & rivers from GEE; BASINS flows via backend."
     },
     {
-      id: "weather", theme: "Weather", name: "Climate normals (WorldClim 2.1)",
-      kind: "raster", requiresEndpoint: true, opacity: 0.6,
-      tiles: [""], attribution: "WorldClim 2.1",
-      note: "Publish WorldClim bioclim layer from GEE and paste the tile URL."
+      id: "weather", theme: "Weather", name: "Annual rainfall (WorldClim)",
+      kind: "gee", geeKey: "worldclim_precip", visible: false, opacity: 0.7,
+      attribution: "WorldClim v1",
+      legend: [{ color: "#ffffcc", label: "Drier" }, { color: "#253494", label: "Wetter" }],
+      note: "Mean annual precipitation (WorldClim BIO12), served from Earth Engine."
     },
     {
       id: "nicfi", theme: "Imagery", name: "Planet NICFI basemap",

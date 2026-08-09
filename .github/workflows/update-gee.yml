@@ -1,0 +1,44 @@
+name: Update GEE tiles
+
+# Runs Earth Engine server-side (service account) and commits app/data/gee_tiles.json
+# with fresh map-tile URLs the static site reads. EE tile URLs are refreshed daily
+# so they stay valid.
+
+on:
+  schedule:
+    - cron: "0 5 * * *"    # daily
+  workflow_dispatch: {}
+
+permissions:
+  contents: write
+
+concurrency:
+  group: update-gee
+  cancel-in-progress: false
+
+jobs:
+  gee:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Install Earth Engine API
+        run: pip install --quiet earthengine-api
+      - name: Generate tile URLs
+        env:
+          EE_SERVICE_ACCOUNT_KEY: ${{ secrets.EE_SERVICE_ACCOUNT_KEY }}
+          EE_PROJECT: orodataportal
+        run: python3 .github/scripts/update_gee.py
+      - name: Commit if changed
+        run: |
+          if ! git diff --quiet -- app/data/gee_tiles.json; then
+            git config user.name "gee-bot"
+            git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+            git add app/data/gee_tiles.json
+            git commit -m "chore: refresh GEE tile URLs [skip ci]"
+            git push
+          else
+            echo "No change."
+          fi
