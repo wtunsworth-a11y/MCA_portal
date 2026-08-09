@@ -9,3 +9,7 @@ node_modules/
 # Local secrets — never commit API keys (NICFI / GFW live in js/config.js locally)
 .env
 *.local
+
+# Python bytecode
+__pycache__/
+*.pyc
