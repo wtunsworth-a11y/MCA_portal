@@ -32,10 +32,10 @@
 
   // --- Resolve a layer's usability ------------------------------------------
   function layerState(l) {
-    if (l.kind === "backend") return { usable: false, reason: "Requires login (see access tiers)" };
-    if (l.kind === "gee") { var t = GEE[l.geeKey]; return { usable: !!(t && t.url), reason: (t && t.url) ? "" : "Awaiting the GEE update job" }; }
-    if (l.requiresKey) { var k = CFG.keys[l.requiresKey]; return { usable: !!k, reason: k ? "" : "Needs API key in config.js" }; }
-    if (l.requiresEndpoint) { var has = l.tiles && l.tiles[0]; return { usable: !!has, reason: has ? "" : "Needs GEE tile endpoint in config.js" }; }
+    if (l.kind === "backend") return { usable: false, reason: "Sign in for access" };
+    if (l.kind === "gee") { var t = GEE[l.geeKey]; return { usable: !!(t && t.url), reason: (t && t.url) ? "" : "Coming soon" }; }
+    if (l.requiresKey) { var k = CFG.keys[l.requiresKey]; return { usable: !!k, reason: k ? "" : "Coming soon" }; }
+    if (l.requiresEndpoint) { var has = l.tiles && l.tiles[0]; return { usable: !!has, reason: has ? "" : "Coming soon" }; }
     return { usable: true, reason: "" };
   }
 
