@@ -1,1 +1,1 @@
-{"type": "FeatureCollection", "updated": "2026-08-09T12:27:56Z", "area": "146.8,-9.9,149.6,-8.0", "days": "7", "features": []}
+{"type": "FeatureCollection", "updated": "2026-08-09T12:52:21Z", "area": "146.6,-10.1,149.8,-7.8", "days": "10", "sources": {"VIIRS_SNPP_NRT": "error: HTTP Error 400: Bad Request", "VIIRS_NOAA20_NRT": "error: HTTP Error 400: Bad Request", "MODIS_NRT": "error: HTTP Error 400: Bad Request"}, "features": []}
