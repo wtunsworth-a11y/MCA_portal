@@ -1,8 +1,9 @@
 name: Update GEE tiles
 
-# Runs Earth Engine server-side (service account) and commits app/data/gee_tiles.json
-# with fresh map-tile URLs the static site reads. EE tile URLs are refreshed daily
-# so they stay valid.
+# Runs Earth Engine server-side (service account), renders each layer as a single
+# PNG clipped to Oro, and commits those images plus app/data/gee_tiles.json (image
+# paths + bbox) the static site overlays. Same-origin images avoid the CORS block
+# on Earth Engine's tile server that MapLibre's WebGL raster can't work around.
 
 on:
   schedule:
@@ -33,11 +34,11 @@ jobs:
         run: python3 .github/scripts/update_gee.py
       - name: Commit if changed
         run: |
-          if ! git diff --quiet -- app/data/gee_tiles.json; then
+          git add app/data/gee_tiles.json app/data/gee_*.png
+          if ! git diff --cached --quiet; then
             git config user.name "gee-bot"
             git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-            git add app/data/gee_tiles.json
-            git commit -m "chore: refresh GEE tile URLs [skip ci]"
+            git commit -m "chore: refresh GEE layer images [skip ci]"
             git push
           else
             echo "No change."

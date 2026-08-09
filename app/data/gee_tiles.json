@@ -1,23 +1,7 @@
 {
-"updated": "2026-08-09T14:23:13Z",
+"updated": null,
 "project": "orodataportal",
-"layers": {
-"treecover2000": {
-"url": "https://earthengine.googleapis.com/v1/projects/orodataportal/maps/47aef7cb2127275baa9394996ba8d005-f0d12b039cb5125d013521c02c037075/tiles/{z}/{x}/{y}",
-"attribution": "Hansen/UMD/Google/USGS/NASA"
-},
-"defor_year": {
-"url": "https://earthengine.googleapis.com/v1/projects/orodataportal/maps/5984b1fa7a9fffeffd3ec2ac214f4d9b-bba51d9b1deb3f212765d09f0acec5cb/tiles/{z}/{x}/{y}",
-"attribution": "Hansen/UMD/Google/USGS/NASA"
-},
-"worldclim_precip": {
-"url": "https://earthengine.googleapis.com/v1/projects/orodataportal/maps/e888f9efd5ea2bde0acd77e73122d8ec-baa28678192ec52df829f6e54499b1f5/tiles/{z}/{x}/{y}",
-"attribution": "WorldClim v1"
-}
-},
-"status": {
-"treecover2000": "ok",
-"defor_year": "ok",
-"worldclim_precip": "ok"
-}
+"bbox": [146.8, -10.0, 149.7, -7.9],
+"layers": {},
+"status": {}
 }

@@ -1,13 +1,18 @@
 /*
  * Oro Data Portal — Phase 1 MVP map application
  * Renders the Oro / Managalas map with MapLibre GL JS, driven by config.js.
- * GEE layers get their tile URLs from data/gee_tiles.json (refreshed by the
- * update-gee GitHub Action); the browser never calls Earth Engine directly.
+ * GEE layers are pre-rendered by the update-gee GitHub Action as single PNG
+ * images clipped to Oro and committed to data/gee_<key>.png; the map overlays
+ * that same-origin image. This sidesteps CORS (Earth Engine's tile server does
+ * not send CORS headers, which MapLibre's WebGL raster requires) and means the
+ * browser never calls Earth Engine directly. data/gee_tiles.json lists the
+ * image path + the bbox the image covers.
  */
 (function () {
   "use strict";
   var CFG = window.PORTAL_CONFIG;
-  var GEE = {};            // { geeKey: { url, attribution } } from gee_tiles.json
+  var GEE = {};                               // { geeKey: { png } } from gee_tiles.json
+  var GEE_BBOX = [146.8, -10.0, 149.7, -7.9]; // w,s,e,n the GEE images cover
   var visibleIds = {};
 
   // --- Build a MapLibre style from the configured basemaps -------------------
@@ -33,7 +38,7 @@
   // --- Resolve a layer's usability ------------------------------------------
   function layerState(l) {
     if (l.kind === "backend") return { usable: false, reason: "Sign in for access" };
-    if (l.kind === "gee") { var t = GEE[l.geeKey]; return { usable: !!(t && t.url), reason: (t && t.url) ? "" : "Coming soon" }; }
+    if (l.kind === "gee") { var t = GEE[l.geeKey]; return { usable: !!(t && t.png), reason: (t && t.png) ? "" : "Coming soon" }; }
     if (l.requiresKey) { var k = CFG.keys[l.requiresKey]; return { usable: !!k, reason: k ? "" : "Coming soon" }; }
     if (l.requiresEndpoint) { var has = l.tiles && l.tiles[0]; return { usable: !!has, reason: has ? "" : "Coming soon" }; }
     return { usable: true, reason: "" };
@@ -42,16 +47,21 @@
   // --- Add live layers to the map -------------------------------------------
   function addLayer(l) {
     if (map.getSource("src-" + l.id)) return;
-    if (l.kind === "raster" || l.kind === "gee") {
-      var tiles;
-      if (l.kind === "gee") {
-        if (!GEE[l.geeKey] || !GEE[l.geeKey].url) return;
-        tiles = [GEE[l.geeKey].url];
-      } else {
-        tiles = l.tiles;
-        if (l.requiresKey && CFG.keys[l.requiresKey]) {
-          tiles = l.tiles.map(function (t) { return t.replace(/{key}/g, CFG.keys[l.requiresKey]); });
-        }
+    if (l.kind === "gee") {
+      // Single PNG clipped to Oro, committed same-origin by the update-gee Action.
+      var g = GEE[l.geeKey];
+      if (!g || !g.png) return;
+      var b = GEE_BBOX, w = b[0], s = b[1], e = b[2], n = b[3];
+      map.addSource("src-" + l.id, { type: "image",
+        url: g.png + (g.png.indexOf("?") < 0 ? "?" : "&") + "t=" + Date.now(),
+        coordinates: [[w, n], [e, n], [e, s], [w, s]] });
+      map.addLayer({ id: "lyr-" + l.id, type: "raster", source: "src-" + l.id,
+        paint: { "raster-opacity": l.opacity != null ? l.opacity : 1 },
+        layout: { visibility: visibleIds[l.id] ? "visible" : "none" } });
+    } else if (l.kind === "raster") {
+      var tiles = l.tiles;
+      if (l.requiresKey && CFG.keys[l.requiresKey]) {
+        tiles = l.tiles.map(function (t) { return t.replace(/{key}/g, CFG.keys[l.requiresKey]); });
       }
       map.addSource("src-" + l.id, { type: "raster", tiles: tiles, tileSize: 256, attribution: l.attribution });
       map.addLayer({ id: "lyr-" + l.id, type: "raster", source: "src-" + l.id,
@@ -83,6 +93,9 @@
   }
 
   function setVisible(l, on) {
+    // GEE images are ~1–3 MB each; add them lazily on first toggle rather than
+    // preloading all of them on map init.
+    if (on && l.kind === "gee" && !map.getSource("src-" + l.id)) addLayer(l);
     var ids = ["lyr-" + l.id, "lyr-" + l.id + "-fill"];
     ids.forEach(function (id) { if (map.getLayer(id)) map.setLayoutProperty(id, "visibility", on ? "visible" : "none"); });
     visibleIds[l.id] = on;
@@ -154,7 +167,11 @@
     });
   }
 
-  function addDataLayers() { CFG.layers.forEach(function (l) { if (layerState(l).usable) addLayer(l); }); }
+  function addDataLayers() { CFG.layers.forEach(function (l) {
+    if (!layerState(l).usable) return;
+    if (l.kind === "gee" && !visibleIds[l.id]) return;  // lazy — added when toggled on
+    addLayer(l);
+  }); }
   function markVisible() { CFG.layers.forEach(function (l) { if (l.visible && layerState(l).usable) visibleIds[l.id] = true; }); }
 
   // --- Synchronous init: boundaries, fire and all non-GEE layers must NEVER
@@ -175,14 +192,15 @@
     map.fitBounds([[147.00, -9.98], [149.44, -8.00]], { padding: 30 });
   });
 
-  // --- GEE tile URLs arrive asynchronously (refreshed by the update-gee Action);
+  // --- GEE image paths arrive asynchronously (refreshed by the update-gee Action);
   // enable those layers when they land. Always resolves — a missing file just
-  // leaves the GEE layers showing "awaiting the GEE update job".
+  // leaves the GEE layers showing "Coming soon".
   fetch("data/gee_tiles.json?t=" + Date.now())
     .then(function (r) { return r.ok ? r.json() : {}; })
     .catch(function () { return {}; })
     .then(function (j) {
       GEE = (j && j.layers) || {};
+      if (j && j.bbox && j.bbox.length === 4) GEE_BBOX = j.bbox;
       markVisible();
       if (map.isStyleLoaded && map.isStyleLoaded()) addDataLayers();  // add now-usable GEE layers (idempotent)
       buildPanel();     // rebuild so GEE rows switch from "awaiting" to enabled

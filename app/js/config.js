@@ -111,12 +111,11 @@ window.PORTAL_CONFIG = {
     },
     {
       id: "landcover", theme: "Land Cover", name: "Land cover (ESA WorldCover 2021, 10 m)",
-      kind: "raster", live: true, visible: false, opacity: 0.75,
-      tiles: ["https://services.terrascope.be/wmts/v2?SERVICE=WMTS&REQUEST=GetTile&VERSION=1.0.0&LAYER=WORLDCOVER_2021_MAP&STYLE=&FORMAT=image/png&TILEMATRIXSET=EPSG:3857&TILEMATRIX=EPSG:3857:{z}&TILEROW={y}&TILECOL={x}"],
-      attribution: "ESA WorldCover 2021 © ESA / Terrascope",
+      kind: "gee", geeKey: "landcover", visible: false, opacity: 0.75,
+      attribution: "ESA WorldCover 2021 © ESA",
       legend: [{ color: "#009900", label: "Tree cover" }, { color: "#ffff4c", label: "Cropland" },
                { color: "#fa0000", label: "Built-up" }, { color: "#0064c8", label: "Water" }],
-      note: "Live, keyless (Terrascope WMTS). Global 10 m land cover — a useful public layer today."
+      note: "ESA WorldCover 2021 (10 m), served as a clipped image from Earth Engine by the update-gee Action."
     },
     {
       id: "topo", theme: "Topography", name: "Terrain / hillshade (Esri stand-in)",
