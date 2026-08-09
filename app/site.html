@@ -5,7 +5,33 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Site analysis — Oro Data Portal</title>
   <meta name="description" content="Draw or upload a site in Oro Province and generate a short landscape profile — a series of maps and statistics (a 'mini-MLA')." />
+  <link rel="stylesheet" href="vendor/maplibre-gl.css" />
   <link rel="stylesheet" href="css/site.css" />
+  <style>
+    .sa-wrap { max-width: 1000px; margin: 0 auto; padding: 18px 20px 0; }
+    .sa-toolbar { display:flex; flex-wrap:wrap; gap:8px; align-items:center; margin-bottom:12px; }
+    .sa-toolbar .btn { padding:8px 12px; }
+    .tool { background:var(--card,#171d2b); color:inherit; border:1px solid var(--line,#26304180);
+            border-radius:9px; padding:8px 12px; font-size:13.5px; cursor:pointer; }
+    .tool.on { background:#2c6cf0; border-color:#2c6cf0; color:#fff; }
+    #sa-buffer-wrap { display:none; align-items:center; gap:6px; font-size:13px; color:var(--muted,#93a0b4); }
+    #sa-buffer { width:78px; padding:7px 9px; border:1px solid var(--line,#263041); border-radius:8px;
+                 background:var(--bg,#0f1420); color:inherit; }
+    #sa-map { height:460px; border-radius:12px; overflow:hidden; border:1px solid var(--line,#263041); }
+    .sa-hint { font-size:12.5px; color:var(--muted,#93a0b4); margin:8px 2px 0; }
+    #sa-report { margin:16px 0 6px; }
+    .sa-empty { color:var(--muted,#93a0b4); font-size:14px; padding:14px; border:1px dashed var(--line,#263041); border-radius:10px; }
+    .sa-tiles { display:grid; grid-template-columns:repeat(auto-fit,minmax(150px,1fr)); gap:10px; }
+    .sa-tile { background:var(--card,#171d2b); border:1px solid var(--line,#263041); border-radius:11px; padding:12px 14px; }
+    .sa-tile .v { font-size:19px; font-weight:600; }
+    .sa-tile .l { font-size:12px; color:var(--muted,#93a0b4); margin-top:2px; }
+    .sa-note { margin:12px 0; font-size:14.5px; }
+    .sa-pending { margin-top:12px; background:var(--card,#171d2b); border:1px solid var(--line,#263041); border-radius:11px; padding:12px 14px; }
+    .sa-pending-h { font-size:12.5px; color:var(--muted,#93a0b4); margin-bottom:6px; }
+    .sa-pending ul { margin:0; padding-left:18px; columns:2; font-size:13.5px; }
+    .sa-actions { margin-top:12px; }
+    @media (max-width:560px){ .sa-pending ul { columns:1; } }
+  </style>
 </head>
 <body>
   <!-- NAV -->
@@ -28,52 +54,37 @@
   <!-- HERO -->
   <header class="hero">
     <div class="wrap">
-      <div class="eyebrow">Tool · Oro Province · <span class="badge planned">Planned — Phase 4b</span></div>
+      <div class="eyebrow">Tool · Oro Province · <span class="badge">Pilot</span></div>
       <h1>Site analysis</h1>
-      <p class="lede">Pick any site in Oro Province — draw it on the map or upload a boundary — and the
-        portal generates a short landscape profile: a series of maps and summary statistics.
-        A point becomes an area with a buffer. Think of it as a <b>mini-MLA</b> for your site.</p>
-      <div class="cta-row">
-        <a class="btn primary" href="map.html">Draw a site on the map →</a>
-        <a class="btn ghost" href="#how">How it works</a>
-      </div>
+      <p class="lede">Define a site — draw it, drop a point, or upload a boundary — and get an instant
+        profile: its area and how it sits against the Managalas Conservation Area and Oro Province.
+        Satellite themes (forest loss, carbon, fire…) are added once Earth Engine is connected.</p>
     </div>
   </header>
 
-  <!-- HOW IT WORKS -->
-  <section class="blk" id="how">
-    <div class="wrap">
-      <div class="sec-h"><div><h2>How it works</h2><p>Four steps, from an area of interest to a site report.</p></div></div>
-      <div class="cards">
-        <div class="card">
-          <h3>1 · Define the site</h3>
-          <p>Draw a <b>point, line or polygon</b> on the map, or upload a boundary
-            (GeoJSON, KML, GPX or shapefile).</p>
-        </div>
-        <div class="card">
-          <h3>2 · Buffer a point</h3>
-          <p>A point or line is buffered to an area — default <b>500 m</b>, adjustable
-            (about 250 m – 5 km). Polygons are used as drawn.</p>
-        </div>
-        <div class="card">
-          <h3>3 · Analyse</h3>
-          <p>The portal computes each theme over the site and returns a
-            <b>map plus a statistic or two</b>. Runs as a background job.</p>
-        </div>
-        <div class="card">
-          <h3>4 · Site report</h3>
-          <p>Maps and stat cards on screen. <b>PDF</b> export for everyone;
-            <b>DOCX</b> for verified users. Download or email to your account.</p>
-        </div>
-      </div>
+  <!-- TOOL + MAP + REPORT -->
+  <section class="sa-wrap">
+    <div class="sa-toolbar">
+      <button id="mode-point" class="tool" data-m="point">📍 Drop a point</button>
+      <button id="mode-polygon" class="tool" data-m="polygon">⬠ Draw a polygon</button>
+      <button id="mode-upload" class="tool">⤒ Upload boundary</button>
+      <button id="sa-finish" class="tool" style="display:none">✓ Finish polygon</button>
+      <button id="mode-clear" class="tool">✕ Clear</button>
+      <span id="sa-buffer-wrap"><label for="sa-buffer">Buffer</label>
+        <input id="sa-buffer" type="number" min="50" step="50" value="500" /> m</span>
+      <input id="sa-file" type="file" accept=".geojson,.json,.kml" style="display:none" />
     </div>
+    <div id="sa-map"></div>
+    <div class="sa-hint">Point → click the map (buffered to the radius above). Polygon → click each corner, then
+      <b>Finish</b> (or double-click). Upload → GeoJSON or KML. Everything is computed in your browser; nothing is uploaded or stored.</div>
+    <div id="sa-report"></div>
   </section>
 
-  <!-- THEMES -->
+  <!-- THEMES (context) -->
   <section class="blk" id="themes">
     <div class="wrap">
       <div class="sec-h">
-        <div><h2>What you get for a site</h2><p>A map and summary for each theme, clipped to your area of interest.</p></div>
+        <div><h2>What a full site profile will include</h2><p>The pilot computes area and boundary overlap now; these satellite themes follow once Earth Engine is connected.</p></div>
       </div>
       <div class="cards">
         <div class="card"><h3>Topography</h3><p>Elevation, slope &amp; hillshade — min / mean / max.</p></div>
@@ -81,11 +92,7 @@
         <div class="card"><h3>Forest cover &amp; loss</h3><p>Forest extent and <b>ha / % lost</b> over time.</p></div>
         <div class="card"><h3>Canopy &amp; carbon</h3><p>Canopy height, biomass and <b>carbon stock</b>.</p></div>
         <div class="card"><h3>Fire history</h3><p>Active-fire detections, counted by year.</p></div>
-        <div class="card"><h3>Climate</h3><p>Rainfall and temperature summary for the site.</p></div>
-        <div class="card"><h3>Hydrology</h3><p>Catchments and rivers within and around the site.</p></div>
         <div class="card"><h3>Access &amp; people</h3><p>Travel time and population near the site.</p></div>
-        <div class="card"><h3>Overlaps</h3><p>Does the site intersect the <b>MCA, a KBA or a protected area</b>?
-          Restricted overlaps (SABL / PFMP / mining) show only for authorised users.</p></div>
       </div>
     </div>
   </section>
@@ -95,16 +102,9 @@
     <div class="wrap">
       <div class="protect">
         <span aria-hidden="true">🔒</span>
-        <div><b>Access &amp; privacy.</b> Public users get the public theme set over a capped area;
-          verified users additionally see the restricted layers their groups allow, and can export DOCX.
-          Sensitive overlaps appear only for users who hold that access group. <b>Nothing is stored per
-          user</b> — a site you draw or upload, and the report generated, are transient: delivered to you,
-          then discarded, and never shown to other users.</div>
+        <div><b>Nothing is stored.</b> The site you draw or upload is analysed in your browser and is not saved to the
+          portal or shown to other users. Report export is by <b>Print / Save as PDF</b>; email delivery arrives with the full version.</div>
       </div>
-      <p class="sub" style="color:var(--faint);font-size:12.5px;margin-top:12px">
-        This tool is planned for Phase 4b. It reuses the portal's Earth Engine layers and the project's
-        landscape-analysis method, so nothing new needs to be downloaded or stored to run it.
-      </p>
     </div>
   </section>
 
@@ -114,5 +114,9 @@
       <div>A mini-MLA for any site in Oro Province</div>
     </div>
   </footer>
+
+  <script src="vendor/maplibre-gl.js"></script>
+  <script src="js/config.js"></script>
+  <script src="js/site-analysis.js"></script>
 </body>
 </html>
