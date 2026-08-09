@@ -35,6 +35,15 @@ footer { margin-top: auto; padding: 12px 16px; border-top: 1px solid var(--line)
 footer a { color: var(--accent); }
 
 .maplibregl-ctrl-attrib { font-size: 10px; }
+
+/* Legend */
+.legend { padding: 10px 16px 4px; border-top: 1px solid var(--line); }
+.legend .lg-h { font-size: 11px; text-transform: uppercase; letter-spacing: .06em; color: var(--muted); margin-bottom: 8px; }
+.legend .lg-t { font-size: 11.5px; color: var(--muted); margin: 8px 0 4px; }
+.legend .lg-row { display: flex; align-items: center; gap: 8px; font-size: 12.5px; margin: 3px 0; }
+.legend .lg-sw { width: 14px; height: 14px; border-radius: 3px; display: inline-block; flex: none; border: 1px solid rgba(255,255,255,.25); }
+.legend .lg-sw.line { height: 3px; border-radius: 2px; border: 0; }
+
 @media (max-width: 720px) {
   #app { grid-template-columns: 1fr; grid-template-rows: 45vh 55vh; }
   #map { height: auto; }

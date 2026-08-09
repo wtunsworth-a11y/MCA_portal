@@ -68,9 +68,37 @@
     }
   }
 
+  var visibleIds = {};
+  CFG.layers.forEach(function (l) { if (l.visible && layerState(l).usable) visibleIds[l.id] = true; });
+
   function setVisible(l, on) {
     var ids = ["lyr-" + l.id, "lyr-" + l.id + "-fill"];
     ids.forEach(function (id) { if (map.getLayer(id)) map.setLayoutProperty(id, "visibility", on ? "visible" : "none"); });
+    visibleIds[l.id] = on;
+    updateLegend();
+  }
+
+  // --- Legend (reflects the currently-visible layers) -----------------------
+  function escapeHtml(s) { return (s || "").replace(/[&<>"]/g, function (c) {
+    return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]; }); }
+  function swatch(color, label, line) {
+    return '<div class="lg-row"><i class="lg-sw' + (line ? " line" : "") + '" style="background:' + color + '"></i>' +
+      '<span>' + escapeHtml(label) + "</span></div>";
+  }
+  function updateLegend() {
+    var box = document.getElementById("legend"); if (!box) return;
+    var rows = [];
+    CFG.layers.forEach(function (l) {
+      if (!visibleIds[l.id]) return;
+      if (l.legend && l.legend.length) {
+        rows.push('<div class="lg-t">' + escapeHtml(l.name) + "</div>");
+        l.legend.forEach(function (g) { rows.push(swatch(g.color, g.label)); });
+      } else if (l.kind === "geojson" && l.style) {
+        rows.push(swatch(l.style.color, l.name, true));
+      }
+    });
+    box.innerHTML = rows.length ? '<div class="lg-h">Legend</div>' + rows.join("") : "";
+    box.style.display = rows.length ? "" : "none";
   }
 
   // --- Build the layer panel, grouped by theme ------------------------------
@@ -129,6 +157,7 @@
   // it must be usable even if the basemap never finishes loading.
   buildPanel();
   buildBasemapSwitch();
+  updateLegend();
   document.getElementById("boundary-btn").addEventListener("click", function () {
     map.flyTo({ center: CFG.view.center, zoom: CFG.view.zoom });
   });
