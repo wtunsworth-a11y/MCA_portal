@@ -10,7 +10,7 @@ CONFIG = os.path.join(ROOT, "app", "js", "config.js")
 OUT = os.path.join(ROOT, "app", "data", "fires.geojson")
 
 AREA = "146.6,-10.1,149.8,-7.8"   # Oro Province bbox (padded): west,south,east,north
-DAYS = "10"                        # FIRMS area API max is 10 days
+DAYS = "5"                         # FIRMS area API caps the day range at 5
 SOURCES = ["VIIRS_SNPP_NRT", "VIIRS_NOAA20_NRT", "MODIS_NRT"]
 
 def firms_key():

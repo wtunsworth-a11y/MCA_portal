@@ -119,10 +119,10 @@ window.PORTAL_CONFIG = {
       note: "Live keyless stand-in (Esri World Hillshade). To be replaced by JAXA AW3D30 via GEE."
     },
     {
-      id: "fire", theme: "Fire", name: "Active fires (NASA FIRMS, last 7 days)",
+      id: "fire", theme: "Fire", name: "Active fires (NASA FIRMS, last 5 days)",
       kind: "points", url: "data/fires.geojson", live: true, visible: false,
       style: { color: "#ff3b30" }, attribution: "NASA FIRMS (VIIRS / MODIS)",
-      legend: [{ color: "#ff3b30", label: "Active fire (last 7 days)" }],
+      legend: [{ color: "#ff3b30", label: "Active fire (last 5 days)" }],
       note: "Refreshed ~every 6h by a GitHub Action (.github/workflows/update-fires.yml) that reads keys.firms and writes data/fires.geojson — avoids the browser CORS block on the FIRMS API."
     },
     {
