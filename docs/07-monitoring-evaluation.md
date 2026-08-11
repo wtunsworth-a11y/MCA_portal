@@ -55,3 +55,24 @@ per-user activity for donor/partner accountability:
   privacy-friendly analytics service) keyed by tier and — for signed-in users — account id.
 - The dashboard reads pre-aggregated summaries so it stays fast on slow connections.
 - The figures in `app/js/analytics.js` are **illustrative**; production reads the event log.
+
+## Pilot analytics — Cloudflare Web Analytics
+
+For the GitHub Pages pilot there is no backend event log, so real public-tier usage is
+measured with **Cloudflare Web Analytics**:
+
+- **What it gives us:** unique visitors, page views, top pages, countries and referrers,
+  over time — the aggregate public-tier numbers we report against SO1.
+- **Why this service:** free, and **privacy-preserving by design** — no cookies, no
+  cross-site tracking, IP addresses anonymised — so it needs **no cookie-consent banner**
+  and fits the privacy principles above and the DICT data-governance discussion.
+- **How it's wired:** `app/js/cf-analytics.js` injects Cloudflare's beacon on every page
+  (loaded from each page's `<head>`). It stays inert until a **token** is pasted into that
+  file — the token is a public site identifier from the Cloudflare dashboard
+  (Analytics & Logs → Web Analytics), safe to commit. This is separate from
+  `app/js/analytics.js`, which only renders the illustrative M&E dashboard.
+- **Where the numbers live:** in the Cloudflare dashboard, not in this repo. Counting
+  starts from the moment the token is added; there is no retrospective data before that.
+- **When IT hosts the portal properly:** this can be replaced by a self-hosted
+  privacy-friendly service (e.g. Plausible/Matomo) feeding the same Usage dashboard, with
+  no change to the tiered reporting model.
