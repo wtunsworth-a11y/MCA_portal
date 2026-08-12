@@ -16,9 +16,10 @@
  */
 (function () {
   "use strict";
-  var TOKEN = "";  // ← paste Cloudflare Web Analytics token here to switch on
+  var TOKEN = "a346ed265f10432fa3d97c8ac1b6b8b7";  // Cloudflare Web Analytics site token (public)
   if (!TOKEN) return;
   var s = document.createElement("script");
+  s.type = "module";
   s.defer = true;
   s.src = "https://static.cloudflareinsights.com/beacon.min.js";
   s.setAttribute("data-cf-beacon", JSON.stringify({ token: TOKEN }));
