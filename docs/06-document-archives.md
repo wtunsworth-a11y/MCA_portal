@@ -13,7 +13,7 @@ Working titles (more will be added):
 | **Managalas** | History of the Managalas Conservation Area — Partners With Melanesians | Indexed — **229 documents, 4,540 pages** (indexed 2026-07-27) |
 | **CSIRO** | CSIRO scientific studies and survey reports for the region | Planned |
 | **Kokoda** | Kokoda Track corridor — historical and environmental records | Planned |
-| **QABB** | Queen Alexandra's Birdwing Butterfly — conservation and research | Planned |
+| **QABB** | Queen Alexandra's Birdwing Butterfly — conservation and research | **Catalogue only — 147 titles** (2026-08-15). Titles + keywords searchable; document text and source files withheld pending permission clearance |
 
 Each archive corresponds to a source document set (e.g. a Google Drive folder). The
 originals are **not** exposed to portal users — see the protection model below.
@@ -81,8 +81,30 @@ To make it compliant later:
    hides the source.
 3. Enforce **access groups** so restricted archives never ship to unauthorised clients.
 
-Restricted archives (QABB and the SLUP/PFMP compartments) should wait for the server-side
+Restricted archives (the SLUP/PFMP compartments) should wait for the server-side
 path before going live.
+
+## QABB — catalogue-only (restricted), permission pending
+
+QABB is added now, but under a deliberately **minimal exposure** model chosen because
+permission to publish its documents (some marked *"Confidential to CSIRO"*) has not yet
+been cleared:
+
+- `app/data/qabb_archive.json` ships **titles, folders, keywords and metadata only** — for
+  **147** documents (tier `restricted`).
+- It contains **no OCR text, no snippets, no Drive IDs and no URLs**. Because the file
+  references never reach the browser, the **source PDFs are unreachable** regardless of the
+  UI — this is enforced at the data level, not just by hiding a button.
+- In the library, QABB results show a *"Catalogue entry — full text and source file withheld
+  pending permission clearance"* line and a disabled **🔒 Awaiting permission** button; the
+  in-portal reader refuses to open a `restricted` record.
+- Search over QABB therefore matches **titles and keywords only** (no body text to match).
+
+**To lift the restriction once permission is cleared** (per document or for the whole set):
+regenerate `qabb_archive.json` from the source index adding the OCR `text`/`snippet` and the
+`driveId`/`url`, and change `tier` from `restricted` to `public` (or the appropriate access
+group). No UI change is needed — the reader already handles `public` records. Ideally this
+is done via the **server-side** path above so the restricted text never ships to the client.
 
 ## Low-bandwidth handling
 
@@ -95,5 +117,7 @@ path before going live.
 - `app/library.html` — the archives page: archive tabs, search box, results, in-portal reader.
 - `app/data/mca_archive.json` — the real Managalas index (229 docs, full OCR text, Drive
   ids/urls). **Interim, client-side** — see *Interim implementation* above.
+- `app/data/qabb_archive.json` — the QABB **catalogue** (147 titles + keywords, tier
+  `restricted`). **No text, no Drive ids/urls** — see *QABB — catalogue-only* above.
 - `app/js/archives.js` — the archive registry (doc counts, tiers, status).
 - `app/js/library.js` — loads the index, full-text search, and the in-portal Drive-preview reader.

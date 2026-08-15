@@ -11,7 +11,7 @@
 (function () {
   "use strict";
   var A = window.PORTAL_ARCHIVES || { registry: [], records: [] };
-  var TIER_LABEL = { public: "PUBLIC", reg: "REGISTERED", partner: "PARTNER" };
+  var TIER_LABEL = { public: "PUBLIC", reg: "REGISTERED", partner: "PARTNER", restricted: "RESTRICTED" };
   var MIN = 2, CAP = 30;
   var state = { archive: "all", q: "" };
   var loaded = false, loadError = false;
@@ -21,14 +21,22 @@
   var meta = document.getElementById("meta");
   var qEl = document.getElementById("q");
 
-  // --- load the real Managalas index --------------------------------------
-  fetch("data/mca_archive.json")
-    .then(function (r) { if (!r.ok) throw new Error(r.status); return r.json(); })
-    .then(function (docs) {
-      A.records = docs.map(function (d) {
-        d.archive = "managalas";
-        return d;
-      });
+  // --- load the archive indexes -------------------------------------------
+  // Managalas: full OCR index (data/mca_archive.json) — readable in-portal.
+  // QABB: catalogue only (data/qabb_archive.json) — titles + keywords, tier
+  // "restricted". It ships NO document text and NO Drive IDs, so neither the
+  // document bodies nor the source PDFs are reachable from the browser until
+  // permission to use them is cleared (see docs/06-document-archives.md).
+  function tag(docs, archive) { return docs.map(function (d) { d.archive = archive; return d; }); }
+  Promise.all([
+    fetch("data/mca_archive.json").then(function (r) { if (!r.ok) throw new Error(r.status); return r.json(); })
+      .then(function (docs) { return tag(docs, "managalas"); }),
+    fetch("data/qabb_archive.json").then(function (r) { return r.ok ? r.json() : []; })
+      .then(function (docs) { return tag(docs, "qabb"); })
+      .catch(function () { return []; })
+  ])
+    .then(function (sets) {
+      A.records = sets[0].concat(sets[1]);
       loaded = true;
       render();
     })
@@ -39,7 +47,7 @@
     var planned = a.status !== "indexed";
     return '<button class="arch-tab' + (planned ? " planned" : "") + (state.archive === a.id ? " active" : "") +
       '" data-a="' + a.id + '" title="' + esc(a.blurb) + '">' + a.name +
-      '<span class="n">' + (planned ? "planned" : a.docs + " docs") + "</span></button>";
+      '<span class="n">' + (planned ? "planned" : a.docs + (a.restricted ? " titles" : " docs")) + "</span></button>";
   }
   tabs.innerHTML =
     '<button class="arch-tab' + (state.archive === "all" ? " active" : "") + '" data-a="all">All archives</button>' +
@@ -114,22 +122,29 @@
     if (!total) { list.innerHTML = '<div class="empty-search"><div class="ic">🗒️</div><h3>No documents match</h3><p>Try a different or broader keyword.</p></div>'; return; }
 
     list.innerHTML = hits.map(function (d) {
+      var restricted = d.tier === "restricted";
       var locked = d.tier !== "public";
       var when = d.year || "";
       var kws = (d.keywords || []).slice(0, 8);
+      // Catalogue entries (restricted) carry no body text: show a status line
+      // instead of a snippet, since nothing of the document is available yet.
+      var body = restricted
+        ? '<div class="snip restricted">Catalogue entry — full text and source file withheld pending permission clearance.</div>'
+        : '<div class="snip">' + hl(contextSnippet(d, terms), terms) + "</div>";
       return '<div class="res' + (locked ? " locked" : "") + '">' +
         "<h3>" + hl(d.title, terms) + "</h3>" +
         '<div class="rmeta"><span>' + esc(archName(d.archive)) + "</span>" +
         (when ? "<span>·</span><span>" + esc(when) + "</span>" : "") +
         (d.folder ? "<span>·</span><span>" + esc(d.folder) + "</span>" : "") +
-        "<span>·</span><span>" + (d.pages || "?") + " pp</span>" +
+        (restricted ? "" : "<span>·</span><span>" + (d.pages || "?") + " pp</span>") +
         (d.dup ? '<span>·</span><span title="possible duplicate">⚠ dup</span>' : "") +
         "<span>·</span><span>" + (TIER_LABEL[d.tier] || "PUBLIC") + "</span></div>" +
-        '<div class="snip">' + hl(contextSnippet(d, terms), terms) + "</div>" +
+        body +
         '<div class="kw">' + kws.map(function (k) {
           return '<button data-k="' + esc(k) + '">' + esc(k) + "</button>"; }).join("") + "</div>" +
-        '<button class="read" data-ref="' + esc(d.ref) + '">' +
-        (locked ? "🔒 Sign in to read" : "Read in portal →") + "</button></div>";
+        '<button class="read" data-ref="' + esc(d.ref) + '"' + (restricted ? ' disabled' : '') + '>' +
+        (restricted ? "🔒 Awaiting permission" : (locked ? "🔒 Sign in to read" : "Read in portal →")) +
+        "</button></div>";
     }).join("");
   }
 
@@ -146,6 +161,7 @@
   var rStage = document.getElementById("rStage");
   function openReader(ref) {
     var d = A.records.filter(function (x) { return x.ref === ref; })[0]; if (!d) return;
+    if (d.tier === "restricted") return;                                  // catalogue only — nothing to open
     if (d.tier !== "public") { window.location.href = "index.html#access"; return; }
     document.getElementById("rTitle").textContent = d.title;
     document.getElementById("rSub").textContent =

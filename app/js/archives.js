@@ -24,8 +24,8 @@ window.PORTAL_ARCHIVES = {
       docs: 0, pages: 0, indexed: null, tier: "reg", status: "planned" },
     { id: "kokoda", name: "Kokoda", blurb: "Kokoda Track corridor — historical and environmental records.",
       docs: 0, pages: 0, indexed: null, tier: "public", status: "planned" },
-    { id: "qabb", name: "QABB", blurb: "Queen Alexandra's Birdwing Butterfly — conservation and research.",
-      docs: 0, pages: 0, indexed: null, tier: "partner", status: "planned" }
+    { id: "qabb", name: "QABB", blurb: "Queen Alexandra's Birdwing Butterfly — conservation & research. Catalogue only: titles and keywords are searchable; the documents and source files are withheld pending permission clearance.",
+      docs: 147, pages: null, indexed: "2026-08-15", tier: "partner", status: "indexed", restricted: true }
   ],
 
   // The real Managalas records (229 docs, full OCR text) are loaded at runtime

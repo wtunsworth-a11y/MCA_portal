@@ -39,7 +39,7 @@
       '<span class="nm">' + a.name + "</span></div>" +
       '<div class="src">' + a.blurb + "</div>" +
       '<div class="foot"><span class="badge">' +
-      (indexed ? a.docs + " docs · " + a.pages + " pp" : "planned") +
+      (a.restricted ? a.docs + " titles · catalogue" : (indexed ? a.docs + " docs · " + a.pages + " pp" : "planned")) +
       '</span><span class="arrow">→</span></div></a>';
   }).join("");
 })();

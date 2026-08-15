@@ -164,6 +164,8 @@ section.blk { padding: 52px 0; border-bottom: 1px solid var(--line); }
 .res .read { display: inline-flex; align-items: center; gap: 6px; background: var(--amber); color: #221a00;
   border: 0; font: inherit; font-weight: 600; font-size: 13.5px; padding: 8px 14px; border-radius: 8px; cursor: pointer; }
 .res.locked .read { background: transparent; color: var(--muted); border: 1px solid var(--line); }
+.res .read[disabled] { cursor: not-allowed; opacity: .8; }
+.res .snip.restricted { font-style: italic; color: var(--faint); }
 
 /* in-portal reader modal */
 .reader { position: fixed; inset: 0; z-index: 60; display: none; }
