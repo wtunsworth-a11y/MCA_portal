@@ -19,13 +19,13 @@ window.PORTAL_ARCHIVES = {
   // archive registry — working titles per the project
   registry: [
     { id: "managalas", name: "Managalas", blurb: "History of the Managalas Conservation Area — Partners With Melanesians.",
-      docs: 229, pages: 4540, indexed: "2026-07-27", tier: "public", status: "indexed" },
-    { id: "csiro", name: "CSIRO", blurb: "CSIRO scientific studies and survey reports for the region.",
-      docs: 0, pages: 0, indexed: null, tier: "reg", status: "planned" },
+      docs: 229, pages: 4540, indexed: "2026-07-27", tier: "public", status: "indexed", data: "data/mca_archive.json" },
+    { id: "csiro", name: "CSIRO", blurb: "CSIRO Land Research Series and survey reports for the region. Catalogue only: titles and keywords are searchable; the documents and source files are withheld (no permission to share).",
+      docs: 6, pages: null, indexed: "2026-08-16", tier: "partner", status: "indexed", restricted: true, data: "data/csiro_archive.json" },
     { id: "kokoda", name: "Kokoda", blurb: "Kokoda Track corridor — historical and environmental records.",
       docs: 0, pages: 0, indexed: null, tier: "public", status: "planned" },
     { id: "qabb", name: "QABB", blurb: "Queen Alexandra's Birdwing Butterfly — conservation & research. Catalogue only: titles and keywords are searchable; the documents and source files are withheld pending permission clearance.",
-      docs: 147, pages: null, indexed: "2026-08-15", tier: "partner", status: "indexed", restricted: true }
+      docs: 147, pages: null, indexed: "2026-08-15", tier: "partner", status: "indexed", restricted: true, data: "data/qabb_archive.json" }
   ],
 
   // The real Managalas records (229 docs, full OCR text) are loaded at runtime

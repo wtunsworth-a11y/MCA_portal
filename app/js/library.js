@@ -21,26 +21,26 @@
   var meta = document.getElementById("meta");
   var qEl = document.getElementById("q");
 
-  // --- load the archive indexes -------------------------------------------
-  // Managalas: full OCR index (data/mca_archive.json) — readable in-portal.
-  // QABB: catalogue only (data/qabb_archive.json) — titles + keywords, tier
-  // "restricted". It ships NO document text and NO Drive IDs, so neither the
-  // document bodies nor the source PDFs are reachable from the browser until
-  // permission to use them is cleared (see docs/06-document-archives.md).
+  // --- load the archive indexes (registry-driven) -------------------------
+  // Each registry entry with a `data` file is fetched and its records tagged
+  // with the archive id. Managalas is the full OCR index (readable in-portal).
+  // Restricted archives (QABB, CSIRO) ship titles + keywords ONLY — no document
+  // text and no Drive IDs/URLs — so neither the document bodies nor the source
+  // files are reachable from the browser until permission is cleared and their
+  // tier is changed from "restricted" (see docs/06-document-archives.md).
   function tag(docs, archive) { return docs.map(function (d) { d.archive = archive; return d; }); }
-  Promise.all([
-    fetch("data/mca_archive.json").then(function (r) { if (!r.ok) throw new Error(r.status); return r.json(); })
-      .then(function (docs) { return tag(docs, "managalas"); }),
-    fetch("data/qabb_archive.json").then(function (r) { return r.ok ? r.json() : []; })
-      .then(function (docs) { return tag(docs, "qabb"); })
-      .catch(function () { return []; })
-  ])
+  var sources = A.registry.filter(function (r) { return r.data; });
+  Promise.all(sources.map(function (r) {
+    return fetch(r.data)
+      .then(function (res) { if (!res.ok) throw new Error(res.status); return res.json(); })
+      .then(function (docs) { return tag(docs, r.id); })
+      .catch(function () { if (r.id === "managalas") loadError = true; return []; });
+  }))
     .then(function (sets) {
-      A.records = sets[0].concat(sets[1]);
+      A.records = sets.reduce(function (a, b) { return a.concat(b); }, []);
       loaded = true;
       render();
-    })
-    .catch(function () { loadError = true; render(); });
+    });
 
   // --- archive tabs -------------------------------------------------------
   function tabHtml(a) {
