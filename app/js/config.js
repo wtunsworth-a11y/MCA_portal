@@ -81,18 +81,18 @@ window.PORTAL_CONFIG = {
       note: "Oro PAs beyond the MCA (e.g. Inaina WMA). Interim/partial areas are added to data/oro_pas.geojson with ptype:'interim'."
     },
     {
-      id: "forest_loss", theme: "Forest Change", name: "Forest loss (Hansen, 2001–2023)",
+      id: "forest_loss", theme: "Forest Change", name: "Forest loss (Hansen, 2001–2025)",
       kind: "raster", live: true, visible: true, opacity: 0.85,
-      tiles: ["https://storage.googleapis.com/earthenginepartners-hansen/tiles/gfc_v1.11/loss_alpha/{z}/{x}/{y}.png"],
+      tiles: ["https://storage.googleapis.com/earthenginepartners-hansen/tiles/gfc_v1.13/loss_alpha/{z}/{x}/{y}.png"],
       attribution: "Hansen/UMD/Google/USGS/NASA",
       legend: [{ color: "#ff3b30", label: "Tree cover loss" }],
       note: "Live now (keyless), single colour. See 'Deforestation year' for the year-coloured version."
     },
     {
-      id: "defor_year", theme: "Forest Change", name: "Deforestation year (Hansen 2001–2023)",
+      id: "defor_year", theme: "Forest Change", name: "Deforestation year (Hansen 2001–2025)",
       kind: "gee", geeKey: "defor_year", visible: false, opacity: 0.9,
       attribution: "Hansen/UMD/Google/USGS/NASA",
-      legend: [{ color: "#fff5b1", label: "2001" }, { color: "#f46d43", label: "~2012" }, { color: "#7a0177", label: "2023" }],
+      legend: [{ color: "#fff5b1", label: "2001" }, { color: "#f46d43", label: "~2013" }, { color: "#7a0177", label: "2025" }],
       note: "Year of tree-cover loss, coloured by year (Earth Engine). A year slider is the next step."
     },
     {

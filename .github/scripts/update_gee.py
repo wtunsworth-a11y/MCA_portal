@@ -39,7 +39,7 @@ def main():
 
     region = ee.Geometry.Rectangle(BBOX)
     thumb = {"region": region, "dimensions": DIM, "format": "png"}
-    hansen = ee.Image("UMD/hansen/global_forest_change_2023_v1_11")
+    hansen = ee.Image("UMD/hansen/global_forest_change_2025_v1_13")
 
     def treecover2000():
         tc = hansen.select("treecover2000")
@@ -47,8 +47,8 @@ def main():
                palette=["cfe8cf", "6fbf73", "1b7837", "08421f"])
 
     def defor_year():
-        ly = hansen.select("lossyear")   # 1..23 => 2001..2023
-        return ly.updateMask(ly.gt(0)).visualize(min=1, max=23,
+        ly = hansen.select("lossyear")   # 1..25 => 2001..2025
+        return ly.updateMask(ly.gt(0)).visualize(min=1, max=25,
                palette=["fff5b1", "fdae61", "f46d43", "d73027", "a50026", "7a0177"])
 
     def worldclim_precip():
