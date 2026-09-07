@@ -241,10 +241,11 @@ footer.site a { color: var(--muted); }
   border: 1px solid var(--line); border-radius: 8px; background: var(--panel2, rgba(255,255,255,.03));
   color: var(--ink); font-weight: 600; font-size: 13px; white-space: nowrap; }
 .funders.big .funder-chip { height: 44px; font-size: 14px; }
-.funding-line { display: flex; align-items: center; flex-wrap: wrap; gap: 6px; margin-top: 12px;
+.funding-line { display: flex; align-items: center; flex-wrap: wrap; gap: 8px; margin-bottom: 14px;
   color: var(--muted); font-size: 12.5px; }
-.funding-line .eu-mini { height: 15px; width: auto; vertical-align: middle; border-radius: 1px; }
+.funding-line .eu-lockup { height: 30px; width: auto; vertical-align: middle; }
 .funding-line a { color: var(--muted); text-decoration: underline; }
+.cr-lockup { height: 60px; width: auto; }
 
 /* credits page */
 .cr-fund { display: flex; align-items: center; gap: 20px; flex-wrap: wrap;

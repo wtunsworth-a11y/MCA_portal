@@ -17,19 +17,19 @@
   "use strict";
 
   var FUNDING = {
-    emblem: "img/eu-emblem.svg",
-    line: "Funded by the European Union",
-    // ↓↓↓ replace with the exact programme / action / grant text you must cite ↓↓↓
-    programme: "under the [programme / action / grant number — to be confirmed]",
+    lockup: "img/eu-funded.svg",   // official 'Funded by the European Union' lockup (emblem + wording)
+    // ↓↓↓ confirm the exact programme / grant text to cite ↓↓↓
+    programme: "under the EU-FCCB programme (Papua New Guinea)",
     disclaimer: "Views and opinions expressed are those of the authors only and do not " +
       "necessarily reflect those of the European Union or the funding programme. " +
       "Neither the European Union nor the granting authority can be held responsible for them."
   };
 
-  // Funder + implementing/host + government partners (logos).
+  // Programme + implementing/host + government partners (logos). The EU funder is
+  // shown via the funding lockup above; these are the project/partner marks.
   var PARTNERS = [
-    { name: "European Union", short: "European Union", url: "https://european-union.europa.eu",
-      logo: "img/eu-emblem.svg", role: "Funder" },
+    { name: "EU-FCCB — Papua New Guinea", short: "EU-FCCB PNG", url: "",
+      logo: "img/eu-fccb.svg", role: "Programme" },
     { name: "CIFOR-ICRAF", short: "CIFOR-ICRAF", url: "https://www.cifor-icraf.org",
       logo: "img/cifor-icraf.svg", role: "Implementing partner" },
     { name: "Oro Provincial Government", short: "Oro Provincial Government", url: "",
@@ -90,28 +90,26 @@
     return wrap;
   }
 
-  // Compact footer strip: logos + funding line + link to full credits.
+  // Compact footer strip: EU funding lockup + partner logos + link to full credits.
   function renderStrip(host) {
     host.innerHTML = "";
+    var fund = el("div", "funding-line",
+      '<img class="eu-lockup" src="' + FUNDING.lockup + '" alt="Funded by the European Union" /> ' +
+      esc(FUNDING.programme) + ' · <a href="credits.html">Credits &amp; data sources →</a>');
+    host.appendChild(fund);
     var row = el("div", "funders");
     PARTNERS.forEach(function (p) { row.appendChild(logo(p, false)); });
     host.appendChild(row);
-    var fund = el("div", "funding-line",
-      '<img class="eu-mini" src="' + FUNDING.emblem + '" alt="European Union" /> ' +
-      esc(FUNDING.line) + " " + esc(FUNDING.programme) +
-      ' · <a href="credits.html">Credits &amp; data sources →</a>');
-    host.appendChild(fund);
   }
 
   // Full credits page.
   function renderFull(host) {
     host.innerHTML = "";
     var f = el("section", "cr-fund");
-    f.appendChild(el("img", "cr-emblem"));
-    f.querySelector(".cr-emblem").src = FUNDING.emblem;
-    f.querySelector(".cr-emblem").alt = "European Union";
+    f.appendChild(el("img", "cr-lockup"));
+    f.querySelector(".cr-lockup").src = FUNDING.lockup;
+    f.querySelector(".cr-lockup").alt = "Funded by the European Union";
     f.appendChild(el("div", null,
-      '<div class="cr-fund-line">' + esc(FUNDING.line) + "</div>" +
       '<div class="cr-fund-prog">' + esc(FUNDING.programme) + "</div>" +
       '<p class="cr-disc">' + esc(FUNDING.disclaimer) + "</p>"));
     host.appendChild(el("h2", null, "Partners"));
