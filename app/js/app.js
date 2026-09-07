@@ -277,5 +277,6 @@
       if (map.isStyleLoaded && map.isStyleLoaded()) addDataLayers();
       buildPanel();     // rebuild so the timeline row switches from "Coming soon" to enabled
       updateLegend();
+      CFG.layers.forEach(function (l) { if (l.kind === "defor_series" && visibleIds[l.id]) toggleDeforCtl(true); });
     });
 })();
