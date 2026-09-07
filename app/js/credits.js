@@ -57,7 +57,8 @@
     ]},
     { group: "Protected areas & boundaries", items: [
       { name: "World Database on Protected Areas (WDPA)", by: "UNEP-WCMC & IUCN / Protected Planet", lic: "Protected Planet terms" },
-      { name: "Administrative & interim protected-area boundaries", by: "PNG official sources / project", lic: "As provided" }
+      { name: "Administrative boundaries — Province / District / LLG", by: "geoBoundaries (gbOpen), clipped to Oro", lic: "CC-BY 4.0" },
+      { name: "Interim / proposed protected-area boundaries", by: "PNG official sources / project", lic: "As provided" }
     ]},
     { group: "Document archives", items: [
       { name: "Managalas archive", by: "Partners With Melanesians", lic: "In-portal view only" },

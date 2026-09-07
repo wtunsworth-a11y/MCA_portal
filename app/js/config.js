@@ -73,6 +73,29 @@ window.PORTAL_CONFIG = {
       note: "Authoritative WDPA boundary (WDPAID 555651673, designated 2017)."
     },
     {
+      id: "districts", theme: "Boundaries", name: "Districts (Ijivitari, Sohe)",
+      kind: "geojson", url: "data/oro_districts.geojson", live: true, visible: false,
+      style: { color: "#e08a3c", weight: 1.8, dash: [6, 3], fill: "rgba(0,0,0,0)" },
+      attribution: "geoBoundaries ADM2 (gbOpen), clipped to Oro",
+      legend: [{ color: "#e08a3c", label: "District boundary" }],
+      note: "Oro's two districts (ADM2), from geoBoundaries; clipped to the province."
+    },
+    {
+      id: "llg", theme: "Boundaries", name: "LLG boundaries",
+      kind: "geojson", url: "data/oro_llg.geojson", live: true, visible: false,
+      style: { color: "#c9a0dc", weight: 1.1, dash: [3, 3], fill: "rgba(0,0,0,0)" },
+      attribution: "geoBoundaries ADM3 (gbOpen), clipped to Oro",
+      legend: [{ color: "#c9a0dc", label: "LLG boundary" }],
+      note: "Local-Level Government wards (ADM3), from geoBoundaries; 9 LLGs across Ijivitari & Sohe."
+    },
+    {
+      id: "provinces_context", theme: "Boundaries", name: "Neighbouring provinces",
+      kind: "geojson", url: "data/png_provinces.geojson", live: true, visible: false,
+      style: { color: "#5f7a6c", weight: 1, fill: "rgba(0,0,0,0)" },
+      attribution: "geoBoundaries ADM1 (gbOpen)",
+      note: "Faint outlines of the provinces bordering Oro (Morobe, Central, Gulf, Milne Bay, NCD) for context."
+    },
+    {
       id: "protected_areas", theme: "Protected Areas", name: "Other protected areas (WDPA / interim)",
       kind: "geojson", url: "data/oro_pas.geojson", live: true, visible: true,
       style: { color: "#57c98a", weight: 1.8, dash: [4, 3], fill: "rgba(87,201,138,0.07)" },
