@@ -229,31 +229,29 @@ footer.site { padding: 30px 0; color: var(--muted); font-size: 13px; }
 footer.site .row { display: flex; justify-content: space-between; gap: 16px; flex-wrap: wrap; }
 footer.site a { color: var(--muted); }
 
-/* funders / partners strip (footer) */
-.site-credits { border-top: 1px solid var(--line); margin-top: 18px; padding-top: 16px; }
-.funders { display: flex; align-items: center; gap: 18px; flex-wrap: wrap; }
-.funders.big { gap: 26px; }
-.funder { display: inline-flex; align-items: center; }
-.funder-img { height: 34px; width: auto; display: block; }
-.funders.big .funder-img { height: 54px; }
-.funder .eu-emblem, .funder-img[src*="eu-emblem"] { border-radius: 2px; }
-.funder-chip { display: inline-flex; align-items: center; height: 34px; padding: 0 12px;
-  border: 1px solid var(--line); border-radius: 8px; background: var(--panel2, rgba(255,255,255,.03));
-  color: var(--ink); font-weight: 600; font-size: 13px; white-space: nowrap; }
-.funders.big .funder-chip { height: 44px; font-size: 14px; }
-.funding-line { display: flex; align-items: center; flex-wrap: wrap; gap: 8px; margin-bottom: 14px;
-  color: var(--muted); font-size: 12.5px; }
-.funding-line .eu-lockup { height: 30px; width: auto; vertical-align: middle; }
-.funding-line a { color: var(--muted); text-decoration: underline; }
-.cr-lockup { height: 60px; width: auto; }
+/* funders / partners — logos sit on a WHITE band so the EU "Funded by" lockup
+   (dark-blue text) and the colour crests stay legible on the dark site. */
+.site-credits, .credits-logos { background: #fff; border: 1px solid #e4e4e4; border-radius: 12px;
+  padding: 14px 18px; margin-top: 18px; }
+.funders { display: flex; align-items: center; gap: 22px; flex-wrap: wrap; }
+.funder, .eu-lockup-wrap { display: inline-flex; align-items: center; }
+.funder-img { height: 30px; width: auto; display: block; }
+.eu-lockup { height: 34px; width: auto; display: block; }
+.funders.big .funder-img { height: 46px; }
+.funders.big .eu-lockup { height: 50px; }
+.funder-chip { display: inline-flex; align-items: center; height: 30px; padding: 0 12px;
+  border: 1px solid #ddd; border-radius: 8px; background: #f4f4f4;
+  color: #1c2330; font-weight: 600; font-size: 13px; white-space: nowrap; }
+.funding-line { flex-wrap: wrap; gap: 6px; margin-top: 12px; color: #55635b; font-size: 12px; }
+.funding-line a { color: #2f6b4f; text-decoration: underline; }
 
 /* credits page */
 .cr-fund { display: flex; align-items: center; gap: 20px; flex-wrap: wrap;
-  background: var(--panel); border: 1px solid var(--line); border-radius: 12px; padding: 18px 20px; margin: 8px 0 26px; }
-.cr-emblem { height: 76px; width: auto; border-radius: 3px; }
-.cr-fund-line { font-size: 18px; font-weight: 700; color: var(--ink); }
-.cr-fund-prog { color: var(--muted); margin-top: 3px; }
-.cr-disc { color: var(--faint); font-size: 12px; max-width: 70ch; margin: 10px 0 0; }
+  background: #fff; border: 1px solid #e4e4e4; border-radius: 12px; padding: 18px 20px; margin: 8px 0 26px; }
+.cr-lockup { height: 60px; width: auto; }
+.cr-fund-prog { color: #1c2330; font-weight: 600; }
+.cr-disc { color: #55635b; font-size: 12px; max-width: 70ch; margin: 10px 0 0; }
+.funders.big.band { background: #fff; border: 1px solid #e4e4e4; border-radius: 12px; padding: 16px 18px; }
 .cr-lead { color: var(--muted); max-width: 80ch; }
 .cr-grp { margin: 22px 0 8px; font-size: 15px; }
 .cr-table { width: 100%; border-collapse: collapse; font-size: 13.5px; }

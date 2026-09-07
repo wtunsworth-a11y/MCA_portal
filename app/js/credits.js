@@ -1,44 +1,36 @@
 /*
  * Oro Data Portal — funders, partners & data-source credits.
  * ------------------------------------------------------------------
- * Single source of truth, rendered in two places:
- *   - a compact strip into  #siteCredits  (in every page footer)
- *   - the full detail into   #creditsFull  (on credits.html)
- *
- * Partner logos use an <img> that falls back to a text chip if the file
- * isn't present yet, so the credit reads correctly today and upgrades to
- * the real logo the moment you drop the file at the path below.
- *
- * TO ADD A LOGO: put the file at app/img/<file> (SVG preferred, or PNG on a
- * transparent/white background) matching the `logo` path in PARTNERS.
- * TO SET THE EU PROGRAMME LINE: edit FUNDING.programme below.
+ * Attribution differs by placement (per the project's rules):
+ *   - EVERY page footer (#siteCredits): EU + CIFOR-ICRAF + Oro Provincial Gov.
+ *   - Title page (home) + Acknowledgements page (credits.html) show the FULL set:
+ *     EU + EU-FCCB + CIFOR-ICRAF + Oro Provincial Gov + PNG National Government.
+ * Logos render on a white band because the EU "Funded by" lockup and the colour
+ * crests need a light background to stay legible on the dark site.
  */
 (function () {
   "use strict";
 
   var FUNDING = {
-    lockup: "img/eu-funded.svg",   // official 'Funded by the European Union' lockup (emblem + wording)
-    // ↓↓↓ confirm the exact programme / grant text to cite ↓↓↓
+    lockup: "img/eu-funded.png",   // official "Funded by the European Union" lockup (horizontal)
     programme: "under the EU-FCCB programme (Papua New Guinea)",
     disclaimer: "Views and opinions expressed are those of the authors only and do not " +
       "necessarily reflect those of the European Union or the funding programme. " +
       "Neither the European Union nor the granting authority can be held responsible for them."
   };
 
-  // Programme + implementing/host + government partners (logos). The EU funder is
-  // shown via the funding lockup above; these are the project/partner marks.
-  var PARTNERS = [
-    { name: "EU-FCCB — Papua New Guinea", short: "EU-FCCB PNG", url: "",
-      logo: "img/eu-fccb.svg", role: "Programme" },
-    { name: "CIFOR-ICRAF", short: "CIFOR-ICRAF", url: "https://www.cifor-icraf.org",
-      logo: "img/cifor-icraf.svg", role: "Implementing partner" },
-    { name: "Oro Provincial Government", short: "Oro Provincial Government", url: "",
-      logo: "img/opg.png", role: "Provincial partner" },
-    { name: "Department of National Planning & Monitoring (PNG)", short: "DNPM", url: "",
-      logo: "img/dnpm.png", role: "Government partner" }
-  ];
+  // Partner logos (the EU funder is shown via the funding lockup above).
+  var P = {
+    fccb:  { name: "EU-FCCB — Papua New Guinea", short: "EU-FCCB PNG", url: "", logo: "img/eu-fccb.png" },
+    cifor: { name: "CIFOR-ICRAF", short: "CIFOR-ICRAF", url: "https://www.cifor-icraf.org", logo: "img/cifor-icraf.png" },
+    opg:   { name: "Oro Provincial Government", short: "Oro Provincial Government", url: "", logo: "img/opg.png" },
+    gov:   { name: "Government of Papua New Guinea", short: "PNG Government", url: "", logo: "img/dnpm.png" }
+  };
+  // Every page: EU + CIFOR-ICRAF + OPG.
+  var FOOTER_PARTNERS = [P.cifor, P.opg];
+  // Title & acknowledgements pages: full set.
+  var FULL_PARTNERS = [P.fccb, P.cifor, P.opg, P.gov];
 
-  // Data sources surfaced through the portal, grouped by theme.
   var DATA = [
     { group: "Satellite imagery & basemaps", items: [
       { name: "Esri World Imagery", by: "Esri, Maxar, Earthstar Geographics", lic: "Esri terms of use" },
@@ -47,7 +39,7 @@
       { name: "OpenTopoMap", by: "OpenTopoMap", lic: "CC-BY-SA" }
     ]},
     { group: "Forest cover & change", items: [
-      { name: "Global Forest Change (tree cover, loss year)", by: "Hansen / UMD / Google / USGS / NASA", lic: "Free use with citation" },
+      { name: "Global Forest Change (tree cover, loss year) — v1.13 / 2025", by: "Hansen / UMD / Google / USGS / NASA", lic: "Free use with citation" },
       { name: "Tropical Moist Forest (TMF)", by: "European Commission JRC", lic: "Free use with citation" },
       { name: "ESA WorldCover 2021 (land cover)", by: "ESA WorldCover consortium", lic: "CC-BY 4.0" },
       { name: "RADD deforestation alerts", by: "Wageningen University (WUR) / Global Forest Watch", lic: "CC-BY 4.0" }
@@ -77,11 +69,10 @@
   function el(tag, cls, html) { var e = document.createElement(tag); if (cls) e.className = cls; if (html != null) e.innerHTML = html; return e; }
   function esc(s) { return (s || "").replace(/[&<>"]/g, function (c) { return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]; }); }
 
-  // A logo image that degrades to a text chip if the file is missing.
-  function logo(p, big) {
-    var wrap = el(p.url ? "a" : "span", "funder" + (big ? " big" : ""));
+  function logo(p) {
+    var wrap = el(p.url ? "a" : "span", "funder");
     if (p.url) { wrap.href = p.url; wrap.target = "_blank"; wrap.rel = "noopener"; }
-    wrap.title = p.name + (p.role ? " — " + p.role : "");
+    wrap.title = p.name;
     var img = new Image();
     img.alt = p.name; img.className = "funder-img";
     img.onerror = function () { wrap.replaceChild(el("span", "funder-chip", esc(p.short)), img); };
@@ -90,19 +81,28 @@
     return wrap;
   }
 
-  // Compact footer strip: EU funding lockup + partner logos + link to full credits.
-  function renderStrip(host) {
-    host.innerHTML = "";
-    var fund = el("div", "funding-line",
-      '<img class="eu-lockup" src="' + FUNDING.lockup + '" alt="Funded by the European Union" /> ' +
-      esc(FUNDING.programme) + ' · <a href="credits.html">Credits &amp; data sources →</a>');
-    host.appendChild(fund);
-    var row = el("div", "funders");
-    PARTNERS.forEach(function (p) { row.appendChild(logo(p, false)); });
-    host.appendChild(row);
+  function euLockup() {
+    var a = el("a", "eu-lockup-wrap");
+    a.href = "https://european-union.europa.eu"; a.target = "_blank"; a.rel = "noopener";
+    a.title = "Funded by the European Union";
+    a.innerHTML = '<img class="eu-lockup" src="' + FUNDING.lockup + '" alt="Funded by the European Union" />';
+    return a;
   }
 
-  // Full credits page.
+  // A white band: EU lockup + the given partner logos.
+  function band(host, partners, withLink) {
+    host.innerHTML = "";
+    var row = el("div", "funders");
+    row.appendChild(euLockup());
+    partners.forEach(function (p) { row.appendChild(logo(p)); });
+    host.appendChild(row);
+    if (withLink) {
+      host.appendChild(el("div", "funding-line",
+        esc("Funded by the European Union " + FUNDING.programme) +
+        ' · <a href="credits.html">Credits &amp; data sources →</a>'));
+    }
+  }
+
   function renderFull(host) {
     host.innerHTML = "";
     var f = el("section", "cr-fund");
@@ -112,27 +112,29 @@
     f.appendChild(el("div", null,
       '<div class="cr-fund-prog">' + esc(FUNDING.programme) + "</div>" +
       '<p class="cr-disc">' + esc(FUNDING.disclaimer) + "</p>"));
+    host.appendChild(f);
+
     host.appendChild(el("h2", null, "Partners"));
-    var prow = el("div", "funders big");
-    PARTNERS.forEach(function (p) { prow.appendChild(logo(p, true)); });
-    host.appendChild(prow);
+    var pb = el("div", "funders big band");
+    FULL_PARTNERS.forEach(function (p) { pb.appendChild(logo(p)); });
+    host.appendChild(pb);
+
     host.appendChild(el("h2", null, "Data sources"));
     host.appendChild(el("p", "cr-lead", "The portal brings together open and licensed datasets. Each is credited to its provider; use is governed by the licence shown."));
     DATA.forEach(function (g) {
       host.appendChild(el("h3", "cr-grp", esc(g.group)));
-      var t = el("table", "cr-table",
+      host.appendChild(el("table", "cr-table",
         "<thead><tr><th>Dataset</th><th>Provider</th><th>Licence / terms</th></tr></thead><tbody>" +
-        g.items.map(function (i) {
-          return "<tr><td>" + esc(i.name) + "</td><td>" + esc(i.by) + "</td><td>" + esc(i.lic) + "</td></tr>";
-        }).join("") + "</tbody>");
-      host.appendChild(t);
+        g.items.map(function (i) { return "<tr><td>" + esc(i.name) + "</td><td>" + esc(i.by) + "</td><td>" + esc(i.lic) + "</td></tr>"; }).join("") +
+        "</tbody>"));
     });
   }
 
   document.addEventListener("DOMContentLoaded", function () {
-    var strip = document.getElementById("siteCredits");
-    if (strip) renderStrip(strip);
-    var full = document.getElementById("creditsFull");
+    var footer = document.getElementById("siteCredits");   // every page
+    // data-set="full" (home/title page) shows all partners; default shows EU+CIFOR+OPG.
+    if (footer) band(footer, footer.getAttribute("data-set") === "full" ? FULL_PARTNERS : FOOTER_PARTNERS, true);
+    var full = document.getElementById("creditsFull");     // acknowledgements page
     if (full) renderFull(full);
   });
 })();
