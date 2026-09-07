@@ -1,0 +1,42 @@
+name: Update deforestation time series
+
+# Renders the cumulative deforestation year stack (2001..2025) as clipped PNGs
+# and commits them. Run on demand — re-run when the Hansen version bumps (the
+# monthly data-version check emails when a newer release is available).
+
+on:
+  workflow_dispatch: {}
+
+permissions:
+  contents: write
+
+concurrency:
+  group: update-defor-series
+  cancel-in-progress: false
+
+jobs:
+  defor:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Install Earth Engine API
+        run: pip install --quiet earthengine-api
+      - name: Render cumulative deforestation PNGs
+        env:
+          EE_SERVICE_ACCOUNT_KEY: ${{ secrets.EE_SERVICE_ACCOUNT_KEY }}
+          EE_PROJECT: orodataportal
+        run: python3 .github/scripts/update_defor_series.py
+      - name: Commit if changed
+        run: |
+          git add app/data/defor_series.json app/data/defor/*.png
+          if ! git diff --cached --quiet; then
+            git config user.name "gee-bot"
+            git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+            git commit -m "chore: refresh cumulative deforestation series"
+            git push
+          else
+            echo "No change."
+          fi

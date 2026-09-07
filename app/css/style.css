@@ -48,3 +48,16 @@ footer a { color: var(--accent); }
   #app { grid-template-columns: 1fr; grid-template-rows: 45vh 55vh; }
   #map { height: auto; }
 }
+
+/* deforestation timeline slider (floating over the map) */
+#map { position: relative; }
+#defor-ctl { position: absolute; left: 50%; bottom: 22px; transform: translateX(-50%);
+  z-index: 5; display: flex; align-items: center; gap: 10px;
+  background: rgba(23,33,43,.92); border: 1px solid var(--line); border-radius: 999px;
+  padding: 7px 14px; box-shadow: 0 4px 16px rgba(0,0,0,.45); }
+#defor-ctl[hidden] { display: none; }
+#defor-ctl #defor-play { width: 32px; text-align: center; padding: 5px 0; }
+#defor-ctl input[type="range"] { width: 230px; accent-color: #e6382d; cursor: pointer; }
+#defor-ctl #defor-year { font-weight: 700; min-width: 3ch; text-align: center; color: var(--ink);
+  font-variant-numeric: tabular-nums; }
+@media (max-width: 720px) { #defor-ctl input[type="range"] { width: 150px; } }

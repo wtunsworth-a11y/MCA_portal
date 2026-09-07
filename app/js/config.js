@@ -116,7 +116,14 @@ window.PORTAL_CONFIG = {
       kind: "gee", geeKey: "defor_year", visible: false, opacity: 0.9,
       attribution: "Hansen/UMD/Google/USGS/NASA",
       legend: [{ color: "#fff5b1", label: "2001" }, { color: "#f46d43", label: "~2013" }, { color: "#7a0177", label: "2025" }],
-      note: "Year of tree-cover loss, coloured by year (Earth Engine). A year slider is the next step."
+      note: "Year of tree-cover loss, coloured by year (Earth Engine, static)."
+    },
+    {
+      id: "defor_timeline", theme: "Forest Change", name: "Deforestation timeline (slider)",
+      kind: "defor_series", visible: false, opacity: 0.9,
+      attribution: "Hansen/UMD/Google/USGS/NASA",
+      legend: [{ color: "#e6382d", label: "Cumulative forest loss (to selected year)" }],
+      note: "Cumulative tree-cover loss with a 2001–2025 year slider (▶ to animate). Frames pre-rendered from Earth Engine by the update-defor-series Action."
     },
     {
       id: "forest_cover", theme: "Forest Cover", name: "Tree cover 2000 (Hansen)",

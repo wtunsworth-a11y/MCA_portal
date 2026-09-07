@@ -14,6 +14,9 @@
   var GEE = {};                               // { geeKey: { png } } from gee_tiles.json
   var GEE_BBOX = [146.8, -10.0, 149.7, -7.9]; // w,s,e,n the GEE images cover
   var visibleIds = {};
+  var DEFOR = null;                           // deforestation time series (defor_series.json)
+  var deforYear = null;                       // currently-selected slider year
+  var deforTimer = null;                      // ▶ animation interval
 
   // --- Build a MapLibre style from the configured basemaps -------------------
   var defaultBase = CFG.basemaps.find(function (b) { return b.default; }) || CFG.basemaps[0];
@@ -39,6 +42,7 @@
   function layerState(l) {
     if (l.kind === "backend") return { usable: false, reason: "Sign in for access" };
     if (l.kind === "gee") { var t = GEE[l.geeKey]; return { usable: !!(t && t.png), reason: (t && t.png) ? "" : "Coming soon" }; }
+    if (l.kind === "defor_series") { var ok = !!(DEFOR && DEFOR.images && DEFOR.years && DEFOR.years.length); return { usable: ok, reason: ok ? "" : "Coming soon" }; }
     if (l.requiresKey) { var k = CFG.keys[l.requiresKey]; return { usable: !!k, reason: k ? "" : "Coming soon" }; }
     if (l.requiresEndpoint) { var has = l.tiles && l.tiles[0]; return { usable: !!has, reason: has ? "" : "Coming soon" }; }
     return { usable: true, reason: "" };
@@ -57,6 +61,16 @@
         coordinates: [[w, n], [e, n], [e, s], [w, s]] });
       map.addLayer({ id: "lyr-" + l.id, type: "raster", source: "src-" + l.id,
         paint: { "raster-opacity": l.opacity != null ? l.opacity : 1 },
+        layout: { visibility: visibleIds[l.id] ? "visible" : "none" } });
+    } else if (l.kind === "defor_series") {
+      // Cumulative deforestation stack; the slider swaps this one image source.
+      if (!DEFOR || !DEFOR.images) return;
+      var db = DEFOR.bbox || GEE_BBOX, dw = db[0], ds = db[1], de = db[2], dn = db[3];
+      if (deforYear == null) deforYear = DEFOR.years[DEFOR.years.length - 1];
+      map.addSource("src-" + l.id, { type: "image", url: DEFOR.images[String(deforYear)],
+        coordinates: [[dw, dn], [de, dn], [de, ds], [dw, ds]] });
+      map.addLayer({ id: "lyr-" + l.id, type: "raster", source: "src-" + l.id,
+        paint: { "raster-opacity": l.opacity != null ? l.opacity : 0.9 },
         layout: { visibility: visibleIds[l.id] ? "visible" : "none" } });
     } else if (l.kind === "raster") {
       var tiles = l.tiles;
@@ -93,12 +107,13 @@
   }
 
   function setVisible(l, on) {
-    // GEE images are ~1–3 MB each; add them lazily on first toggle rather than
-    // preloading all of them on map init.
-    if (on && l.kind === "gee" && !map.getSource("src-" + l.id)) addLayer(l);
+    // GEE / deforestation images are added lazily on first toggle rather than
+    // preloading them all on map init.
+    if (on && (l.kind === "gee" || l.kind === "defor_series") && !map.getSource("src-" + l.id)) addLayer(l);
     var ids = ["lyr-" + l.id, "lyr-" + l.id + "-fill"];
     ids.forEach(function (id) { if (map.getLayer(id)) map.setLayoutProperty(id, "visibility", on ? "visible" : "none"); });
     visibleIds[l.id] = on;
+    if (l.kind === "defor_series") toggleDeforCtl(on);
     updateLegend();
   }
 
@@ -167,9 +182,53 @@
     });
   }
 
+  // --- Deforestation timeline slider (drives the defor_series image source) --
+  function setDeforIndex(i) {
+    if (!DEFOR) return;
+    i = Math.max(0, Math.min(DEFOR.years.length - 1, i));
+    deforYear = DEFOR.years[i];
+    var r = document.getElementById("defor-range"); if (r) r.value = i;
+    var lab = document.getElementById("defor-year"); if (lab) lab.textContent = deforYear;
+    var src = map.getSource("src-defor_timeline");
+    if (src && src.updateImage) src.updateImage({ url: DEFOR.images[String(deforYear)] });
+    [i + 1, i - 1, i + 2].forEach(function (k) {   // preload neighbours for smooth scrubbing
+      if (k >= 0 && k < DEFOR.years.length) { var im = new Image(); im.src = DEFOR.images[String(DEFOR.years[k])]; }
+    });
+  }
+  function stopPlay() { if (deforTimer) { clearInterval(deforTimer); deforTimer = null; }
+    var p = document.getElementById("defor-play"); if (p) p.textContent = "▶"; }
+  function startPlay() {
+    var p = document.getElementById("defor-play"); if (p) p.textContent = "⏸";
+    deforTimer = setInterval(function () {
+      var r = document.getElementById("defor-range"); var i = (r ? +r.value : 0) + 1;
+      if (i > DEFOR.years.length - 1) i = 0;
+      setDeforIndex(i);
+    }, 700);
+  }
+  function buildDeforCtl() {
+    if (document.getElementById("defor-ctl") || !DEFOR) return;
+    var last = DEFOR.years.length - 1;
+    var box = document.createElement("div"); box.id = "defor-ctl"; box.hidden = true;
+    var play = document.createElement("button"); play.id = "defor-play"; play.type = "button";
+    play.title = "Play / pause"; play.textContent = "▶";
+    var range = document.createElement("input"); range.type = "range"; range.id = "defor-range";
+    range.min = 0; range.max = last; range.step = 1; range.value = last;
+    range.setAttribute("aria-label", "Deforestation year");
+    var lab = document.createElement("span"); lab.id = "defor-year"; lab.textContent = DEFOR.years[last];
+    box.appendChild(play); box.appendChild(range); box.appendChild(lab);
+    document.getElementById("map").appendChild(box);
+    range.addEventListener("input", function () { stopPlay(); setDeforIndex(+range.value); });
+    play.addEventListener("click", function () { deforTimer ? stopPlay() : startPlay(); });
+  }
+  function toggleDeforCtl(on) {
+    if (on) buildDeforCtl();
+    var box = document.getElementById("defor-ctl"); if (box) box.hidden = !on;
+    if (!on) stopPlay();
+  }
+
   function addDataLayers() { CFG.layers.forEach(function (l) {
     if (!layerState(l).usable) return;
-    if (l.kind === "gee" && !visibleIds[l.id]) return;  // lazy — added when toggled on
+    if ((l.kind === "gee" || l.kind === "defor_series") && !visibleIds[l.id]) return;  // lazy — added when toggled on
     addLayer(l);
   }); }
   function markVisible() { CFG.layers.forEach(function (l) { if (l.visible && layerState(l).usable) visibleIds[l.id] = true; }); }
@@ -204,6 +263,19 @@
       markVisible();
       if (map.isStyleLoaded && map.isStyleLoaded()) addDataLayers();  // add now-usable GEE layers (idempotent)
       buildPanel();     // rebuild so GEE rows switch from "awaiting" to enabled
+      updateLegend();
+    });
+
+  // --- Deforestation time series (pre-rendered by the update-defor-series Action).
+  fetch("data/defor_series.json?t=" + Date.now())
+    .then(function (r) { return r.ok ? r.json() : null; })
+    .catch(function () { return null; })
+    .then(function (j) {
+      if (!j || !j.images || !j.years || !j.years.length) return;
+      DEFOR = j; deforYear = j.years[j.years.length - 1];
+      markVisible();
+      if (map.isStyleLoaded && map.isStyleLoaded()) addDataLayers();
+      buildPanel();     // rebuild so the timeline row switches from "Coming soon" to enabled
       updateLegend();
     });
 })();
