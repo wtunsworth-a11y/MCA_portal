@@ -143,7 +143,9 @@
         '<div class="kw">' + kws.map(function (k) {
           return '<button data-k="' + esc(k) + '">' + esc(k) + "</button>"; }).join("") + "</div>" +
         '<button class="read" data-ref="' + esc(d.ref) + '"' + (restricted ? ' disabled' : '') + '>' +
-        (restricted ? "🔒 Awaiting permission" : (locked ? "🔒 Sign in to read" : "Read in portal →")) +
+        (restricted ? "🔒 Awaiting permission"
+          : (d.fileWithheld ? "🔒 File withheld (sensitive species)"
+          : (locked ? "🔒 Sign in to read" : "Read in portal →"))) +
         "</button></div>";
     }).join("");
   }
@@ -173,6 +175,10 @@
       rStage.innerHTML = '<iframe title="' + esc(d.title) + '" src="https://drive.google.com/file/d/' +
         esc(d.driveId) + '/preview" style="width:100%;height:100%;border:0;background:#fff" ' +
         'allow="autoplay" loading="lazy"></iframe>';
+    } else if (d.fileWithheld) {
+      rStage.innerHTML = '<div class="placeholder"><p>🔒 <strong>Source file withheld to protect a sensitive species.</strong><br/>' +
+        'This document records precise locations of the endangered Queen Alexandra’s Birdwing; the file and exact coordinates are not published. ' +
+        'The record stays searchable — contact the Managalas Conservation Area for access to the full document.</p></div>';
     } else {
       rStage.innerHTML = '<div class="placeholder"><p>No preview available for this document.</p></div>';
     }

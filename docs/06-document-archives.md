@@ -121,6 +121,12 @@ needed — the reader already handles `public` records. Ideally this is done via
   clean re-OCR'd text, titles, snippets and keywords were merged in by `drive_id`
   (Drive ids/urls unchanged, so links and the reader are unaffected). Two filenames
   corrected in Drive were applied from the recovery package README.
+  _Sensitive-species redaction:_ the **QABB Status Report** (desktop study) listed exact
+  GPS coordinates of Queen Alexandra's Birdwing sites. Those 3 coordinate pairs are
+  redacted from the public text and the file pointer is withheld (`fileWithheld:true`,
+  empty `driveId`/`url`); the record stays public and searchable. Reviewed all 51 — the
+  other biodiversity reports carry no precise endangered-species coordinates and remain
+  fully public to showcase MCA's conservation value.
 - `app/data/qabb_archive.json` — the QABB **catalogue** (147 titles + keywords, tier
   `restricted`). **No text, no Drive ids/urls** — see *Restricted, catalogue-only* above.
 - `app/data/csiro_archive.json` — the CSIRO **catalogue** (6 titles + keywords, tier
