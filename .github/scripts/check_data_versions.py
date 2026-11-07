@@ -60,12 +60,25 @@ def check_hansen():
             "up to date — portal on gfc_v1.%d (%d), no newer version found" % (cur, hansen_year(cur)), "")
 
 def manual_items():
-    # Datasets that can't be probed cleanly — flag for a quick human glance.
+    # Datasets that can't be probed cleanly auth-free — flag for a quick human
+    # glance. Each lists the version the portal currently uses and where to check.
     return [
+        ("REVIEW", "JRC TMF (Tropical Moist Forest)",
+         "portal uses projects/JRC/TMF/v1_2025 (DeforestationYear). JRC advises always "
+         "using the latest edition — check for a newer v1_<year>.",
+         "https://forobs.jrc.ec.europa.eu/TMF/data"),
+        ("REVIEW", "JRC GFC2020 (EUDR benchmark forest map)",
+         "portal uses JRC/GFC2020/V2. Check for a newer version (a V3/V4 is noted in JRC reports).",
+         "https://developers.google.com/earth-engine/datasets/catalog/JRC_GFC2020_V2"),
+        ("REVIEW", "Nature Trace / DeepMind ForTy (forest typology)",
+         "portal uses forest_typology_2020_v1_0. Check for a newer year/version or a time series.",
+         "https://developers.google.com/earth-engine/datasets/catalog/projects_nature-trace_assets_forest_typology_forest_typology_2020_v1_0_collection"),
         ("REVIEW", "ESA WorldCover", "portal uses v200 (2021). Check for a newer edition.",
          "https://developers.google.com/earth-engine/datasets/catalog/ESA_WorldCover_v200"),
         ("REVIEW", "WorldClim (rainfall)", "portal uses WORLDCLIM/V1/BIO. Check for a newer edition.",
          "https://developers.google.com/earth-engine/datasets/tags/worldclim"),
+        ("REVIEW", "NASA FIRMS / NOAA CPC SOI", "live feeds (fire ~6-hourly, SOI weekly) — no action; "
+         "listed so the monthly email confirms they are still flowing.", ""),
     ]
 
 def main():
@@ -77,7 +90,7 @@ def main():
     else:
         lines.append("• [ok]  %s — %s" % (name, detail))
     for status, name, detail, url in manual_items():
-        lines.append("• [review] %s — %s  (%s)" % (name, detail, url))
+        lines.append("• [review] %s — %s%s" % (name, detail, ("  (%s)" % url if url else "")))
 
     print("Oro Data Portal — monthly data-source version check")
     print("=" * 55)
