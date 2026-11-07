@@ -13,7 +13,7 @@
 
   var FUNDING = {
     lockup: "img/eu-funded.png",   // official "Funded by the European Union" lockup (horizontal)
-    programme: "under the EU-FCCB programme (Papua New Guinea)",
+    programme: "under the EU-FCCB Nexus Programme in Papua New Guinea",
     disclaimer: "Views and opinions expressed are those of the authors only and do not " +
       "necessarily reflect those of the European Union or the funding programme. " +
       "Neither the European Union nor the granting authority can be held responsible for them."

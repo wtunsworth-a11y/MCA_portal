@@ -40,7 +40,7 @@
 
   // --- Resolve a layer's usability ------------------------------------------
   function layerState(l) {
-    if (l.kind === "backend") return { usable: false, reason: "Sign in for access" };
+    if (l.kind === "backend") return { usable: false, reason: "Partner data — on request" };
     if (l.kind === "gee") { var t = GEE[l.geeKey]; return { usable: !!(t && t.png), reason: (t && t.png) ? "" : "Coming soon" }; }
     if (l.kind === "defor_series") { var ok = !!(DEFOR && DEFOR.images && DEFOR.years && DEFOR.years.length); return { usable: ok, reason: ok ? "" : "Coming soon" }; }
     if (l.requiresKey) { var k = CFG.keys[l.requiresKey]; return { usable: !!k, reason: k ? "" : "Coming soon" }; }

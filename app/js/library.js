@@ -145,7 +145,7 @@
         '<button class="read" data-ref="' + esc(d.ref) + '"' + (restricted ? ' disabled' : '') + '>' +
         (restricted ? "🔒 Awaiting permission"
           : (d.fileWithheld ? "🔒 File withheld (sensitive species)"
-          : (locked ? "🔒 Sign in to read" : "Read in portal →"))) +
+          : (locked ? "🔒 Partner access" : "Read in portal →"))) +
         "</button></div>";
     }).join("");
   }

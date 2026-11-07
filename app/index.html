@@ -3,6 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <link rel="icon" href="img/favicon.svg" type="image/svg+xml" />
   <title>Oro Data Portal — Oro (Northern) Province, PNG</title>
   <meta name="description" content="Land use and conservation data for Oro (Northern) Province, Papua New Guinea: interactive maps, live monitoring, site analysis, and a document library." />
   <link rel="stylesheet" href="css/site.css" />
@@ -20,10 +21,9 @@
         <a href="site.html">Site analysis</a>
         <a href="index.html#live">Live data</a>
         <a href="library.html">Archives</a>
-        <a href="analytics.html">Usage</a>
       </nav>
       <span class="spacer"></span>
-      <a class="tier-chip" href="index.html#access">Public access · Sign in</a>
+      <a class="tier-chip" href="index.html#access">Public access</a>
     </div>
   </div>
 
@@ -63,7 +63,7 @@
   <section class="blk" id="site">
     <div class="wrap">
       <div class="sec-h">
-        <div><h2>Analyse a site <span class="badge planned">Planned — Phase 4b</span></h2>
+        <div><h2>Analyse a site</h2>
           <p>Draw or upload any site in Oro Province and generate a short landscape profile — a mini-MLA.</p></div>
         <a class="more" href="site.html">About this tool →</a>
       </div>
@@ -89,32 +89,24 @@
       </div>
       <div class="live-cards">
         <div class="live-card">
-          <div class="lh"><span class="blip"></span> Deforestation alerts</div>
-          <div class="big" style="color:var(--loss)">31</div>
-          <div class="sub">RADD radar alerts · last 30 days · MCA + 5 km</div>
-          <a class="lnk" href="map.html">Open forest-change layers →</a>
-        </div>
-        <div class="live-card">
-          <div class="lh"><span class="blip"></span> Fire reports</div>
-          <div class="big" style="color:var(--fire)">7</div>
-          <div class="sub">VIIRS/MODIS active fires · last 30 days (NASA FIRMS)</div>
+          <div class="lh"><span class="blip"></span> Active fires</div>
+          <div class="big" style="color:var(--fire)" id="fireBig">—</div>
+          <div class="sub" id="fireSub">VIIRS/MODIS active-fire detections (NASA FIRMS)</div>
           <a class="lnk" href="map.html">Open fire layer →</a>
         </div>
         <div class="live-card">
-          <div class="lh"><span class="blip"></span> Southern Oscillation Index</div>
-          <div class="big" style="color:var(--water)">−8.2</div>
-          <div class="sub">El Niño watch · drier-phase fire risk (Australian BoM)</div>
-          <svg class="spark" viewBox="0 0 260 40" preserveAspectRatio="none" aria-hidden="true">
-            <line x1="0" y1="20" x2="260" y2="20" stroke="#24352c" stroke-dasharray="3 3"/>
-            <polyline fill="none" stroke="#4aa8ff" stroke-width="1.6"
-              points="0,12 22,9 44,16 66,14 88,20 110,18 132,24 154,22 176,28 198,26 220,32 242,31 260,35"/>
-          </svg>
+          <div class="lh"><span class="blip"></span> Forest loss</div>
+          <div class="big" style="color:var(--loss)">2001–2025</div>
+          <div class="sub">Annual tree-cover loss · Hansen/UMD v1.13 — explore the cumulative year slider</div>
+          <a class="lnk" href="map.html">Open the loss slider →</a>
+        </div>
+        <div class="live-card">
+          <div class="lh"><span class="blip"></span> Climate &amp; fire risk</div>
+          <div class="big" style="color:var(--water);font-size:22px;line-height:1.3">ENSO watch</div>
+          <div class="sub">ENSO state drives drier-phase fire risk. A live Southern Oscillation Index
+            feed (Australian BoM) is being wired in.</div>
         </div>
       </div>
-      <p class="sub" style="color:var(--faint);font-size:12.5px;margin-top:12px">
-        Figures are illustrative in this Phase-1 build. In production they are refreshed by a scheduled
-        Google Earth Engine job and the FIRMS / RADD / BoM feeds.
-      </p>
     </div>
   </section>
 

@@ -148,7 +148,7 @@ window.PORTAL_CONFIG = {
       note: "ESA WorldCover 2021 (10 m), served as a clipped image from Earth Engine by the update-gee Action."
     },
     {
-      id: "topo", theme: "Topography", name: "Terrain / hillshade (Esri stand-in)",
+      id: "topo", theme: "Topography", name: "Terrain / hillshade",
       kind: "raster", live: true, visible: false, opacity: 0.9,
       tiles: ["https://server.arcgisonline.com/ArcGIS/rest/services/Elevation/World_Hillshade/MapServer/tile/{z}/{y}/{x}"],
       attribution: "Hillshade © Esri",

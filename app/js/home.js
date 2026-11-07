@@ -30,6 +30,22 @@
   }).join("");
 
   // Archive cards — the historical document collections.
+  // Live fire card — read the committed FIRMS feed and show the real count.
+  (function () {
+    var big = document.getElementById("fireBig"), sub = document.getElementById("fireSub");
+    if (!big) return;
+    fetch("data/fires.geojson").then(function (r) { return r.json(); }).then(function (d) {
+      var n = (d.features || []).length;
+      var days = d.days || null;
+      big.textContent = String(n);
+      sub.textContent = "VIIRS/MODIS active-fire detections" +
+        (days ? " · last " + days + " day" + (days === 1 ? "" : "s") : "") + " (NASA FIRMS)";
+    }).catch(function () {
+      big.textContent = "—";
+      sub.textContent = "Fire feed unavailable — open the fire layer on the map.";
+    });
+  })();
+
   var TIER_DOT = { public: "#3ddc84", reg: "#4aa8ff", partner: "#f5b301" };
   var reg = (window.PORTAL_ARCHIVES && window.PORTAL_ARCHIVES.registry) || [];
   document.getElementById("archiveCards").innerHTML = reg.map(function (a) {
