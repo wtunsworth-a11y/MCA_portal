@@ -180,7 +180,33 @@ zero-cost.
 ## Licensing & attribution
 
 All external sources above are free for research/non-commercial use but carry
-attribution requirements (JAXA, JRC, NASA, Planet NICFI, WorldClim, BoM, WWF
+attribution requirements (JAXA, JRC, NASA, Planet NICFI, WorldClim, NOAA CPC, WWF
 HydroSHEDS, ISRIC). Attribution must be shown in the map UI. PNG national datasets
 (PNGRIS, PNGLES, NFI) and partner data (DAL) need data-sharing agreements before
 redistribution — hence their tiered access.
+
+## Layers & feeds added — Nov 2026
+
+Rendered by the `update-gee` Action as clipped-to-Oro images (committed PNGs, same-origin,
+no CORS), unless noted:
+
+- **Forest change since 2020 (EUDR cut-off)** — Hansen tree-cover loss 2021–2025, and a
+  vectorised export of ≥ 2 ha clearings (`app/data/oro_defor_post2020.geojson`) that powers
+  the Site Analysis EUDR screen.
+- **JRC GFC2020 v2** (`JRC/GFC2020/V2`) — the EUDR benchmark forest-2020 map. *JRC states it
+  has no authoritative status — a screening aid, not a legal reference.*
+- **JRC TMF DeforestationYear** (`projects/JRC/TMF/v1_2025`) — latest Tropical Moist Forest
+  edition (replaces the old empty placeholder layer).
+- **Nature Trace / DeepMind ForTy 2020** — 10 m forest typology (natural vs planted/tree
+  crops), aligned to FAO/EUDR definitions; class encoding confirmed from the Oro histogram.
+- **RADD near-real-time alerts** (`projects/radar-wur/raddalert/v1`) — confirmed Sentinel-1
+  radar clearing alerts of the last 90 days; `app/data/radd.json` carries the ≥ 2 ha event
+  count + area for the homepage card.
+- **SOI (ENSO)** — now **NOAA CPC standardized SOI** (`update-soi` Action → `app/data/soi.json`),
+  **not** the BoM feed: the Australian BoM blocks automated access, so NOAA CPC (the same
+  Tahiti–Darwin index) is used and attributed on the card.
+- **Fire (FIRMS)** — live, VIIRS/MODIS, refreshed ~6-hourly (`app/data/fires.geojson`); the
+  homepage fire card reads the real detection count.
+
+New dataset editions for all of the above surface in the **monthly data-version email**
+(`.github/scripts/check_data_versions.py`) so the portal stays current.
