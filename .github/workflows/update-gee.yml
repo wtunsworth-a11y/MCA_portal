@@ -32,9 +32,14 @@ jobs:
           EE_SERVICE_ACCOUNT_KEY: ${{ secrets.EE_SERVICE_ACCOUNT_KEY }}
           EE_PROJECT: orodataportal
         run: python3 .github/scripts/update_gee.py
+      - name: Export EUDR post-2020 clearance polygons
+        env:
+          EE_SERVICE_ACCOUNT_KEY: ${{ secrets.EE_SERVICE_ACCOUNT_KEY }}
+          EE_PROJECT: orodataportal
+        run: python3 .github/scripts/update_eudr.py
       - name: Commit if changed
         run: |
-          git add app/data/gee_tiles.json app/data/gee_*.png
+          git add app/data/gee_tiles.json app/data/gee_*.png app/data/oro_defor_post2020.geojson
           if ! git diff --cached --quiet; then
             git config user.name "gee-bot"
             git config user.email "41898282+github-actions[bot]@users.noreply.github.com"

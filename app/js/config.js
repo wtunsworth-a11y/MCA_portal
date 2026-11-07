@@ -132,12 +132,35 @@ window.PORTAL_CONFIG = {
       legend: [{ color: "#cfe8cf", label: "Low cover" }, { color: "#1b7837", label: "Dense forest" }],
       note: "Served from Earth Engine (Hansen treecover2000) by the update-gee Action."
     },
-    // ---- GEE-served layers: paste XYZ endpoints from your Earth Engine app ----
     {
-      id: "tmf_change", theme: "Forest Change", name: "JRC TMF — Deforestation year",
-      kind: "raster", requiresEndpoint: true, opacity: 0.85,
-      tiles: [""], attribution: "JRC Tropical Moist Forest",
-      note: "Publish projects/JRC/TMF DeforestationYear from GEE and paste the tile URL."
+      id: "defor_post2020", theme: "Forest Change", name: "Deforestation since 2020 (EUDR cut-off)",
+      kind: "gee", geeKey: "defor_post2020", visible: false, opacity: 0.95,
+      attribution: "Hansen/UMD/Google/USGS/NASA",
+      legend: [{ color: "#fdae61", label: "2021" }, { color: "#d73027", label: "2023" }, { color: "#7a0177", label: "2025" }],
+      note: "Tree-cover loss after the EUDR cut-off date (31 Dec 2020), lossyear 2021–2025. Used by the Site Analysis EUDR screen. Screening indication, not a legal determination."
+    },
+    {
+      id: "tmf_defor", theme: "Forest Change", name: "JRC TMF — Deforestation year",
+      kind: "gee", geeKey: "tmf_defor", visible: false, opacity: 0.9,
+      attribution: "JRC Tropical Moist Forest (v1_2025)",
+      legend: [{ color: "#fff5b1", label: "2001" }, { color: "#f46d43", label: "~2013" }, { color: "#7a0177", label: "2025" }],
+      note: "JRC Tropical Moist Forest DeforestationYear (latest edition), served as a clipped image from Earth Engine by the update-gee Action."
+    },
+    {
+      id: "gfc2020", theme: "Forest Cover", name: "Forest 2020 — EUDR benchmark (JRC GFC2020)",
+      kind: "gee", geeKey: "gfc2020", visible: false, opacity: 0.6,
+      attribution: "JRC Global Forest Cover 2020 v2",
+      legend: [{ color: "#1b7837", label: "Forest in 2020 (EUDR definition)" }],
+      note: "The JRC EUDR benchmark forest map for the 2020 cut-off. JRC states it has no authoritative status — a screening aid, not a legal reference."
+    },
+    {
+      id: "forty", theme: "Forest Cover", name: "Forest typology 2020 (natural vs planted)",
+      kind: "gee", geeKey: "forty", visible: false, opacity: 0.8,
+      attribution: "Nature Trace / Google DeepMind ForTy 2020 v1.0",
+      legend: [{ color: "#05450a", label: "Primary" }, { color: "#6fbf73", label: "Naturally regenerating" },
+               { color: "#bdb76b", label: "Planted" }, { color: "#e08214", label: "Plantation" },
+               { color: "#ffd92f", label: "Tree crops / agroforestry" }, { color: "#d9d9d9", label: "Other land" }],
+      note: "Global forest typology at 10 m, aligned to FAO/EUDR definitions — distinguishes natural forest from plantations and tree crops. Class legend provisional pending encoding confirmation."
     },
     {
       id: "landcover", theme: "Land Cover", name: "Land cover (ESA WorldCover 2021, 10 m)",

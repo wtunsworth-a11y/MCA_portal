@@ -1,0 +1,101 @@
+#!/usr/bin/env python3
+"""Export post-2020 forest-clearance polygons for Oro, for the portal's
+in-browser EUDR plot screen.
+
+EUDR turns on whether a plot was subject to deforestation AFTER the cut-off
+date (31 December 2020). This script takes Hansen tree-cover loss for
+lossyear 2021..2025, keeps only contiguous clearings >= MIN_HA (so the output
+is real clearing events, not isolated noisy pixels), vectorises them within the
+Oro Province boundary, and writes a small simplified GeoJSON the static site
+ships. The Site Analysis tool samples a drawn plot against these polygons to
+report post-2020 deforestation on that plot.
+
+This is a SCREENING INDICATION built on the global Hansen/GFC product — not an
+authoritative or legal EUDR determination.
+
+Writes app/data/oro_defor_post2020.geojson. Runs in GitHub Actions with the
+service-account key in EE_SERVICE_ACCOUNT_KEY.
+"""
+import os, json, datetime
+
+ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+DATA = os.path.join(ROOT, "app", "data")
+OUT = os.path.join(DATA, "oro_defor_post2020.geojson")
+PROJECT = os.environ.get("EE_PROJECT", "orodataportal")
+
+MIN_HA = 0.5                 # smallest clearing event to keep (ha)
+PIXEL_HA = 0.09              # 30 m Hansen pixel ~ 0.09 ha
+MIN_PIXELS = max(1, int(round(MIN_HA / PIXEL_HA)))   # ~6 px
+CUTOFF_LOSSYEAR = 21         # lossyear 21 => 2021 (first full year after cut-off)
+
+
+def oro_geometry(ee):
+    """Oro Province geometry from the committed GeoJSON (falls back to bbox)."""
+    try:
+        gj = json.load(open(os.path.join(DATA, "oro_province.geojson")))
+        feats = gj.get("features") or [gj]
+        geoms = [ee.Geometry(f["geometry"]) for f in feats if f.get("geometry")]
+        return ee.Geometry.MultiPolygon([]).union(1) if not geoms else \
+            ee.FeatureCollection([ee.Feature(g) for g in geoms]).geometry()
+    except Exception:
+        return ee.Geometry.Rectangle([146.8, -10.0, 149.7, -7.9])
+
+
+def main():
+    meta = {"updated": datetime.datetime.utcnow().strftime("%Y-%m-%dT%H:%M:%SZ"),
+            "cutoff": "2020-12-31", "min_ha": MIN_HA, "status": "ok", "count": 0}
+    try:
+        import ee
+        key = os.environ["EE_SERVICE_ACCOUNT_KEY"]
+        info = json.loads(key)
+        ee.Initialize(ee.ServiceAccountCredentials(info["client_email"], key_data=key), project=PROJECT)
+    except Exception as e:
+        _write_empty(meta, "init error: " + str(e)[:300]); return
+
+    try:
+        aoi = oro_geometry(ee)
+        hansen = ee.Image("UMD/hansen/global_forest_change_2025_v1_13")
+        ly = hansen.select("lossyear")
+        post = ly.gte(CUTOFF_LOSSYEAR).selfMask()                 # 1 where loss >= 2021
+        # keep only contiguous clearings >= MIN_PIXELS
+        patch = post.connectedPixelCount(MIN_PIXELS + 50, True)
+        big = post.updateMask(patch.gte(MIN_PIXELS))
+        # carry the loss year (2000 + lossyear) so each polygon knows its year
+        year = ly.add(2000).updateMask(big)
+        vectors = year.reduceToVectors(
+            geometry=aoi, scale=30, geometryType="polygon", eightConnected=True,
+            labelProperty="zone", reducer=ee.Reducer.max(), maxPixels=1e10, bestEffort=True)
+        # simplify geometries a touch to keep the file small
+        vectors = vectors.map(lambda f: f.simplify(20)).limit(6000)
+        gj = vectors.getInfo()
+        # normalise properties: expose year + area (ha)
+        feats = []
+        for f in gj.get("features", []):
+            p = f.get("properties", {}) or {}
+            yr = p.get("max") or p.get("zone")
+            feats.append({"type": "Feature", "geometry": f["geometry"],
+                          "properties": {"year": int(yr) if yr else None}})
+        out = {"type": "FeatureCollection",
+               "updated": meta["updated"], "cutoff": meta["cutoff"],
+               "min_ha": MIN_HA, "note": "Hansen post-2020 clearings >= %.1f ha, Oro." % MIN_HA,
+               "features": feats}
+        os.makedirs(DATA, exist_ok=True)
+        json.dump(out, open(OUT, "w"))
+        print("post-2020 clearings:", len(feats))
+    except Exception as e:
+        _write_empty(meta, "export error: " + str(e)[:300])
+
+
+def _write_empty(meta, status):
+    meta["status"] = status
+    os.makedirs(DATA, exist_ok=True)
+    # keep an existing good file if the run failed; otherwise write an empty FC
+    if not os.path.exists(OUT):
+        json.dump({"type": "FeatureCollection", "updated": meta["updated"],
+                   "cutoff": meta["cutoff"], "status": status, "features": []},
+                  open(OUT, "w"))
+    print("STATUS:", status)
+
+
+if __name__ == "__main__":
+    main()
