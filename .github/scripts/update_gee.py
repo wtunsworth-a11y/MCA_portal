@@ -143,20 +143,26 @@ def main():
             return _glad_cache
         ic = ee.ImageCollection("projects/glad/alert/UpdResult").filterBounds(region)
         meta = {}
-        # Oro tiles only carry the year-bands they currently publish (e.g. conf26),
-        # so detect which conf<YY>/alertDate<YY> years are present and use those.
-        try:
-            bands = ic.first().bandNames().getInfo()
-        except Exception as e:
-            _glad_cache["mask"] = None; _glad_cache["meta"] = {"data_latest": None, "err": str(e)[:150]}
-            return _glad_cache
-        years = sorted(int(b[4:]) for b in bands if b.startswith("conf") and b[4:].isdigit())
-        parts = []
-        for yy in years:
+        # The Oro bbox spans several GLAD tiles that DON'T all carry the same
+        # year-bands (some have conf25+conf26, some only conf26). So for each
+        # candidate year, mosaic ONLY the tiles that actually contain that band.
+        cur_yy = datetime.datetime.utcnow().year - 2000
+        parts, present = [], []
+        for yy in (cur_yy - 1, cur_yy):
+            cb, db = "conf%d" % yy, "alertDate%d" % yy
+            tiles = ic.map(lambda im, cb=cb: im.set("_hb", im.bandNames().contains(cb))) \
+                      .filter(ee.Filter.eq("_hb", True))
+            try:
+                if not tiles.size().getInfo():
+                    continue
+            except Exception:
+                continue
             base = (datetime.date(2000 + yy, 1, 1) - GLAD_EPOCH).days   # days since 2020-01-01
-            conf = ic.select("conf%d" % yy).mosaic()                    # 0 none, 2 alert, 3 confirmed
-            ad = ic.select("alertDate%d" % yy).mosaic()                 # day-of-year within the year
+            conf = tiles.select(cb).mosaic()                            # 0 none, 2 alert, 3 confirmed
+            ad = tiles.select(db).mosaic()                              # day-of-year within the year
             parts.append(ad.add(base - 1).updateMask(conf.gte(3)).rename("d"))   # confirmed only
+            present.append(2000 + yy)
+        years = present
         if not parts:
             _glad_cache["mask"] = None; _glad_cache["meta"] = {"data_latest": None, "years": years}
             return _glad_cache
