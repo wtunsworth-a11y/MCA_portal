@@ -1,5 +1,8 @@
 {
+"updated": "2026-11-07T06:54:12Z",
 "window_days": 90,
 "geography": "asia",
-"status": "pending — populated by the update-gee Action"
+"status": "ok",
+"events_gt2ha": 0,
+"area_ha": 0
 }

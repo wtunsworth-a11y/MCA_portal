@@ -1,5 +1,5 @@
 {
-"updated": "2026-11-07T06:50:26Z",
+"updated": "2026-11-07T06:54:12Z",
 "project": "orodataportal",
 "bbox": [
 146.8,
@@ -26,6 +26,9 @@
 "forty": {
 "png": "data/gee_forty.png"
 },
+"radd_recent": {
+"png": "data/gee_radd_recent.png"
+},
 "worldclim_precip": {
 "png": "data/gee_worldclim_precip.png"
 },
@@ -41,6 +44,7 @@
 "gfc2020": "ok",
 "tmf_defor": "ok",
 "forty": "ok",
+"radd_recent": "ok",
 "worldclim_precip": "ok",
 "landcover": "ok"
 }
