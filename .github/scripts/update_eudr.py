@@ -62,24 +62,30 @@ def main():
         # keep only contiguous clearings >= MIN_PIXELS
         patch = post.connectedPixelCount(MIN_PIXELS + 50, True)
         big = post.updateMask(patch.gte(MIN_PIXELS))
-        # Vectorise a single band whose value is the loss year (2000 + lossyear),
-        # masked to the big clearings. With one band and labelProperty="year",
-        # reduceToVectors groups contiguous same-year pixels into polygons and
-        # writes the year straight into the 'year' property (no reducer needed).
-        yimg = ly.add(2000).toInt().updateMask(big).rename("year")
-        vectors = yimg.reduceToVectors(
+        # Vectorise the clearings as a SINGLE class (contiguous patches merge,
+        # regardless of loss year). This keeps the feature count well under EE's
+        # 5000-element getInfo cap so coverage is COMPLETE (no truncation) and the
+        # shipped file stays small. Per-year labelling is dropped deliberately —
+        # the screen reports total ha + count "since the 2020 cut-off".
+        single = big.gt(0).rename("clearing")
+        vectors = single.reduceToVectors(
             geometry=aoi, scale=30, geometryType="polygon", eightConnected=True,
-            labelProperty="year", maxPixels=1e10, bestEffort=True)
-        # cap under EE's 5000-element getInfo limit, then simplify to keep the file small
-        vectors = vectors.limit(4800).map(lambda f: f.simplify(20))
+            maxPixels=1e10, bestEffort=True)
+        vectors = vectors.limit(4800).map(lambda f: f.simplify(30))
         gj = vectors.getInfo()
-        # normalise properties: expose the loss year
+
+        def rnd(x):
+            if isinstance(x, (int, float)):
+                return round(x, 5)
+            if isinstance(x, list):
+                return [rnd(v) for v in x]
+            return x
         feats = []
         for f in gj.get("features", []):
-            p = f.get("properties", {}) or {}
-            yr = p.get("year")
-            feats.append({"type": "Feature", "geometry": f["geometry"],
-                          "properties": {"year": int(yr) if yr else None}})
+            geom = f.get("geometry") or {}
+            if geom.get("coordinates") is not None:
+                geom = {"type": geom.get("type"), "coordinates": rnd(geom["coordinates"])}
+            feats.append({"type": "Feature", "geometry": geom, "properties": {}})
         out = {"type": "FeatureCollection",
                "updated": meta["updated"], "cutoff": meta["cutoff"],
                "min_ha": MIN_HA, "note": "Hansen post-2020 clearings >= %.1f ha, Oro." % MIN_HA,
