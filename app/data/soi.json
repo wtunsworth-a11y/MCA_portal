@@ -1,5 +1,63 @@
 {
+"updated": "2026-11-07T06:44:36Z",
 "source": "NOAA CPC standardized SOI",
 "url": "https://www.cpc.ncep.noaa.gov/data/indices/soi",
-"status": "pending — populated by the update-soi Action"
+"status": "ok",
+"value": -2.0,
+"month": "Sep 2026",
+"phase": "El Nino-like \u2014 drier, higher fire risk",
+"series": [
+{
+"t": "2025-09",
+"v": 0.0
+},
+{
+"t": "2025-10",
+"v": 1.1
+},
+{
+"t": "2025-11",
+"v": 1.1
+},
+{
+"t": "2025-12",
+"v": -0.0
+},
+{
+"t": "2026-01",
+"v": 1.1
+},
+{
+"t": "2026-02",
+"v": 1.4
+},
+{
+"t": "2026-03",
+"v": 1.2
+},
+{
+"t": "2026-04",
+"v": -0.6
+},
+{
+"t": "2026-05",
+"v": -0.9
+},
+{
+"t": "2026-06",
+"v": -1.4
+},
+{
+"t": "2026-07",
+"v": -2.4
+},
+{
+"t": "2026-08",
+"v": -1.1
+},
+{
+"t": "2026-09",
+"v": -2.0
+}
+]
 }
