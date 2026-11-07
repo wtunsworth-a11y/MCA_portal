@@ -1,5 +1,5 @@
 {
-"updated": "2026-11-06T12:37:16Z",
+"updated": "2026-11-07T06:41:16Z",
 "project": "orodataportal",
 "bbox": [
 146.8,
@@ -14,6 +14,18 @@
 "defor_year": {
 "png": "data/gee_defor_year.png"
 },
+"defor_post2020": {
+"png": "data/gee_defor_post2020.png"
+},
+"gfc2020": {
+"png": "data/gee_gfc2020.png"
+},
+"tmf_defor": {
+"png": "data/gee_tmf_defor.png"
+},
+"forty": {
+"png": "data/gee_forty.png"
+},
 "worldclim_precip": {
 "png": "data/gee_worldclim_precip.png"
 },
@@ -22,8 +34,13 @@
 }
 },
 "status": {
+"_forty_hist": "{'classification': {'1': 3501458.756862748, '2': 737424.8549019609, '4': 29, '5': 41442.470588235294, '6': 647804.7019607845}}",
 "treecover2000": "ok",
 "defor_year": "ok",
+"defor_post2020": "ok",
+"gfc2020": "ok",
+"tmf_defor": "ok",
+"forty": "ok",
 "worldclim_precip": "ok",
 "landcover": "ok"
 }

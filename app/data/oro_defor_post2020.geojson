@@ -1,0 +1,1 @@
+{"type": "FeatureCollection", "updated": "2026-11-07T06:41:52Z", "cutoff": "2020-12-31", "status": "export error: Image.reduceToVectors: Need 1+1 bands for Reducer.max, image has 1.", "features": []}
