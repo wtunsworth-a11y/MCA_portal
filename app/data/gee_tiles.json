@@ -1,5 +1,5 @@
 {
-"updated": "2026-11-07T07:47:51Z",
+"updated": "2026-11-07T08:56:05Z",
 "project": "orodataportal",
 "bbox": [
 146.8,
@@ -45,6 +45,7 @@
 "tmf_defor": "ok",
 "forty": "ok",
 "radd_recent": "ok",
+"glad_recent": "error: HTTP Error 400: Bad Request",
 "worldclim_precip": "ok",
 "landcover": "ok"
 }

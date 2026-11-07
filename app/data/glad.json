@@ -1,5 +1,8 @@
 {
+"updated": "2026-11-07T08:56:05Z",
 "window_days": 90,
 "source": "GLAD-L (UMD) Landsat alerts",
-"status": "pending — populated by the update-gee Action"
+"status": "error: Error in map(ID=07_30_ASIA):\nImage.select: Band pattern 'conf25' did not match any bands. Available bands: [conf26, alertDate26, obsCount, obsDate, swir1, nir, red]",
+"_conf26_hist": "{'conf26': {'0': 669105.3803921561, '2': 1308.4823529411763, '3': 1672.286274509804}}",
+"data_latest": null
 }
