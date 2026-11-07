@@ -261,44 +261,52 @@
   function eudrScreen(ring, plotCentroid) {
     if (deforPost2020 == null) return { loaded: false };
     if (!deforPost2020.length) return { loaded: true, count: 0, ha: 0, years: [], meta: deforMeta };
+    var plotHa = ringAreaM2(ring) / 1e4;
     var pbb = bboxOf(ring);
     var cand = deforPost2020.filter(function (d) { return d.bbox && bbIntersect(pbb, d.bbox); });
-    if (!cand.length) return { loaded: true, count: 0, ha: 0, years: [], meta: deforMeta };
+    if (!cand.length) return { loaded: true, count: 0, clearedHa: 0, plotHa: plotHa, pct: 0, meta: deforMeta };
     function step(arr) { return Math.max(1, Math.floor(arr.length / 12)); }
-    var count = 0;
+    // Sum the real area of every mapped clearing that intersects the plot
+    // (resolution-independent, unlike grid sampling). Edge clearings are counted
+    // in full — conservative, which is the safe direction for a screen.
+    var count = 0, clearedM2 = 0;
     cand.forEach(function (d) {
       var hit = (d.centroid && pointInRing(d.centroid, ring)) ||
                 (plotCentroid && pointInPolys(plotCentroid, d.polys));
       var or = d.polys[0] && d.polys[0][0], i;
       if (!hit && or) { for (i = 0; i < or.length; i += step(or)) { if (pointInRing(or[i], ring)) { hit = true; break; } } }
       if (!hit) { for (i = 0; i < ring.length; i += step(ring)) { if (pointInPolys(ring[i], d.polys)) { hit = true; break; } } }
-      if (hit) count++;
+      if (hit) { count++; clearedM2 += d.areaM2; }
     });
-    // ha of overlap via grid sampling over the plot bbox against candidates only
-    var N = 56, inAoi = 0, inDef = 0, k;
-    for (var a = 0; a <= N; a++) for (var b = 0; b <= N; b++) {
-      var pt = [pbb[0] + (pbb[2] - pbb[0]) * a / N, pbb[1] + (pbb[3] - pbb[1]) * b / N];
-      if (!pointInRing(pt, ring)) continue; inAoi++;
-      for (k = 0; k < cand.length; k++) { if (pointInPolys(pt, cand[k].polys)) { inDef++; break; } }
-    }
-    var ha = inAoi ? (inDef / inAoi) * (ringAreaM2(ring) / 1e4) : 0;
-    if (count === 0 && inDef > 0) count = 1;   // grid caught overlap the vertex tests missed
-    return { loaded: true, count: count, ha: ha, years: [], meta: deforMeta };
+    var clearedHa = Math.min(clearedM2 / 1e4, plotHa);
+    var pct = plotHa ? Math.min(100, (clearedHa / plotHa) * 100) : 0;
+    return { loaded: true, count: count, clearedHa: clearedHa, plotHa: plotHa, pct: pct, meta: deforMeta };
   }
+  function pctStr(p) { return (p > 0 && p < 0.1) ? "<0.1%" : fmt(p, 1) + "%"; }
   function eudrPanel(e) {
     if (!e.loaded) return '<div class="sa-note"><b>EUDR screen</b><br/>Post-2020 clearance layer not loaded.</div>';
     var src = e.meta && e.meta.min_ha ? (" Minimum mapped clearing " + e.meta.min_ha + " ha.") : "";
     var caveat = '<div class="sa-eudr-caveat">Screening indication only, from the global Hansen/JRC ' +
-      'forest products — <b>not</b> an authoritative or legal EUDR determination.' + src + '</div>';
-    if (e.count === 0) {
-      return '<div class="sa-eudr ok"><div class="sa-eudr-h">🟢 EUDR screen — no post-2020 deforestation detected</div>' +
-        '<p>No mapped forest-clearance event (after the 31 Dec 2020 cut-off) was found on this plot. ' +
-        'Lower apparent deforestation risk.</p>' + caveat + '</div>';
-    }
-    var yrs = e.years.length ? " (" + e.years.join(", ") + ")" : "";
-    return '<div class="sa-eudr flag"><div class="sa-eudr-h">🔴 EUDR screen — post-2020 deforestation detected</div>' +
-      '<p><b>' + fmt(e.ha, 1) + ' ha</b> across <b>' + e.count + '</b> clearance event' + (e.count === 1 ? "" : "s") +
-      ' after the 2020 cut-off' + yrs + ' overlap this plot. Flag for due diligence before sourcing.</p>' + caveat + '</div>';
+      'forest products — <b>not</b> an authoritative or legal EUDR determination.' + src +
+      ' Hectares are summed from mapped clearings that intersect the plot (edge clearings counted in full).</div>';
+    var freePct = Math.max(0, 100 - e.pct), freeHa = Math.max(0, e.plotHa - e.clearedHa);
+    var cls = e.pct <= 0 ? "ok" : (e.pct < 5 ? "warn" : "flag");
+    var icon = e.pct <= 0 ? "🟢" : (e.pct < 5 ? "🟡" : "🔴");
+    var head = e.pct <= 0
+      ? "no post-2020 deforestation detected"
+      : pctStr(e.pct) + " of the plot shows post-2020 clearing";
+    var tail = e.pct <= 0 ? "" : (e.pct < 5
+      ? " Review the cleared portion before sourcing."
+      : " Flag for due diligence before sourcing.");
+    var bar = '<div class="sa-eudr-bar">' +
+      '<span class="free" style="width:' + freePct.toFixed(1) + '%"></span>' +
+      '<span class="cleared" style="width:' + e.pct.toFixed(1) + '%"></span></div>';
+    var rows = '<div class="sa-eudr-rows">' +
+      '<div><span class="sw free"></span>Deforestation-free (apparent): <b>' + pctStr(freePct) + '</b> · ' + fmt(freeHa, 1) + ' ha</div>' +
+      '<div><span class="sw cleared"></span>Post-2020 clearing: <b>' + pctStr(e.pct) + '</b> · ' + fmt(e.clearedHa, 1) + ' ha' +
+      (e.count ? ' · ' + e.count + ' event' + (e.count === 1 ? "" : "s") : "") + '</div></div>';
+    return '<div class="sa-eudr ' + cls + '"><div class="sa-eudr-h">' + icon + ' EUDR screen — ' + head + '</div>' +
+      '<p>Plot area <b>' + fmt(e.plotHa, 1) + ' ha</b>.' + tail + '</p>' + bar + rows + caveat + '</div>';
   }
 
   function analyse(ring) {

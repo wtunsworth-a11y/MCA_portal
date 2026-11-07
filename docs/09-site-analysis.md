@@ -108,9 +108,12 @@ in the browser** against committed data — no backend, no GEE call per request:
 - **EUDR screen** — the drawn/uploaded plot is tested against committed **post-2020
   forest-clearance polygons** (Hansen tree-cover loss after the 31 Dec 2020 cut-off,
   contiguous clearings ≥ 2 ha, clipped to Oro, exported by `.github/scripts/update_eudr.py`
-  → `app/data/oro_defor_post2020.geojson`). The report shows a **green "no post-2020
-  deforestation detected"** or **red "post-2020 deforestation detected — N events, X ha"**
-  verdict. The EUDR context layers (**GFC2020 v2** forest-2020 benchmark and **Nature Trace
+  → `app/data/oro_defor_post2020.geojson`). The report shows a **proportional** result —
+  the **% and hectares of the plot that are deforestation-free vs cleared since 2020**, a
+  split bar, and an event count — graded green (0% cleared) / amber (<5%) / red (≥5%). This
+  works for any plot size (a 1,000 ha concession and a 0.5 ha garden both get a proportion,
+  not a single yes/no). Hectares are summed from the real clearing polygons intersecting the
+  plot (edge clearings counted in full — conservative). The EUDR context layers (**GFC2020 v2** forest-2020 benchmark and **Nature Trace
   ForTy** natural-vs-planted typology) are viewable on the main map.
 
   > **This is a screening indication, not a legal EUDR determination.** It is built on the
