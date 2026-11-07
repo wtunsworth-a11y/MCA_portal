@@ -62,15 +62,14 @@ def main():
         # keep only contiguous clearings >= MIN_PIXELS
         patch = post.connectedPixelCount(MIN_PIXELS + 50, True)
         big = post.updateMask(patch.gte(MIN_PIXELS))
-        # reduceToVectors needs a label band (first) PLUS a band to reduce:
-        #   band 0 'lbl'  = 1 everywhere a big clearing is (single class to vectorise)
-        #   band 1 'yr'   = loss year (2000 + lossyear); Reducer.max -> patch's year
-        label = big.toInt().rename("lbl")
-        yimg = ly.add(2000).toInt().updateMask(big).rename("yr")
-        stacked = label.addBands(yimg)
-        vectors = stacked.reduceToVectors(
+        # Vectorise a single band whose value is the loss year (2000 + lossyear),
+        # masked to the big clearings. With one band and labelProperty="year",
+        # reduceToVectors groups contiguous same-year pixels into polygons and
+        # writes the year straight into the 'year' property (no reducer needed).
+        yimg = ly.add(2000).toInt().updateMask(big).rename("year")
+        vectors = yimg.reduceToVectors(
             geometry=aoi, scale=30, geometryType="polygon", eightConnected=True,
-            reducer=ee.Reducer.max(), maxPixels=1e10, bestEffort=True)
+            labelProperty="year", maxPixels=1e10, bestEffort=True)
         # cap under EE's 5000-element getInfo limit, then simplify to keep the file small
         vectors = vectors.limit(4800).map(lambda f: f.simplify(20))
         gj = vectors.getInfo()
@@ -78,7 +77,7 @@ def main():
         feats = []
         for f in gj.get("features", []):
             p = f.get("properties", {}) or {}
-            yr = p.get("yr")
+            yr = p.get("year")
             feats.append({"type": "Feature", "geometry": f["geometry"],
                           "properties": {"year": int(yr) if yr else None}})
         out = {"type": "FeatureCollection",
