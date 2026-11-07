@@ -39,10 +39,12 @@
     .sa-eudr p { margin:4px 0; font-size:14px; }
     .sa-eudr-bar { display:flex; height:12px; border-radius:6px; overflow:hidden; margin:8px 0 6px;
       background:#2a3342; border:1px solid var(--line,#263041); }
-    .sa-eudr-bar .free { background:#2ea56b; } .sa-eudr-bar .cleared { background:#ff3b30; }
+    .sa-eudr-bar .free, .sa-eudr-bar .standing { background:#2ea56b; }
+    .sa-eudr-bar .nonforest { background:#b9a06b; } .sa-eudr-bar .cleared { background:#ff3b30; }
     .sa-eudr-rows { font-size:13px; display:grid; gap:3px; }
     .sa-eudr-rows .sw { display:inline-block; width:10px; height:10px; border-radius:2px; margin-right:6px; vertical-align:middle; }
-    .sa-eudr-rows .sw.free { background:#2ea56b; } .sa-eudr-rows .sw.cleared { background:#ff3b30; }
+    .sa-eudr-rows .sw.free, .sa-eudr-rows .sw.standing { background:#2ea56b; }
+    .sa-eudr-rows .sw.nonforest { background:#b9a06b; } .sa-eudr-rows .sw.cleared { background:#ff3b30; }
     .sa-eudr-caveat { font-size:11.5px; color:var(--muted,#93a0b4); margin-top:6px; line-height:1.45; }
     @media (max-width:560px){ .sa-pending ul { columns:1; } }
   </style>

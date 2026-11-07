@@ -87,8 +87,10 @@
   var map, mode = null, verts = [], lastPoint = null, aoiRing = null;
   var oroPolys = [], paList = [];  // paList: [{ name, polys }] — MCA + other Oro PAs
   // Post-2020 forest-clearance events (for the EUDR screen). null = not loaded.
-  var deforPost2020 = null;        // [{ polys, areaM2, year, centroid }]
+  var deforPost2020 = null;        // [{ polys, areaM2, centroid, bbox }]
   var deforMeta = null;            // { updated, cutoff, min_ha, status }
+  var nonForest2020 = null;        // GFC2020 non-forest-2020 patches (same shape)
+  var nonForestReady = false;      // true only once the real export (status ok) has loaded
 
   var esri = "https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}";
   try {
@@ -155,6 +157,18 @@
         paint: { "line-color": "#ff3b30", "line-width": 1 } });
       if (aoiRing) analyse(aoiRing);  // refresh if a site was drawn before this loaded
     }).catch(function () { deforPost2020 = []; deforMeta = { status: "unavailable" }; });
+    // Non-forest in 2020 (JRC GFC2020 v2) — the complement used for the three-way
+    // EUDR split. Loaded for sampling only (not drawn, to keep the map uncluttered).
+    fetch("data/oro_nonforest2020.geojson").then(function (r) { return r.json(); }).then(function (gj) {
+      nonForestReady = gj.status === "ok";
+      nonForest2020 = (gj.features || []).map(function (f) {
+        var polys = polysOf(f.geometry);
+        var areaM2 = 0; polys.forEach(function (p) { if (p[0]) areaM2 += ringAreaM2(p[0]); });
+        var or = polys[0] && polys[0][0];
+        return { polys: polys, areaM2: areaM2, centroid: or ? centroidOf(or) : null, bbox: or ? bboxOf(or) : null };
+      });
+      if (aoiRing) analyse(aoiRing);
+    }).catch(function () { nonForest2020 = []; });
     // AOI layers
     map.addSource("aoi", { type: "geojson", data: emptyFC() });
     map.addLayer({ id: "aoi-fill", type: "fill", source: "aoi", paint: { "fill-color": "#2c6cf0", "fill-opacity": 0.18 } });
@@ -258,29 +272,44 @@
   // intersection test for the event COUNT and (b) grid sampling for the ha of
   // overlap (so it works for concave/odd shapes, not just centroids).
   function bbIntersect(a, b) { return !(a[2] < b[0] || a[0] > b[2] || a[3] < b[1] || a[1] > b[3]); }
-  function eudrScreen(ring, plotCentroid) {
-    if (deforPost2020 == null) return { loaded: false };
-    if (!deforPost2020.length) return { loaded: true, count: 0, ha: 0, years: [], meta: deforMeta };
-    var plotHa = ringAreaM2(ring) / 1e4;
+  function stepN(arr) { return Math.max(1, Math.floor(arr.length / 12)); }
+  // Sum the real area (m²) of every polygon in `list` that intersects the plot,
+  // bbox-pre-filtered, using robust vertex/centroid tests (resolution-independent;
+  // edge polygons counted in full — conservative).
+  function sumIntersect(ring, plotCentroid, list) {
     var pbb = bboxOf(ring);
-    var cand = deforPost2020.filter(function (d) { return d.bbox && bbIntersect(pbb, d.bbox); });
-    if (!cand.length) return { loaded: true, count: 0, clearedHa: 0, plotHa: plotHa, pct: 0, meta: deforMeta };
-    function step(arr) { return Math.max(1, Math.floor(arr.length / 12)); }
-    // Sum the real area of every mapped clearing that intersects the plot
-    // (resolution-independent, unlike grid sampling). Edge clearings are counted
-    // in full — conservative, which is the safe direction for a screen.
-    var count = 0, clearedM2 = 0;
+    var cand = list.filter(function (d) { return d.bbox && bbIntersect(pbb, d.bbox); });
+    var count = 0, m2 = 0;
     cand.forEach(function (d) {
       var hit = (d.centroid && pointInRing(d.centroid, ring)) ||
                 (plotCentroid && pointInPolys(plotCentroid, d.polys));
       var or = d.polys[0] && d.polys[0][0], i;
-      if (!hit && or) { for (i = 0; i < or.length; i += step(or)) { if (pointInRing(or[i], ring)) { hit = true; break; } } }
-      if (!hit) { for (i = 0; i < ring.length; i += step(ring)) { if (pointInPolys(ring[i], d.polys)) { hit = true; break; } } }
-      if (hit) { count++; clearedM2 += d.areaM2; }
+      if (!hit && or) { for (i = 0; i < or.length; i += stepN(or)) { if (pointInRing(or[i], ring)) { hit = true; break; } } }
+      if (!hit) { for (i = 0; i < ring.length; i += stepN(ring)) { if (pointInPolys(ring[i], d.polys)) { hit = true; break; } } }
+      if (hit) { count++; m2 += d.areaM2; }
     });
-    var clearedHa = Math.min(clearedM2 / 1e4, plotHa);
-    var pct = plotHa ? Math.min(100, (clearedHa / plotHa) * 100) : 0;
-    return { loaded: true, count: count, clearedHa: clearedHa, plotHa: plotHa, pct: pct, meta: deforMeta };
+    return { count: count, m2: m2 };
+  }
+  function eudrScreen(ring, plotCentroid) {
+    if (deforPost2020 == null) return { loaded: false };
+    var plotHa = ringAreaM2(ring) / 1e4;
+    var cl = deforPost2020.length ? sumIntersect(ring, plotCentroid, deforPost2020) : { count: 0, m2: 0 };
+    var clearedHa = Math.min(cl.m2 / 1e4, plotHa);
+    var res = { loaded: true, count: cl.count, plotHa: plotHa, clearedHa: clearedHa,
+                pct: plotHa ? Math.min(100, clearedHa / plotHa * 100) : 0, meta: deforMeta };
+    // three-way split using GFC2020 non-forest-2020 (only when the real export loaded)
+    if (nonForest2020 != null && nonForestReady) {
+      var nf = nonForest2020.length ? sumIntersect(ring, plotCentroid, nonForest2020) : { count: 0, m2: 0 };
+      var preNF = Math.min(nf.m2 / 1e4, plotHa);
+      var forest2020 = Math.max(0, plotHa - preNF);
+      var cleared = Math.min(clearedHa, forest2020);        // clearings sit within forest-2020
+      res.threeWay = true;
+      res.preNonForestHa = preNF;
+      res.clearedHa = cleared;
+      res.standingHa = Math.max(0, forest2020 - cleared);
+      res.pct = plotHa ? Math.min(100, cleared / plotHa * 100) : 0;
+    }
+    return res;
   }
   function pctStr(p) { return (p > 0 && p < 0.1) ? "<0.1%" : fmt(p, 1) + "%"; }
   function eudrPanel(e) {
@@ -289,22 +318,36 @@
     var caveat = '<div class="sa-eudr-caveat">Screening indication only, from the global Hansen/JRC ' +
       'forest products — <b>not</b> an authoritative or legal EUDR determination.' + src +
       ' Hectares are summed from mapped clearings that intersect the plot (edge clearings counted in full).</div>';
-    var freePct = Math.max(0, 100 - e.pct), freeHa = Math.max(0, e.plotHa - e.clearedHa);
     var cls = e.pct <= 0 ? "ok" : (e.pct < 5 ? "warn" : "flag");
     var icon = e.pct <= 0 ? "🟢" : (e.pct < 5 ? "🟡" : "🔴");
     var head = e.pct <= 0
       ? "no post-2020 deforestation detected"
-      : pctStr(e.pct) + " of the plot shows post-2020 clearing";
+      : pctStr(e.pct) + " of the plot cleared since 2020";
     var tail = e.pct <= 0 ? "" : (e.pct < 5
       ? " Review the cleared portion before sourcing."
       : " Flag for due diligence before sourcing.");
-    var bar = '<div class="sa-eudr-bar">' +
-      '<span class="free" style="width:' + freePct.toFixed(1) + '%"></span>' +
-      '<span class="cleared" style="width:' + e.pct.toFixed(1) + '%"></span></div>';
-    var rows = '<div class="sa-eudr-rows">' +
-      '<div><span class="sw free"></span>Deforestation-free (apparent): <b>' + pctStr(freePct) + '</b> · ' + fmt(freeHa, 1) + ' ha</div>' +
-      '<div><span class="sw cleared"></span>Post-2020 clearing: <b>' + pctStr(e.pct) + '</b> · ' + fmt(e.clearedHa, 1) + ' ha' +
-      (e.count ? ' · ' + e.count + ' event' + (e.count === 1 ? "" : "s") : "") + '</div></div>';
+    var bar, rows, pH = e.plotHa || 1;
+    if (e.threeWay) {
+      var stPct = e.standingHa / pH * 100, nfPct = e.preNonForestHa / pH * 100;
+      bar = '<div class="sa-eudr-bar">' +
+        '<span class="standing" style="width:' + stPct.toFixed(1) + '%"></span>' +
+        '<span class="nonforest" style="width:' + nfPct.toFixed(1) + '%"></span>' +
+        '<span class="cleared" style="width:' + e.pct.toFixed(1) + '%"></span></div>';
+      rows = '<div class="sa-eudr-rows">' +
+        '<div><span class="sw standing"></span>Standing forest (forest in 2020, uncleared): <b>' + pctStr(stPct) + '</b> · ' + fmt(e.standingHa, 1) + ' ha</div>' +
+        '<div><span class="sw nonforest"></span>Pre-2020 non-forest (existing land use): <b>' + pctStr(nfPct) + '</b> · ' + fmt(e.preNonForestHa, 1) + ' ha</div>' +
+        '<div><span class="sw cleared"></span>Cleared since 2020: <b>' + pctStr(e.pct) + '</b> · ' + fmt(e.clearedHa, 1) + ' ha' +
+        (e.count ? ' · ' + e.count + ' event' + (e.count === 1 ? "" : "s") : "") + '</div></div>';
+    } else {
+      var freePct = Math.max(0, 100 - e.pct), freeHa = Math.max(0, e.plotHa - e.clearedHa);
+      bar = '<div class="sa-eudr-bar">' +
+        '<span class="free" style="width:' + freePct.toFixed(1) + '%"></span>' +
+        '<span class="cleared" style="width:' + e.pct.toFixed(1) + '%"></span></div>';
+      rows = '<div class="sa-eudr-rows">' +
+        '<div><span class="sw free"></span>Deforestation-free (apparent): <b>' + pctStr(freePct) + '</b> · ' + fmt(freeHa, 1) + ' ha</div>' +
+        '<div><span class="sw cleared"></span>Post-2020 clearing: <b>' + pctStr(e.pct) + '</b> · ' + fmt(e.clearedHa, 1) + ' ha' +
+        (e.count ? ' · ' + e.count + ' event' + (e.count === 1 ? "" : "s") : "") + '</div></div>';
+    }
     return '<div class="sa-eudr ' + cls + '"><div class="sa-eudr-h">' + icon + ' EUDR screen — ' + head + '</div>' +
       '<p>Plot area <b>' + fmt(e.plotHa, 1) + ' ha</b>.' + tail + '</p>' + bar + rows + caveat + '</div>';
   }

@@ -1,0 +1,6 @@
+{
+"type": "FeatureCollection",
+"status": "pending — populated by the update-gee Action (update_eudr.py)",
+"note": "JRC GFC2020 v2 non-forest-2020 patches, Oro land. Until present, the EUDR screen uses the two-way (deforestation-free vs cleared) view.",
+"features": []
+}
