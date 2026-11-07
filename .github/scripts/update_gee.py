@@ -142,33 +142,16 @@ def main():
         if _glad_cache:
             return _glad_cache
         ic = ee.ImageCollection("projects/glad/alert/UpdResult").filterBounds(region)
-        meta = {}
-        # The Oro bbox spans several GLAD tiles that DON'T all carry the same
-        # year-bands (some have conf25+conf26, some only conf26). So for each
-        # candidate year, mosaic ONLY the tiles that actually contain that band.
-        cur_yy = datetime.datetime.utcnow().year - 2000
-        parts, present = [], []
-        for yy in (cur_yy - 1, cur_yy):
-            cb, db = "conf%d" % yy, "alertDate%d" % yy
-            tiles = ic.map(lambda im, cb=cb: im.set("_hb", im.bandNames().contains(cb))) \
-                      .filter(ee.Filter.eq("_hb", True))
-            try:
-                if not tiles.size().getInfo():
-                    continue
-            except Exception:
-                continue
-            base = (datetime.date(2000 + yy, 1, 1) - GLAD_EPOCH).days   # days since 2020-01-01
-            conf = tiles.select(cb).mosaic()                            # 0 none, 2 alert, 3 confirmed
-            ad = tiles.select(db).mosaic()                              # day-of-year within the year
-            parts.append(ad.add(base - 1).updateMask(conf.gte(3)).rename("d"))   # confirmed only
-            present.append(2000 + yy)
-        years = present
-        if not parts:
-            _glad_cache["mask"] = None; _glad_cache["meta"] = {"data_latest": None, "years": years}
-            return _glad_cache
-        dateImg = parts[0]
-        for p in parts[1:]:
-            dateImg = dateImg.max(p)
+        # Every Oro tile carries the current year's band (conf<YY>), so use that
+        # directly — select across the whole collection is safe. (Some tiles also
+        # carry the prior year, but not all, and select() fails lazily on a tile
+        # that lacks a band, so we don't mix years.)
+        yy = datetime.datetime.utcnow().year - 2000
+        base = (datetime.date(2000 + yy, 1, 1) - GLAD_EPOCH).days   # days since 2020-01-01
+        conf = ic.select("conf%d" % yy).mosaic()                    # 0 none, 2 alert, 3 confirmed
+        ad = ic.select("alertDate%d" % yy).mosaic()                 # day-of-year within the year
+        dateImg = ad.add(base - 1).updateMask(conf.gte(3)).rename("d")   # confirmed only
+        meta = {"years": [2000 + yy]}
         try:
             maxday = dateImg.reduceRegion(ee.Reducer.max(), region, 30,
                      maxPixels=1e10, bestEffort=True).get("d").getInfo()
@@ -179,7 +162,6 @@ def main():
             cutday = int(maxday) - GLAD_DAYS
         else:
             cutday, meta["data_latest"] = 0, None
-        meta["years"] = [2000 + y for y in years]
         _glad_cache["mask"] = dateImg.gte(cutday).selfMask()
         _glad_cache["meta"] = meta
         return _glad_cache
@@ -267,6 +249,8 @@ def main():
         glad_out["years"] = prep["meta"].get("years")
         if mask is None:
             raise RuntimeError("no GLAD year-bands over Oro")
+        glad_out["_confirmed_px"] = mask.reduceRegion(ee.Reducer.count(), region, 30,
+                                    maxPixels=1e10, bestEffort=True).get("d").getInfo()
         patch = mask.connectedPixelCount(260, True)          # GLAD 30 m: 2 ha = ~22 px
         big = mask.updateMask(patch.gte(22))
         events = big.reduceToVectors(geometry=region, scale=30, geometryType="polygon",
