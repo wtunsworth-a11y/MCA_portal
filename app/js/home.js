@@ -46,6 +46,27 @@
     });
   })();
 
+  // Live SOI card — read the committed NOAA CPC SOI feed.
+  (function () {
+    var big = document.getElementById("soiBig"), sub = document.getElementById("soiSub");
+    if (!big) return;
+    fetch("data/soi.json").then(function (r) { return r.json(); }).then(function (d) {
+      if (d && typeof d.value === "number") {
+        big.textContent = (d.value > 0 ? "+" : "") + d.value.toFixed(1);
+        sub.textContent = (d.phase || "SOI") + (d.month ? " · " + d.month : "") +
+          " · " + (d.source || "NOAA CPC SOI");
+      } else {
+        big.style.fontSize = "22px"; big.style.lineHeight = "1.3";
+        big.textContent = "ENSO watch";
+        sub.textContent = "Southern Oscillation Index feed is being wired in (NOAA CPC).";
+      }
+    }).catch(function () {
+      big.style.fontSize = "22px"; big.style.lineHeight = "1.3";
+      big.textContent = "ENSO watch";
+      sub.textContent = "Southern Oscillation Index — ENSO state & drier-phase fire risk.";
+    });
+  })();
+
   var TIER_DOT = { public: "#3ddc84", reg: "#4aa8ff", partner: "#f5b301" };
   var reg = (window.PORTAL_ARCHIVES && window.PORTAL_ARCHIVES.registry) || [];
   document.getElementById("archiveCards").innerHTML = reg.map(function (a) {

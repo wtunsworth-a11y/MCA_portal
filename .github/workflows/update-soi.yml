@@ -1,0 +1,37 @@
+name: Update SOI (ENSO)
+
+# Fetches the Southern Oscillation Index (NOAA CPC standardized SOI) server-side
+# and commits app/data/soi.json for the homepage climate / fire-risk card.
+# NOAA CPC is used because the Australian BoM blocks automated access; the index
+# is the same Tahiti-Darwin SOI signal.
+
+on:
+  schedule:
+    - cron: "0 6 * * 1"   # weekly, Monday (SOI updates monthly)
+  workflow_dispatch: {}
+
+permissions:
+  contents: write
+
+concurrency:
+  group: update-soi
+  cancel-in-progress: false
+
+jobs:
+  soi:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - name: Fetch SOI and build JSON
+        run: python3 .github/scripts/update_soi.py
+      - name: Commit if changed
+        run: |
+          if ! git diff --quiet -- app/data/soi.json; then
+            git config user.name "soi-bot"
+            git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+            git add app/data/soi.json
+            git commit -m "chore: refresh SOI (ENSO)"
+            git push
+          else
+            echo "No change in SOI."
+          fi

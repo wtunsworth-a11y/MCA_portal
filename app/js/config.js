@@ -160,7 +160,7 @@ window.PORTAL_CONFIG = {
       legend: [{ color: "#05450a", label: "Primary" }, { color: "#6fbf73", label: "Naturally regenerating" },
                { color: "#bdb76b", label: "Planted" }, { color: "#e08214", label: "Plantation" },
                { color: "#ffd92f", label: "Tree crops / agroforestry" }, { color: "#d9d9d9", label: "Other land" }],
-      note: "Global forest typology at 10 m, aligned to FAO/EUDR definitions — distinguishes natural forest from plantations and tree crops. Class legend provisional pending encoding confirmation."
+      note: "Global forest typology at 10 m, aligned to FAO/EUDR definitions — distinguishes natural forest from plantations and tree crops. Oro is dominated by primary and naturally-regenerating forest (confirmed from the class histogram)."
     },
     {
       id: "landcover", theme: "Land Cover", name: "Land cover (ESA WorldCover 2021, 10 m)",

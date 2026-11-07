@@ -60,19 +60,23 @@ def main():
         # keep only contiguous clearings >= MIN_PIXELS
         patch = post.connectedPixelCount(MIN_PIXELS + 50, True)
         big = post.updateMask(patch.gte(MIN_PIXELS))
-        # carry the loss year (2000 + lossyear) so each polygon knows its year
-        year = ly.add(2000).updateMask(big)
-        vectors = year.reduceToVectors(
+        # reduceToVectors needs a label band (first) PLUS a band to reduce:
+        #   band 0 'lbl'  = 1 everywhere a big clearing is (single class to vectorise)
+        #   band 1 'yr'   = loss year (2000 + lossyear); Reducer.max -> patch's year
+        label = big.toInt().rename("lbl")
+        yimg = ly.add(2000).toInt().updateMask(big).rename("yr")
+        stacked = label.addBands(yimg)
+        vectors = stacked.reduceToVectors(
             geometry=aoi, scale=30, geometryType="polygon", eightConnected=True,
-            labelProperty="zone", reducer=ee.Reducer.max(), maxPixels=1e10, bestEffort=True)
+            reducer=ee.Reducer.max(), maxPixels=1e10, bestEffort=True)
         # simplify geometries a touch to keep the file small
         vectors = vectors.map(lambda f: f.simplify(20)).limit(6000)
         gj = vectors.getInfo()
-        # normalise properties: expose year + area (ha)
+        # normalise properties: expose the loss year
         feats = []
         for f in gj.get("features", []):
             p = f.get("properties", {}) or {}
-            yr = p.get("max") or p.get("zone")
+            yr = p.get("yr")
             feats.append({"type": "Feature", "geometry": f["geometry"],
                           "properties": {"year": int(yr) if yr else None}})
         out = {"type": "FeatureCollection",
