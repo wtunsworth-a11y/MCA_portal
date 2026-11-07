@@ -26,7 +26,7 @@ NONFOREST_OUT = os.path.join(DATA, "oro_nonforest2020.geojson")
 
 PIXEL_HA = 0.09              # 30 m pixel ~ 0.09 ha
 CLEAR_MIN_HA = 2.0           # smallest clearing event to keep (EUDR-meaningful)
-NONFOREST_MIN_HA = 1.0       # smallest non-forest patch to keep
+NONFOREST_MIN_HA = 5.0       # smallest non-forest patch to keep (context class, 100 m)
 CUTOFF_LOSSYEAR = 21         # lossyear 21 => 2021 (first full year after cut-off)
 UPDATED = datetime.datetime.utcnow().strftime("%Y-%m-%dT%H:%M:%SZ")
 
@@ -51,15 +51,18 @@ def _rnd(x):
     return x
 
 
-def export_mask(ee, aoi, mask01, min_ha, out_path, note):
+def export_mask(ee, aoi, mask01, min_ha, out_path, note, scale=30):
     """Vectorise a single-class mask into simplified, coord-rounded polygons and
-    write a FeatureCollection. Returns the feature count."""
-    min_px = max(1, int(round(min_ha / PIXEL_HA)))
+    write a FeatureCollection. Returns the feature count. `scale` trades precision
+    for size: clearings use 30 m; the non-forest context class uses a coarser
+    scale so contiguous land merges into few polygons (complete + small file)."""
+    pixel_ha = (scale * scale) / 1e4
+    min_px = max(1, int(round(min_ha / pixel_ha)))
     patch = mask01.connectedPixelCount(min_px + 50, True)
     big = mask01.updateMask(patch.gte(min_px)).gt(0).rename("c")
-    vectors = big.reduceToVectors(geometry=aoi, scale=30, geometryType="polygon",
+    vectors = big.reduceToVectors(geometry=aoi, scale=scale, geometryType="polygon",
               eightConnected=True, maxPixels=1e10, bestEffort=True)
-    vectors = vectors.limit(4800).map(lambda f: f.simplify(30))
+    vectors = vectors.limit(4800).map(lambda f: f.simplify(max(30, scale)))
     gj = vectors.getInfo()
     feats = []
     for f in gj.get("features", []):
@@ -118,7 +121,8 @@ def main():
         gfc = ee.ImageCollection("JRC/GFC2020/V2").mosaic().select(0)
         nonforest = gfc.unmask(0).eq(0).clip(aoi).selfMask()
         export_mask(ee, aoi, nonforest, NONFOREST_MIN_HA, NONFOREST_OUT,
-                    "JRC GFC2020 v2 non-forest-2020 patches >= %.1f ha, Oro land." % NONFOREST_MIN_HA)
+                    "JRC GFC2020 v2 non-forest-2020 patches >= %.1f ha, Oro land (100 m)." % NONFOREST_MIN_HA,
+                    scale=100)
     except Exception as e:
         _write_empty(NONFOREST_OUT, "export error: " + str(e)[:200])
 
