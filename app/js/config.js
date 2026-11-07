@@ -140,6 +140,13 @@ window.PORTAL_CONFIG = {
       note: "Tree-cover loss after the EUDR cut-off date (31 Dec 2020), lossyear 2021–2025. Used by the Site Analysis EUDR screen. Screening indication, not a legal determination."
     },
     {
+      id: "radd_recent", theme: "Forest Change", name: "Clearing alerts — last 90 days (RADD)",
+      kind: "gee", geeKey: "radd_recent", visible: false, opacity: 0.95,
+      attribution: "RADD / Wageningen University (Sentinel-1)",
+      legend: [{ color: "#ff2d2d", label: "Confirmed radar clearing alert (≤90 days)" }],
+      note: "Near-real-time radar deforestation alerts (RADD, Sentinel-1), confirmed alerts of the last 90 days, served as a clipped image from Earth Engine by the update-gee Action."
+    },
+    {
       id: "tmf_defor", theme: "Forest Change", name: "JRC TMF — Deforestation year",
       kind: "gee", geeKey: "tmf_defor", visible: false, opacity: 0.9,
       attribution: "JRC Tropical Moist Forest (v1_2025)",

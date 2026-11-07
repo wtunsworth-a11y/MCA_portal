@@ -92,6 +92,23 @@ def main():
         pal = ["05450a", "6fbf73", "bdb76b", "e08214", "ffd92f", "d9d9d9"]
         return img.updateMask(img.gte(1)).visualize(min=1, max=6, palette=pal)
 
+    # RADD near-real-time radar deforestation alerts (Sentinel-1), last 90 days.
+    RADD_DAYS = 90
+    def _radd_mask():
+        radd = (ee.ImageCollection("projects/radar-wur/raddalert/v1")
+                .filterMetadata("geography", "equals", "asia")
+                .filterMetadata("layer", "contains", "alert"))
+        img = radd.sort("system:time_start", False).first()
+        alert = img.select("Alert")      # 2 = low/unconfirmed, 3 = confirmed/high
+        date = img.select("Date")        # YYDDD (YY=year-2000, DDD=day-of-year)
+        cutoff = ee.Date(datetime.datetime.utcnow().strftime("%Y-%m-%d")).advance(-RADD_DAYS, "day")
+        code = (ee.Number.parse(cutoff.format("yy")).multiply(1000)
+                .add(cutoff.getRelative("day", "year").add(1)))
+        return alert.eq(3).And(date.gte(code)).selfMask()
+
+    def radd_recent():
+        return _radd_mask().visualize(palette=["ff2d2d"])
+
     def worldclim_precip():
         return ee.Image("WORLDCLIM/V1/BIO").select("bio12").visualize(min=0, max=5000,
                palette=["ffffcc", "a1dab4", "41b6c4", "2c7fb8", "253494"])
@@ -115,6 +132,7 @@ def main():
     for key_name, fn in [("treecover2000", treecover2000), ("defor_year", defor_year),
                          ("defor_post2020", defor_post2020), ("gfc2020", gfc2020),
                          ("tmf_defor", tmf_defor), ("forty", forty),
+                         ("radd_recent", radd_recent),
                          ("worldclim_precip", worldclim_precip), ("landcover", landcover)]:
         try:
             url = fn().getThumbURL(thumb)
@@ -127,6 +145,27 @@ def main():
 
     write_json(result)
     print("layers:", list(result["layers"].keys()), "| status:", result["status"])
+
+    # RADD summary for the homepage: count of >=2 ha confirmed clearing events in
+    # the last 90 days, and total alerted area. Written to app/data/radd.json.
+    radd_out = {"updated": result["updated"], "window_days": RADD_DAYS,
+                "geography": "asia", "status": "ok"}
+    try:
+        mask = _radd_mask()
+        patch = mask.connectedPixelCount(260, True)          # RADD 10 m: 2 ha = 200 px
+        big = mask.updateMask(patch.gte(200))
+        events = big.reduceToVectors(geometry=region, scale=10, geometryType="polygon",
+                 eightConnected=True, maxPixels=1e10, bestEffort=True).limit(4800)
+        radd_out["events_gt2ha"] = int(events.size().getInfo())
+        area = mask.multiply(ee.Image.pixelArea()).reduceRegion(
+                reducer=ee.Reducer.sum(), geometry=region, scale=10,
+                maxPixels=1e10, bestEffort=True).get("Alert")
+        ha = ee.Number(area).divide(1e4).getInfo() if area is not None else None
+        radd_out["area_ha"] = round(ha, 1) if ha is not None else None
+    except Exception as e:
+        radd_out["status"] = "error: " + str(e)[:200]
+    json.dump(radd_out, open(os.path.join(DATA, "radd.json"), "w"), indent=0)
+    print("radd:", radd_out)
 
 if __name__ == "__main__":
     main()

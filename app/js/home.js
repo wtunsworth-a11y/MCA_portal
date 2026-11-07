@@ -46,6 +46,29 @@
     });
   })();
 
+  // Live RADD card — read the committed RADD summary (count of >=2 ha clearing
+  // alerts in the last 90 days).
+  (function () {
+    var big = document.getElementById("raddBig"), sub = document.getElementById("raddSub");
+    if (!big) return;
+    fetch("data/radd.json").then(function (r) { return r.json(); }).then(function (d) {
+      if (d && typeof d.events_gt2ha === "number") {
+        big.textContent = String(d.events_gt2ha);
+        sub.textContent = "Radar clearing alerts >2 ha · last " + (d.window_days || 90) +
+          " days" + (typeof d.area_ha === "number" ? " · " + d.area_ha.toLocaleString() + " ha total" : "") +
+          " (Sentinel-1 / RADD)";
+      } else {
+        big.style.fontSize = "22px"; big.style.lineHeight = "1.3";
+        big.textContent = "RADD";
+        sub.textContent = "Near-real-time radar clearing alerts — feed is being wired in.";
+      }
+    }).catch(function () {
+      big.style.fontSize = "22px"; big.style.lineHeight = "1.3";
+      big.textContent = "RADD";
+      sub.textContent = "Radar deforestation alerts >2 ha · last 90 days (Sentinel-1 / RADD).";
+    });
+  })();
+
   // Live SOI card — read the committed NOAA CPC SOI feed.
   (function () {
     var big = document.getElementById("soiBig"), sub = document.getElementById("soiSub");
