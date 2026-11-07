@@ -53,22 +53,18 @@
       <div class="card-p"><h3>Public totals (last 30 days)</h3><div id="pubTotals"></div></div>
     </div>
 
-    <div class="panel-h"><h2>Named users</h2><span class="hint">registered &amp; partner — detailed for M&amp;E reporting</span></div>
-    <div class="table-wrap">
-      <table class="users">
-        <thead><tr><th>User</th><th>Tier</th><th>Organisation</th>
-          <th style="text-align:right">Sessions</th><th style="text-align:right">Datasets</th>
-          <th style="text-align:right">Docs read</th><th>Last active</th></tr></thead>
-        <tbody id="userRows"></tbody>
-      </table>
+    <div class="panel-h"><h2>Named users</h2><span class="hint">registered &amp; partner — activates with sign-in</span></div>
+    <div class="mnote">
+      Per-account reporting (sessions, datasets viewed, documents read, last active — rolled up by tier and
+      organisation) appears here once registered and partner sign-in is live. No named-user data is collected yet.
     </div>
 
     <div class="mnote">
-      <b>How this works.</b> Usage events are logged server-side against the access tier. The public portal records
-      only <b>aggregate counts</b> (visits, dataset views, searches, documents read) with no personal data.
-      Registered and partner sign-ins are attributed to the named account so partner and donor reporting can show
-      who used what, when. Figures on this page are illustrative; production feeds from the portal's event log and
-      exports to CSV/PDF for reporting periods.
+      <b>How this works.</b> The public portal records only <b>aggregate, anonymous counts</b> via
+      <b>Cloudflare Web Analytics</b> (no cookies, no personal data) — visitors, page views, top pages, countries
+      and referrers, viewed in the Cloudflare dashboard. When registered/partner sign-in exists, those sessions are
+      attributed to the named account so partner and donor reporting can show who used what, when, and export to
+      CSV/PDF per reporting period. This page shows no figures until those live feeds are connected.
     </div>
   </div>
 
