@@ -25,6 +25,18 @@ def download(url, path):
     with urllib.request.urlopen(url, timeout=180) as r:
         open(path, "wb").write(r.read())
 
+def oro_geometry(ee):
+    """Oro Province geometry from the committed GeoJSON (falls back to bbox)."""
+    try:
+        gj = json.load(open(os.path.join(DATA, "oro_province.geojson")))
+        feats = gj.get("features") or [gj]
+        geoms = [ee.Geometry(f["geometry"]) for f in feats if f.get("geometry")]
+        return ee.FeatureCollection([ee.Feature(g) for g in geoms]).geometry() if geoms \
+            else ee.Geometry.Rectangle(BBOX)
+    except Exception:
+        return ee.Geometry.Rectangle(BBOX)
+
+
 def main():
     result = {"updated": datetime.datetime.utcnow().strftime("%Y-%m-%dT%H:%M:%SZ"),
               "project": PROJECT, "bbox": BBOX, "layers": {}, "status": {}}
@@ -38,6 +50,7 @@ def main():
         write_json(result); print(result["status"]); return
 
     region = ee.Geometry.Rectangle(BBOX)
+    oro_geom = oro_geometry(ee)          # Oro Province land (for province-clipped counts)
     thumb = {"region": region, "dimensions": DIM, "format": "png"}
     hansen = ee.Image("UMD/hansen/global_forest_change_2025_v1_13")
 
@@ -150,7 +163,9 @@ def main():
         base = (datetime.date(2000 + yy, 1, 1) - GLAD_EPOCH).days   # days since 2020-01-01
         conf = ic.select("conf%d" % yy).mosaic()                    # 0 none, 2 alert, 3 confirmed
         ad = ic.select("alertDate%d" % yy).mosaic()                 # day-of-year within the year
-        dateImg = ad.add(base - 1).updateMask(conf.gte(3)).rename("d")   # confirmed only
+        # confirmed only, CLIPPED TO ORO PROVINCE (not the bbox) so the count and
+        # the rendered layer reflect Oro, excluding neighbouring provinces/ocean.
+        dateImg = ad.add(base - 1).updateMask(conf.gte(3)).rename("d").clip(oro_geom)
         meta = {"years": [2000 + yy]}
         try:
             maxday = dateImg.reduceRegion(ee.Reducer.max(), region, 30,
@@ -234,7 +249,7 @@ def main():
 
     # GLAD-L summary (primary recent-alert source) -> app/data/glad.json
     glad_out = {"updated": result["updated"], "window_days": GLAD_DAYS,
-                "source": "GLAD-L (UMD) Landsat alerts", "status": "ok"}
+                "source": "GLAD-L (UMD) Landsat alerts", "extent": "Oro Province", "status": "ok"}
     try:
         gic = ee.ImageCollection("projects/glad/alert/UpdResult").filterBounds(region)
         chist = gic.select("conf26").mosaic().reduceRegion(
