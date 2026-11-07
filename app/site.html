@@ -46,6 +46,15 @@
     .sa-eudr-rows .sw.free, .sa-eudr-rows .sw.standing { background:#2ea56b; }
     .sa-eudr-rows .sw.nonforest { background:#b9a06b; } .sa-eudr-rows .sw.cleared { background:#ff3b30; }
     .sa-eudr-caveat { font-size:11.5px; color:var(--muted,#93a0b4); margin-top:6px; line-height:1.45; }
+    .sa-explainer { margin:12px 0; background:var(--card,#171d2b); border:1px solid var(--line,#263041); border-radius:11px; padding:10px 14px; }
+    .sa-explainer summary { cursor:pointer; font-weight:600; font-size:14px; }
+    .sa-explainer p { font-size:13px; margin:8px 0 4px; }
+    .sa-explainer ul { margin:6px 0 4px; padding-left:0; list-style:none; display:grid; gap:5px; font-size:13px; }
+    .sa-explainer li { line-height:1.4; }
+    .sa-explainer .sw { display:inline-block; width:11px; height:11px; border-radius:2px; margin-right:7px; vertical-align:middle; }
+    .sa-explainer .sw.standing { background:#2ea56b; } .sa-explainer .sw.nonforest { background:#b9a06b; } .sa-explainer .sw.cleared { background:#ff3b30; }
+    .sa-explainer .grade { font-size:12.5px; margin-top:6px; }
+    .sa-explainer .cav { font-size:11.5px; color:var(--muted,#93a0b4); margin-top:6px; line-height:1.45; }
     @media (max-width:560px){ .sa-pending ul { columns:1; } }
   </style>
   <script src="js/cf-analytics.js"></script>
@@ -94,6 +103,20 @@
     <div id="sa-map"></div>
     <div class="sa-hint">Point → click the map (buffered to the radius above). Polygon → click each corner, then
       <b>Finish</b> (or double-click). Upload → GeoJSON or KML. Everything is computed in your browser; nothing is uploaded or stored.</div>
+    <details class="sa-explainer" open>
+      <summary>EUDR deforestation screen — how to read it</summary>
+      <p>When you define a plot, the screen estimates how much of it falls into three categories, using the
+        JRC <b>GFC2020</b> forest-2020 benchmark and <b>Hansen</b> tree-cover loss after the cut-off:</p>
+      <ul>
+        <li><span class="sw standing"></span><b>Standing forest</b> — forest in 2020 that is still standing. Deforestation-free.</li>
+        <li><span class="sw nonforest"></span><b>Pre-2020 non-forest</b> — already non-forest in 2020 (existing gardens, settlements, grassland). Not “deforestation” under the EUDR.</li>
+        <li><span class="sw cleared"></span><b>Cleared since 2020</b> — forest in 2020 cleared after the <b>31 Dec 2020</b> cut-off. This is the EUDR concern.</li>
+      </ul>
+      <div class="grade">Verdict grade on the cleared share: 🟢 0% · 🟡 under 5% · 🔴 5% or more.</div>
+      <div class="cav">A <b>screening indication</b> to guide due diligence — <b>not</b> a legal EUDR determination.
+        Based on global Hansen/JRC products (JRC states GFC2020 has no authoritative status); clearings mapped
+        at ≥ 2 ha; confirm with plot-level and official checks before any sourcing decision.</div>
+    </details>
     <div id="sa-report"></div>
   </section>
 
