@@ -151,7 +151,24 @@ def main():
     radd_out = {"updated": result["updated"], "window_days": RADD_DAYS,
                 "geography": "asia", "status": "ok"}
     try:
+        radd = (ee.ImageCollection("projects/radar-wur/raddalert/v1")
+                .filterMetadata("geography", "equals", "asia")
+                .filterMetadata("layer", "contains", "alert"))
+        rimg = radd.sort("system:time_start", False).first()
+        alert = rimg.select("Alert")
+        # diagnostics: does RADD cover Oro, and are there alerts at all?
+        radd_out["_diag"] = {}
+        radd_out["_diag"]["images"] = int(radd.size().getInfo())
+        conf_all = alert.eq(3).selfMask()
+        any_conf = alert.gte(2).selfMask()
+        radd_out["_diag"]["confirmed_px_all"] = conf_all.reduceRegion(
+            ee.Reducer.count(), region, scale=30, maxPixels=1e10, bestEffort=True).get("Alert").getInfo()
+        radd_out["_diag"]["any_alert_px_all"] = any_conf.reduceRegion(
+            ee.Reducer.count(), region, scale=30, maxPixels=1e10, bestEffort=True).get("Alert").getInfo()
+
         mask = _radd_mask()
+        radd_out["_diag"]["confirmed_px_90d"] = mask.reduceRegion(
+            ee.Reducer.count(), region, scale=30, maxPixels=1e10, bestEffort=True).get("Alert").getInfo()
         patch = mask.connectedPixelCount(260, True)          # RADD 10 m: 2 ha = 200 px
         big = mask.updateMask(patch.gte(200))
         events = big.reduceToVectors(geometry=region, scale=10, geometryType="polygon",
