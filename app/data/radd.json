@@ -1,14 +1,9 @@
 {
-"updated": "2026-11-07T06:57:00Z",
+"updated": "2026-11-07T07:01:41Z",
 "window_days": 90,
 "geography": "asia",
 "status": "ok",
-"_diag": {
-"images": 143,
-"confirmed_px_all": 501905,
-"any_alert_px_all": 531162,
-"confirmed_px_90d": 0
-},
-"events_gt2ha": 0,
-"area_ha": 0
+"data_latest": "2024-01-16",
+"events_gt2ha": 17,
+"area_ha": 1134.7
 }
