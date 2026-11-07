@@ -86,6 +86,9 @@
   // ---- state ---------------------------------------------------------------
   var map, mode = null, verts = [], lastPoint = null, aoiRing = null;
   var oroPolys = [], paList = [];  // paList: [{ name, polys }] — MCA + other Oro PAs
+  // Post-2020 forest-clearance events (for the EUDR screen). null = not loaded.
+  var deforPost2020 = null;        // [{ polys, areaM2, year, centroid }]
+  var deforMeta = null;            // { updated, cutoff, min_ha, status }
 
   var esri = "https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}";
   try {
@@ -135,6 +138,22 @@
       map.addLayer({ id: "oro_pas-line", type: "line", source: "oro_pas", paint: { "line-color": "#57c98a", "line-width": 1.8, "line-dasharray": [4, 3] } });
       if (aoiRing) analyse(aoiRing);  // refresh if a site was drawn before PAs loaded
     }).catch(function () {});
+    // Post-2020 forest clearances (Hansen >= 2021, >=0.5 ha) — the EUDR signal
+    fetch("data/oro_defor_post2020.geojson").then(function (r) { return r.json(); }).then(function (gj) {
+      deforMeta = { updated: gj.updated, cutoff: gj.cutoff, min_ha: gj.min_ha, status: gj.status || "ok" };
+      deforPost2020 = (gj.features || []).map(function (f) {
+        var polys = polysOf(f.geometry);
+        var areaM2 = 0; polys.forEach(function (p) { if (p[0]) areaM2 += ringAreaM2(p[0]); });
+        var c = polys[0] && polys[0][0] ? centroidOf(polys[0][0]) : null;
+        return { polys: polys, areaM2: areaM2, year: f.properties && f.properties.year, centroid: c };
+      });
+      map.addSource("defor2020", { type: "geojson", data: gj });
+      map.addLayer({ id: "defor2020-fill", type: "fill", source: "defor2020",
+        paint: { "fill-color": "#ff3b30", "fill-opacity": 0.55 } });
+      map.addLayer({ id: "defor2020-line", type: "line", source: "defor2020",
+        paint: { "line-color": "#ff3b30", "line-width": 1 } });
+      if (aoiRing) analyse(aoiRing);  // refresh if a site was drawn before this loaded
+    }).catch(function () { deforPost2020 = []; deforMeta = { status: "unavailable" }; });
     // AOI layers
     map.addSource("aoi", { type: "geojson", data: emptyFC() });
     map.addLayer({ id: "aoi-fill", type: "fill", source: "aoi", paint: { "fill-color": "#2c6cf0", "fill-opacity": 0.18 } });
@@ -233,6 +252,37 @@
     if (pct > 0.005) return fmt(pct * 100, 1) + "% within " + name;
     return "outside " + name;
   }
+  // EUDR screen: detect post-2020 forest clearances intersecting the plot.
+  // A clearing counts if its centroid is in the plot, or the plot's centroid is
+  // in the clearing (covers both large-plot and small-plot nesting).
+  function eudrScreen(ring, plotCentroid) {
+    if (deforPost2020 == null) return { loaded: false };
+    if (!deforPost2020.length) return { loaded: true, count: 0, ha: 0, years: [], meta: deforMeta };
+    var count = 0, areaM2 = 0, years = {};
+    deforPost2020.forEach(function (d) {
+      var hit = (d.centroid && pointInRing(d.centroid, ring)) ||
+                (plotCentroid && pointInPolys(plotCentroid, d.polys));
+      if (hit) { count++; areaM2 += d.areaM2; if (d.year) years[d.year] = 1; }
+    });
+    return { loaded: true, count: count, ha: areaM2 / 1e4,
+             years: Object.keys(years).sort(), meta: deforMeta };
+  }
+  function eudrPanel(e) {
+    if (!e.loaded) return '<div class="sa-note"><b>EUDR screen</b><br/>Post-2020 clearance layer not loaded.</div>';
+    var src = e.meta && e.meta.min_ha ? (" Minimum mapped clearing " + e.meta.min_ha + " ha.") : "";
+    var caveat = '<div class="sa-eudr-caveat">Screening indication only, from the global Hansen/JRC ' +
+      'forest products — <b>not</b> an authoritative or legal EUDR determination.' + src + '</div>';
+    if (e.count === 0) {
+      return '<div class="sa-eudr ok"><div class="sa-eudr-h">🟢 EUDR screen — no post-2020 deforestation detected</div>' +
+        '<p>No mapped forest-clearance event (after the 31 Dec 2020 cut-off) was found on this plot. ' +
+        'Lower apparent deforestation risk.</p>' + caveat + '</div>';
+    }
+    var yrs = e.years.length ? " (" + e.years.join(", ") + ")" : "";
+    return '<div class="sa-eudr flag"><div class="sa-eudr-h">🔴 EUDR screen — post-2020 deforestation detected</div>' +
+      '<p><b>' + fmt(e.ha, 1) + ' ha</b> across <b>' + e.count + '</b> clearance event' + (e.count === 1 ? "" : "s") +
+      ' after the 2020 cut-off' + yrs + ' overlap this plot. Flag for due diligence before sourcing.</p>' + caveat + '</div>';
+  }
+
   function analyse(ring) {
     var areaM2 = ringAreaM2(ring), ha = areaM2 / 1e4, km2 = areaM2 / 1e6;
     var c = centroidOf(ring);
@@ -273,6 +323,7 @@
 
     el("sa-report").innerHTML =
       '<div class="sa-tiles">' + tiles + "</div>" + breakdown +
+      eudrPanel(eudrScreen(ring, c)) +
       '<div class="sa-pending"><div class="sa-pending-h">Satellite themes — available once Earth Engine is connected</div><ul>' +
         pending + "</ul></div>" +
       '<div class="sa-actions"><button id="sa-print" class="btn ghost">Print / Save as PDF</button></div>';

@@ -31,7 +31,12 @@ jobs:
             git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
             git add app/data/soi.json
             git commit -m "chore: refresh SOI (ENSO)"
-            git push
+            for i in 1 2 3 4 5; do
+              git push && break
+              echo "push rejected (concurrent bot); rebasing and retrying…"
+              git pull --rebase --autostash || true
+              sleep 3
+            done
           else
             echo "No change in SOI."
           fi

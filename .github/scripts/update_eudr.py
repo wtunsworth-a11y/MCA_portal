@@ -23,9 +23,11 @@ DATA = os.path.join(ROOT, "app", "data")
 OUT = os.path.join(DATA, "oro_defor_post2020.geojson")
 PROJECT = os.environ.get("EE_PROJECT", "orodataportal")
 
-MIN_HA = 0.5                 # smallest clearing event to keep (ha)
+MIN_HA = 2.0                 # smallest clearing event to keep (ha) — EUDR-meaningful,
+                             # matches the MCA_App RADD >2 ha convention and keeps the
+                             # vector count under Earth Engine's 5000-feature export cap
 PIXEL_HA = 0.09              # 30 m Hansen pixel ~ 0.09 ha
-MIN_PIXELS = max(1, int(round(MIN_HA / PIXEL_HA)))   # ~6 px
+MIN_PIXELS = max(1, int(round(MIN_HA / PIXEL_HA)))   # ~22 px
 CUTOFF_LOSSYEAR = 21         # lossyear 21 => 2021 (first full year after cut-off)
 
 
@@ -69,8 +71,8 @@ def main():
         vectors = stacked.reduceToVectors(
             geometry=aoi, scale=30, geometryType="polygon", eightConnected=True,
             reducer=ee.Reducer.max(), maxPixels=1e10, bestEffort=True)
-        # simplify geometries a touch to keep the file small
-        vectors = vectors.map(lambda f: f.simplify(20)).limit(6000)
+        # cap under EE's 5000-element getInfo limit, then simplify to keep the file small
+        vectors = vectors.limit(4800).map(lambda f: f.simplify(20))
         gj = vectors.getInfo()
         # normalise properties: expose the loss year
         feats = []
