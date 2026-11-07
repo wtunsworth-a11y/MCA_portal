@@ -117,6 +117,10 @@ needed — the reader already handles `public` records. Ideally this is done via
 - `app/library.html` — the archives page: archive tabs, search box, results, in-portal reader.
 - `app/data/mca_archive.json` — the real Managalas index (229 docs, full OCR text, Drive
   ids/urls). **Interim, client-side** — see *Interim implementation* above.
+  _Re-OCR (2026-11-07):_ 51 "From PWM" files had corrupt embedded text layers; their
+  clean re-OCR'd text, titles, snippets and keywords were merged in by `drive_id`
+  (Drive ids/urls unchanged, so links and the reader are unaffected). Two filenames
+  corrected in Drive were applied from the recovery package README.
 - `app/data/qabb_archive.json` — the QABB **catalogue** (147 titles + keywords, tier
   `restricted`). **No text, no Drive ids/urls** — see *Restricted, catalogue-only* above.
 - `app/data/csiro_archive.json` — the CSIRO **catalogue** (6 titles + keywords, tier
