@@ -77,8 +77,9 @@ def manual_items():
          "https://developers.google.com/earth-engine/datasets/catalog/ESA_WorldCover_v200"),
         ("REVIEW", "WorldClim (rainfall)", "portal uses WORLDCLIM/V1/BIO. Check for a newer edition.",
          "https://developers.google.com/earth-engine/datasets/tags/worldclim"),
-        ("REVIEW", "NASA FIRMS / NOAA CPC SOI", "live feeds (fire ~6-hourly, SOI weekly) — no action; "
-         "listed so the monthly email confirms they are still flowing.", ""),
+        ("REVIEW", "Live alert feeds (FIRMS / GLAD-L / NOAA CPC SOI)",
+         "fire ~6-hourly, GLAD-L Landsat alerts + SOI weekly — no action; listed so the "
+         "monthly email confirms they are still flowing (check GLAD-L has the current year's band).", ""),
     ]
 
 def main():

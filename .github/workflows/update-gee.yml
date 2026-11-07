@@ -39,7 +39,7 @@ jobs:
         run: python3 .github/scripts/update_eudr.py
       - name: Commit if changed
         run: |
-          git add app/data/gee_tiles.json app/data/gee_*.png app/data/oro_defor_post2020.geojson app/data/oro_nonforest2020.geojson app/data/radd.json
+          git add app/data/gee_tiles.json app/data/gee_*.png app/data/oro_defor_post2020.geojson app/data/oro_nonforest2020.geojson app/data/radd.json app/data/glad.json
           if ! git diff --cached --quiet; then
             git config user.name "gee-bot"
             git config user.email "41898282+github-actions[bot]@users.noreply.github.com"

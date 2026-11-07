@@ -132,6 +132,42 @@ def main():
     def radd_recent():
         return radd_prep()["mask"].visualize(palette=["ff2d2d"])
 
+    # GLAD-L Landsat deforestation alerts (UMD/GLAD) — current (2025/2026 bands),
+    # forest-loss specific. Primary recent-alert source (RADD community feed lags).
+    GLAD_DAYS = 90
+    _glad_cache = {}
+    GLAD_EPOCH = datetime.date(2020, 1, 1)
+    GLAD_BASE = {25: 1827, 26: 2192}   # days since 2020-01-01 for 1 Jan 2025 / 2026
+
+    def glad_prep():
+        if _glad_cache:
+            return _glad_cache
+        ic = ee.ImageCollection("projects/glad/alert/UpdResult").filterBounds(region)
+        parts = []
+        for yy in (25, 26):
+            conf = ic.select("conf%d" % yy).mosaic()        # 0 none,1 low,2 high/confirmed
+            ad = ic.select("alertDate%d" % yy).mosaic()      # day-of-year within the year
+            day = ad.add(GLAD_BASE[yy] - 1).updateMask(conf.gte(2)).rename("d")
+            parts.append(day)
+        dateImg = parts[0].max(parts[1])                     # latest confirmed-alert day
+        meta = {}
+        try:
+            maxday = dateImg.reduceRegion(ee.Reducer.max(), region, 30,
+                     maxPixels=1e10, bestEffort=True).get("d").getInfo()
+        except Exception:
+            maxday = None
+        if maxday:
+            meta["data_latest"] = (GLAD_EPOCH + datetime.timedelta(days=int(maxday))).isoformat()
+            cutday = int(maxday) - GLAD_DAYS
+        else:
+            cutday, meta["data_latest"] = 0, None
+        _glad_cache["mask"] = dateImg.gte(cutday).selfMask()
+        _glad_cache["meta"] = meta
+        return _glad_cache
+
+    def glad_recent():
+        return glad_prep()["mask"].visualize(palette=["ff2d2d"])
+
     def worldclim_precip():
         return ee.Image("WORLDCLIM/V1/BIO").select("bio12").visualize(min=0, max=5000,
                palette=["ffffcc", "a1dab4", "41b6c4", "2c7fb8", "253494"])
@@ -155,7 +191,7 @@ def main():
     for key_name, fn in [("treecover2000", treecover2000), ("defor_year", defor_year),
                          ("defor_post2020", defor_post2020), ("gfc2020", gfc2020),
                          ("tmf_defor", tmf_defor), ("forty", forty),
-                         ("radd_recent", radd_recent),
+                         ("radd_recent", radd_recent), ("glad_recent", glad_recent),
                          ("worldclim_precip", worldclim_precip), ("landcover", landcover)]:
         try:
             url = fn().getThumbURL(thumb)
@@ -191,6 +227,35 @@ def main():
         radd_out["status"] = "error: " + str(e)[:200]
     json.dump(radd_out, open(os.path.join(DATA, "radd.json"), "w"), indent=0)
     print("radd:", radd_out)
+
+    # GLAD-L summary (primary recent-alert source) -> app/data/glad.json
+    glad_out = {"updated": result["updated"], "window_days": GLAD_DAYS,
+                "source": "GLAD-L (UMD) Landsat alerts", "status": "ok"}
+    try:
+        gic = ee.ImageCollection("projects/glad/alert/UpdResult").filterBounds(region)
+        chist = gic.select("conf26").mosaic().reduceRegion(
+                ee.Reducer.frequencyHistogram(), region, 300, maxPixels=1e9, bestEffort=True).getInfo()
+        glad_out["_conf26_hist"] = str(chist)[:200]
+    except Exception as e:
+        glad_out["_conf26_hist"] = "err: " + str(e)[:120]
+    try:
+        prep = glad_prep()
+        mask = prep["mask"]
+        glad_out["data_latest"] = prep["meta"].get("data_latest")
+        patch = mask.connectedPixelCount(260, True)          # GLAD 30 m: 2 ha = ~22 px
+        big = mask.updateMask(patch.gte(22))
+        events = big.reduceToVectors(geometry=region, scale=30, geometryType="polygon",
+                 eightConnected=True, maxPixels=1e10, bestEffort=True).limit(4800)
+        glad_out["events_gt2ha"] = int(events.size().getInfo())
+        area = mask.multiply(ee.Image.pixelArea()).reduceRegion(
+                reducer=ee.Reducer.sum(), geometry=region, scale=30,
+                maxPixels=1e10, bestEffort=True).get("d")
+        ha = ee.Number(area).divide(1e4).getInfo() if area is not None else None
+        glad_out["area_ha"] = round(ha, 1) if ha is not None else None
+    except Exception as e:
+        glad_out["status"] = "error: " + str(e)[:200]
+    json.dump(glad_out, open(os.path.join(DATA, "glad.json"), "w"), indent=0)
+    print("glad:", glad_out)
 
 if __name__ == "__main__":
     main()

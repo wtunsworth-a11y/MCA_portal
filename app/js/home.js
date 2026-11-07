@@ -46,29 +46,29 @@
     });
   })();
 
-  // Live RADD card — read the committed RADD summary (count of >=2 ha clearing
-  // alerts in the last 90 days).
+  // Live GLAD-L card — read the committed GLAD summary (count of >=2 ha clearing
+  // alerts in the last 90 days to the feed's latest date).
   (function () {
-    var big = document.getElementById("raddBig"), sub = document.getElementById("raddSub");
+    var big = document.getElementById("gladBig"), sub = document.getElementById("gladSub");
     if (!big) return;
-    fetch("data/radd.json").then(function (r) { return r.json(); }).then(function (d) {
+    fetch("data/glad.json").then(function (r) { return r.json(); }).then(function (d) {
       if (d && typeof d.events_gt2ha === "number") {
         big.textContent = String(d.events_gt2ha);
         var to = "";
         if (d.data_latest) { var dt = new Date(d.data_latest);
           if (!isNaN(dt)) to = " to " + dt.toLocaleDateString(undefined, { month: "short", year: "numeric" }); }
-        sub.textContent = "Radar clearing alerts >2 ha · " + (d.window_days || 90) + " days" + to +
+        sub.textContent = "Landsat clearing alerts >2 ha · " + (d.window_days || 90) + " days" + to +
           (typeof d.area_ha === "number" ? " · " + d.area_ha.toLocaleString() + " ha" : "") +
-          " (Sentinel-1 / RADD)";
+          " (GLAD-L / UMD)";
       } else {
         big.style.fontSize = "22px"; big.style.lineHeight = "1.3";
-        big.textContent = "RADD";
-        sub.textContent = "Near-real-time radar clearing alerts — feed is being wired in.";
+        big.textContent = "GLAD-L";
+        sub.textContent = "Near-real-time Landsat clearing alerts — feed is being wired in.";
       }
     }).catch(function () {
       big.style.fontSize = "22px"; big.style.lineHeight = "1.3";
-      big.textContent = "RADD";
-      sub.textContent = "Radar deforestation alerts >2 ha · last 90 days (Sentinel-1 / RADD).";
+      big.textContent = "GLAD-L";
+      sub.textContent = "Landsat deforestation alerts >2 ha · last 90 days (GLAD-L / UMD).";
     });
   })();
 

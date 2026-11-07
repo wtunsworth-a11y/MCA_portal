@@ -1,0 +1,5 @@
+{
+"window_days": 90,
+"source": "GLAD-L (UMD) Landsat alerts",
+"status": "pending — populated by the update-gee Action"
+}
