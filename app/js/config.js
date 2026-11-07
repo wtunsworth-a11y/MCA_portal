@@ -144,7 +144,7 @@ window.PORTAL_CONFIG = {
       kind: "gee", geeKey: "radd_recent", visible: false, opacity: 0.95,
       attribution: "RADD / Wageningen University (Sentinel-1)",
       legend: [{ color: "#ff2d2d", label: "Confirmed radar clearing alert (≤90 days)" }],
-      note: "Near-real-time radar deforestation alerts (RADD, Sentinel-1), confirmed alerts of the last 90 days, served as a clipped image from Earth Engine by the update-gee Action."
+      note: "Near-real-time radar deforestation alerts (RADD, Sentinel-1), confirmed alerts in the latest 90-day window of the feed (the community RADD 'asia' feed can lag, so the window ends at the data's own latest date), served as a clipped image from Earth Engine by the update-gee Action."
     },
     {
       id: "tmf_defor", theme: "Forest Change", name: "JRC TMF — Deforestation year",

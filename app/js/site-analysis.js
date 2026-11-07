@@ -144,8 +144,9 @@
       deforPost2020 = (gj.features || []).map(function (f) {
         var polys = polysOf(f.geometry);
         var areaM2 = 0; polys.forEach(function (p) { if (p[0]) areaM2 += ringAreaM2(p[0]); });
-        var c = polys[0] && polys[0][0] ? centroidOf(polys[0][0]) : null;
-        return { polys: polys, areaM2: areaM2, year: f.properties && f.properties.year, centroid: c };
+        var or = polys[0] && polys[0][0];
+        return { polys: polys, areaM2: areaM2, centroid: or ? centroidOf(or) : null,
+                 bbox: or ? bboxOf(or) : null };
       });
       map.addSource("defor2020", { type: "geojson", data: gj });
       map.addLayer({ id: "defor2020-fill", type: "fill", source: "defor2020",
@@ -253,19 +254,36 @@
     return "outside " + name;
   }
   // EUDR screen: detect post-2020 forest clearances intersecting the plot.
-  // A clearing counts if its centroid is in the plot, or the plot's centroid is
-  // in the clearing (covers both large-plot and small-plot nesting).
+  // Fast + shape-robust: bbox pre-filter to nearby clearings, then (a) a robust
+  // intersection test for the event COUNT and (b) grid sampling for the ha of
+  // overlap (so it works for concave/odd shapes, not just centroids).
+  function bbIntersect(a, b) { return !(a[2] < b[0] || a[0] > b[2] || a[3] < b[1] || a[1] > b[3]); }
   function eudrScreen(ring, plotCentroid) {
     if (deforPost2020 == null) return { loaded: false };
     if (!deforPost2020.length) return { loaded: true, count: 0, ha: 0, years: [], meta: deforMeta };
-    var count = 0, areaM2 = 0, years = {};
-    deforPost2020.forEach(function (d) {
+    var pbb = bboxOf(ring);
+    var cand = deforPost2020.filter(function (d) { return d.bbox && bbIntersect(pbb, d.bbox); });
+    if (!cand.length) return { loaded: true, count: 0, ha: 0, years: [], meta: deforMeta };
+    function step(arr) { return Math.max(1, Math.floor(arr.length / 12)); }
+    var count = 0;
+    cand.forEach(function (d) {
       var hit = (d.centroid && pointInRing(d.centroid, ring)) ||
                 (plotCentroid && pointInPolys(plotCentroid, d.polys));
-      if (hit) { count++; areaM2 += d.areaM2; if (d.year) years[d.year] = 1; }
+      var or = d.polys[0] && d.polys[0][0], i;
+      if (!hit && or) { for (i = 0; i < or.length; i += step(or)) { if (pointInRing(or[i], ring)) { hit = true; break; } } }
+      if (!hit) { for (i = 0; i < ring.length; i += step(ring)) { if (pointInPolys(ring[i], d.polys)) { hit = true; break; } } }
+      if (hit) count++;
     });
-    return { loaded: true, count: count, ha: areaM2 / 1e4,
-             years: Object.keys(years).sort(), meta: deforMeta };
+    // ha of overlap via grid sampling over the plot bbox against candidates only
+    var N = 56, inAoi = 0, inDef = 0, k;
+    for (var a = 0; a <= N; a++) for (var b = 0; b <= N; b++) {
+      var pt = [pbb[0] + (pbb[2] - pbb[0]) * a / N, pbb[1] + (pbb[3] - pbb[1]) * b / N];
+      if (!pointInRing(pt, ring)) continue; inAoi++;
+      for (k = 0; k < cand.length; k++) { if (pointInPolys(pt, cand[k].polys)) { inDef++; break; } }
+    }
+    var ha = inAoi ? (inDef / inAoi) * (ringAreaM2(ring) / 1e4) : 0;
+    if (count === 0 && inDef > 0) count = 1;   // grid caught overlap the vertex tests missed
+    return { loaded: true, count: count, ha: ha, years: [], meta: deforMeta };
   }
   function eudrPanel(e) {
     if (!e.loaded) return '<div class="sa-note"><b>EUDR screen</b><br/>Post-2020 clearance layer not loaded.</div>';

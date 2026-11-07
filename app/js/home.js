@@ -54,8 +54,11 @@
     fetch("data/radd.json").then(function (r) { return r.json(); }).then(function (d) {
       if (d && typeof d.events_gt2ha === "number") {
         big.textContent = String(d.events_gt2ha);
-        sub.textContent = "Radar clearing alerts >2 ha · last " + (d.window_days || 90) +
-          " days" + (typeof d.area_ha === "number" ? " · " + d.area_ha.toLocaleString() + " ha total" : "") +
+        var to = "";
+        if (d.data_latest) { var dt = new Date(d.data_latest);
+          if (!isNaN(dt)) to = " to " + dt.toLocaleDateString(undefined, { month: "short", year: "numeric" }); }
+        sub.textContent = "Radar clearing alerts >2 ha · " + (d.window_days || 90) + " days" + to +
+          (typeof d.area_ha === "number" ? " · " + d.area_ha.toLocaleString() + " ha" : "") +
           " (Sentinel-1 / RADD)";
       } else {
         big.style.fontSize = "22px"; big.style.lineHeight = "1.3";

@@ -92,22 +92,45 @@ def main():
         pal = ["05450a", "6fbf73", "bdb76b", "e08214", "ffd92f", "d9d9d9"]
         return img.updateMask(img.gte(1)).visualize(min=1, max=6, palette=pal)
 
-    # RADD near-real-time radar deforestation alerts (Sentinel-1), last 90 days.
+    # RADD near-real-time radar deforestation alerts (Sentinel-1). The community
+    # RADD 'asia' feed in Earth Engine can lag, so the window is the 90 days up to
+    # the DATA's own latest alert date (not "today"), to avoid a misleading 0.
     RADD_DAYS = 90
-    def _radd_mask():
+    _radd_cache = {}
+
+    def _code_to_date(code):
+        yy, ddd = int(code) // 1000, int(code) % 1000
+        return datetime.date(2000 + yy, 1, 1) + datetime.timedelta(days=ddd - 1)
+
+    def radd_prep():
+        if _radd_cache:
+            return _radd_cache
         radd = (ee.ImageCollection("projects/radar-wur/raddalert/v1")
                 .filterMetadata("geography", "equals", "asia")
                 .filterMetadata("layer", "contains", "alert"))
         img = radd.sort("system:time_start", False).first()
         alert = img.select("Alert")      # 2 = low/unconfirmed, 3 = confirmed/high
         date = img.select("Date")        # YYDDD (YY=year-2000, DDD=day-of-year)
-        cutoff = ee.Date(datetime.datetime.utcnow().strftime("%Y-%m-%d")).advance(-RADD_DAYS, "day")
-        code = (ee.Number.parse(cutoff.format("yy")).multiply(1000)
-                .add(cutoff.getRelative("day", "year").add(1)))
-        return alert.eq(3).And(date.gte(code)).selfMask()
+        meta = {}
+        try:
+            maxcode = (date.updateMask(alert.eq(3)).reduceRegion(
+                       ee.Reducer.max(), region, scale=30, maxPixels=1e10, bestEffort=True)
+                       .get("Date").getInfo())
+        except Exception:
+            maxcode = None
+        if maxcode:
+            latest = _code_to_date(maxcode)
+            cutoff = latest - datetime.timedelta(days=RADD_DAYS)
+            cutcode = (cutoff.year - 2000) * 1000 + cutoff.timetuple().tm_yday
+            meta["data_latest"] = latest.isoformat()
+        else:
+            cutcode, meta["data_latest"] = 0, None
+        _radd_cache["mask"] = alert.eq(3).And(date.gte(cutcode)).selfMask()
+        _radd_cache["meta"] = meta
+        return _radd_cache
 
     def radd_recent():
-        return _radd_mask().visualize(palette=["ff2d2d"])
+        return radd_prep()["mask"].visualize(palette=["ff2d2d"])
 
     def worldclim_precip():
         return ee.Image("WORLDCLIM/V1/BIO").select("bio12").visualize(min=0, max=5000,
@@ -151,24 +174,9 @@ def main():
     radd_out = {"updated": result["updated"], "window_days": RADD_DAYS,
                 "geography": "asia", "status": "ok"}
     try:
-        radd = (ee.ImageCollection("projects/radar-wur/raddalert/v1")
-                .filterMetadata("geography", "equals", "asia")
-                .filterMetadata("layer", "contains", "alert"))
-        rimg = radd.sort("system:time_start", False).first()
-        alert = rimg.select("Alert")
-        # diagnostics: does RADD cover Oro, and are there alerts at all?
-        radd_out["_diag"] = {}
-        radd_out["_diag"]["images"] = int(radd.size().getInfo())
-        conf_all = alert.eq(3).selfMask()
-        any_conf = alert.gte(2).selfMask()
-        radd_out["_diag"]["confirmed_px_all"] = conf_all.reduceRegion(
-            ee.Reducer.count(), region, scale=30, maxPixels=1e10, bestEffort=True).get("Alert").getInfo()
-        radd_out["_diag"]["any_alert_px_all"] = any_conf.reduceRegion(
-            ee.Reducer.count(), region, scale=30, maxPixels=1e10, bestEffort=True).get("Alert").getInfo()
-
-        mask = _radd_mask()
-        radd_out["_diag"]["confirmed_px_90d"] = mask.reduceRegion(
-            ee.Reducer.count(), region, scale=30, maxPixels=1e10, bestEffort=True).get("Alert").getInfo()
+        prep = radd_prep()
+        mask = prep["mask"]
+        radd_out["data_latest"] = prep["meta"].get("data_latest")
         patch = mask.connectedPixelCount(260, True)          # RADD 10 m: 2 ha = 200 px
         big = mask.updateMask(patch.gte(200))
         events = big.reduceToVectors(geometry=region, scale=10, geometryType="polygon",
