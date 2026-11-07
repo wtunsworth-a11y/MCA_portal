@@ -110,10 +110,13 @@ def main():
     except Exception as e:
         _write_empty(CLEAR_OUT, "export error: " + str(e)[:200], {"cutoff": "2020-12-31"})
 
-    # 2) non-forest in 2020 (JRC GFC2020 v2, Map == 0 = non-forest), within Oro land
+    # 2) non-forest in 2020 (JRC GFC2020 v2), within Oro land.
+    # GFC2020 encodes forest as 1 and leaves non-forest MASKED (no 0 value), so
+    # non-forest = the unmasked complement (unmask(0) == 0), restricted to the
+    # Oro land geometry (which already excludes ocean).
     try:
         gfc = ee.ImageCollection("JRC/GFC2020/V2").mosaic().select(0)
-        nonforest = gfc.eq(0).selfMask()
+        nonforest = gfc.unmask(0).eq(0).clip(aoi).selfMask()
         export_mask(ee, aoi, nonforest, NONFOREST_MIN_HA, NONFOREST_OUT,
                     "JRC GFC2020 v2 non-forest-2020 patches >= %.1f ha, Oro land." % NONFOREST_MIN_HA)
     except Exception as e:
