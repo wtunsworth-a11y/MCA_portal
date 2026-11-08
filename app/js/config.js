@@ -217,13 +217,6 @@ window.PORTAL_CONFIG = {
       tiles: [""], attribution: "Imagery © Planet / NICFI",
       note: "Priority layer. Set keys.nicfi; tile URL built from the chosen NICFI mosaic + key (~4.7 m tropical imagery, monthly)."
     },
-    {
-      id: "radd", theme: "Forest Change", name: "RADD deforestation alerts (near-real-time)",
-      kind: "raster", requiresKey: "gfw", opacity: 0.95,
-      tiles: [""], attribution: "RADD / WUR / GFW",
-      legend: [{ color: "#ff00ff", label: "RADD alert" }],
-      note: "Priority layer. Radar-based, sees through PNG cloud cover. Serve via GFW Data API tiles or GEE; drives the reporting engine's 'recent change' signal."
-    },
     // ---- Backend-served curated layers (Partner tier — see docs/05) ----------
     { id: "biodiversity", theme: "Biodiversity", name: "Biodiversity (curated)", kind: "backend", tier: "tiered", note: "PSP/NFI/surveys/IUCN/GBIF — served from PostGIS, generalised for public." },
     { id: "soil",   theme: "Soil", name: "Soil (PNGRIS)", kind: "backend", tier: "partner", note: "Curated national dataset — partner tier." },
