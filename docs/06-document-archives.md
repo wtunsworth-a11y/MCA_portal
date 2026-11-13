@@ -10,10 +10,10 @@ Working titles (more will be added):
 
 | Archive | Scope | Status |
 |---|---|---|
-| **Managalas** | History of the Managalas Conservation Area — Partners With Melanesians | Indexed — **241 documents, ~4,580 pages** (indexed 2026-07-27; +12 added 2026-11-13) |
+| **Managalas** | History of the Managalas Conservation Area — Partners With Melanesians | Indexed — **241 documents, 4,725 pages** (indexed 2026-07-27; +12 added 2026-11-13) |
 | **CSIRO** | CSIRO Land Research Series (LRS) and survey reports for the region | **Catalogue only — 6 titles** (2026-08-16). Titles + keywords searchable; documents and source files withheld (no permission to share) |
 | **Kokoda** | Kokoda Track corridor — historical and environmental records | Planned |
-| **QABB** | Queen Alexandra's Birdwing Butterfly — conservation and research | **Catalogue only — 148 titles** (2026-08-15; +2 on 2026-11-13, one excluded manuscript removed). Titles + keywords searchable; document text and source files withheld pending permission clearance |
+| **QABB** | Queen Alexandra's Birdwing Butterfly — conservation and research | **Catalogue only — 147 titles** (2026-08-15; 2026-11-13: +1 new title, one excluded manuscript removed → net unchanged). Titles + keywords searchable; document text and source files withheld pending permission clearance |
 
 Each archive corresponds to a source document set (e.g. a Google Drive folder). The
 originals are **not** exposed to portal users — see the protection model below.
@@ -90,7 +90,7 @@ QABB and CSIRO are added under a deliberately **minimal exposure** model, becaus
 to publish their documents has not been cleared (QABB includes items marked *"Confidential to
 CSIRO"*; the CSIRO LRS set is *"no permission to share"*):
 
-- `app/data/qabb_archive.json` (**148** titles) and `app/data/csiro_archive.json` (**6**
+- `app/data/qabb_archive.json` (**147** titles) and `app/data/csiro_archive.json` (**6**
   titles) ship **titles, folders, keywords and metadata only** (tier `restricted`).
 - They contain **no OCR text, no snippets, no Drive IDs and no URLs**. Because the file
   references never reach the browser, the **source files are unreachable** regardless of the
@@ -130,13 +130,15 @@ needed — the reader already handles `public` records. Ideally this is done via
   _Additions (2026-11-13):_ a handover added **12 new PwM documents** (born-digital
   Word/PPT converted to searchable PDF, clean text, no OCR needed) across 3.Program
   Reports, MCA Zone Activity Reports, 1.CA Submission, 4.Survey Docxs and 8.PWM
-  Presentations — merged by `drive_id` as public full-text records (229 → **241**).
-  The QABB catalogue gained **2** new titles (catalogue-only; 2 of the 4 handover QABB
-  items were already listed, and the 4 "Qabb docs" mirror copies are the same items).
+  Presentations — merged by `drive_id` as public full-text records (229 → **241**, +90
+  pages → **4,725**; page counts read from the PDFs via `pdfinfo`).
+  The QABB catalogue gained **1** new title ("QABB review paper WWP 20041216",
+  catalogue-only); 2 of the 4 handover QABB items were already listed, the 4 "Qabb docs"
+  mirror copies are the same items, and a thin "0_Acknowledgements" page was left out.
   **Exclusion:** `O_alexandrae_MANUSCRIPT` is licensed but **not redistributable**
   (per `exclusions.json`); its stray catalogue entry (`qabb-006`) was **removed** and its
-  text/files are never indexed (147 → **148** = 147 − 1 excluded + 2 new).
-- `app/data/qabb_archive.json` — the QABB **catalogue** (148 titles + keywords, tier
+  text/files are never indexed. QABB net **147** (= 147 − 1 excluded + 1 new).
+- `app/data/qabb_archive.json` — the QABB **catalogue** (147 titles + keywords, tier
   `restricted`). **No text, no Drive ids/urls** — see *Restricted, catalogue-only* above.
 - `app/data/csiro_archive.json` — the CSIRO **catalogue** (6 titles + keywords, tier
   `restricted`). **No text, no Drive ids/urls** — same model as QABB.
