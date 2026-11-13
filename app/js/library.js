@@ -3,7 +3,7 @@
  * Search-first by design: nothing is listed until the user searches, so the
  * collection is never presented as a browsable file tree.
  *
- * The Managalas archive is the real 229-document index (full OCR text) loaded
+ * The Managalas archive is the real 241-document index (full OCR text) loaded
  * from data/mca_archive.json. Search runs over title + keywords + full text.
  * (Interim: the index is loaded client-side. Production moves it server-side so
  * the full text is never shipped to the browser — see docs/06.)
@@ -96,7 +96,7 @@
       meta.textContent = "";
       var hint = loadError
         ? "Could not load the archive index. Serve the app over http:// (not file://) and reload."
-        : (loaded ? "" : "Loading the Managalas index (229 documents)…");
+        : (loaded ? "" : "Loading the Managalas index (241 documents)…");
       list.innerHTML =
         '<div class="empty-search"><div class="ic">🔎</div>' +
         "<h3>Search the archives</h3>" +
