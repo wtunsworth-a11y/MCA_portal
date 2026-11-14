@@ -1,5 +1,5 @@
 {
-"updated": "2026-11-13T12:44:09Z",
+"updated": "2026-11-14T01:08:32Z",
 "project": "orodataportal",
 "bbox": [
 146.8,
@@ -37,6 +37,9 @@
 },
 "landcover": {
 "png": "data/gee_landcover.png"
+},
+"canopy": {
+"png": "data/gee_canopy.png"
 }
 },
 "status": {
@@ -50,6 +53,7 @@
 "radd_recent": "ok",
 "glad_recent": "ok",
 "worldclim_precip": "ok",
-"landcover": "ok"
+"landcover": "ok",
+"canopy": "ok"
 }
 }
