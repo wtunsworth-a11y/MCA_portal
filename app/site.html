@@ -56,6 +56,16 @@
     .sa-explainer .sw.standing { background:var(--canopy); } .sa-explainer .sw.nonforest { background:#c7a86a; } .sa-explainer .sw.cleared { background:var(--loss); }
     .sa-explainer .grade { font-size:12.5px; margin-top:6px; }
     .sa-explainer .cav { font-size:11.5px; color:var(--muted); margin-top:6px; line-height:1.45; }
+    .tg { font-size:10.5px; font-weight:700; padding:2px 8px; border-radius:999px; vertical-align:middle;
+          background:var(--panel2); color:var(--muted); border:1px solid var(--line); }
+    .tg.live { background:#e6f4ec; color:#1c7a4e; border-color:#c5e6d3; }
+    .sa-themes { margin:12px 0; }
+    .sa-themes-h { font-size:12.5px; color:var(--muted); font-weight:700; margin-bottom:8px; }
+    .sa-theme { background:var(--panel); border:1px solid var(--line); border-radius:14px; padding:12px 16px; margin-bottom:10px; box-shadow:var(--shadow); }
+    .sa-theme h4 { margin:0 0 8px; font-size:14.5px; font-weight:800; }
+    .sa-kv { display:flex; justify-content:space-between; gap:12px; font-size:13.5px; padding:3px 0; }
+    .sa-kv span { color:var(--muted); }
+    .sa-src { font-size:11.5px; color:var(--faint); margin-top:8px; }
     @media (max-width:560px){ .sa-pending ul { columns:1; } }
   </style>
   <script src="js/cf-analytics.js"></script>
@@ -84,8 +94,9 @@
       <div class="eyebrow">Tool · Oro Province · <span class="badge">Pilot</span></div>
       <h1>Site analysis</h1>
       <p class="lede">Define a site — draw it, drop a point, or upload a boundary — and get an instant
-        profile: its area and how it sits against the Managalas Conservation Area and Oro Province.
-        Satellite themes (forest loss, carbon, fire…) are added once Earth Engine is connected.</p>
+        profile: its area, how it sits against the Managalas Conservation Area and Oro Province, an
+        EUDR deforestation screen, and forest, land-cover and fire themes from satellite data.
+        Canopy, carbon and climate follow once the Earth Engine backend is connected.</p>
     </div>
   </header>
 
@@ -125,15 +136,15 @@
   <section class="blk" id="themes">
     <div class="wrap">
       <div class="sec-h">
-        <div><h2>What a full site profile will include</h2><p>The pilot computes area and boundary overlap now; these satellite themes follow once Earth Engine is connected.</p></div>
+        <div><h2>What a site profile includes</h2><p>Draw or upload a site to get these themes. Forest, land cover and fire are <b>live now</b>; the rest follow once the Earth Engine backend is connected.</p></div>
       </div>
       <div class="cards">
-        <div class="card"><h3>Topography</h3><p>Elevation, slope &amp; hillshade — min / mean / max.</p></div>
-        <div class="card"><h3>Land cover</h3><p>Land-cover map and the % in each class.</p></div>
-        <div class="card"><h3>Forest cover &amp; loss</h3><p>Forest extent and <b>ha / % lost</b> over time.</p></div>
-        <div class="card"><h3>Canopy &amp; carbon</h3><p>Canopy height, biomass and <b>carbon stock</b>.</p></div>
-        <div class="card"><h3>Fire history</h3><p>Active-fire detections, counted by year.</p></div>
-        <div class="card"><h3>Access &amp; people</h3><p>Travel time and population near the site.</p></div>
+        <div class="card"><h3>Forest cover &amp; loss <span class="tg live">Live</span></h3><p>Forest in 2020 and <b>ha / % cleared</b> since the EUDR cut-off.</p></div>
+        <div class="card"><h3>Land cover <span class="tg live">Live</span></h3><p>Land-cover map and the % in each class.</p></div>
+        <div class="card"><h3>Fire activity <span class="tg live">Live</span></h3><p>Active-fire detections within the site (NASA FIRMS).</p></div>
+        <div class="card"><h3>Topography <span class="tg">Soon</span></h3><p>Elevation, slope &amp; hillshade — min / mean / max.</p></div>
+        <div class="card"><h3>Canopy &amp; carbon <span class="tg">Soon</span></h3><p>Canopy height, biomass and <b>carbon stock</b>.</p></div>
+        <div class="card"><h3>Access &amp; people <span class="tg">Soon</span></h3><p>Travel time and population near the site.</p></div>
       </div>
     </div>
   </section>

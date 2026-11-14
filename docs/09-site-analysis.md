@@ -121,5 +121,17 @@ in the browser** against committed data — no backend, no GEE call per request:
   > clearings ≥ 2 ha, and does not replace operator due diligence or plot-level field
   > verification. The authoritative, full-resolution version is the GEE-backed engine above.
 
-The satellite per-theme stats (canopy, carbon, climate, hydrology) still await the GEE
-endpoints and are shown as "available once Earth Engine is connected".
+- **Forest, land-cover and fire themes** — computed in the browser from committed layers,
+  no backend:
+  - *Forest cover & loss* — forest-2020 extent and the ha / % cleared since the EUDR cut-off,
+    from the GFC2020 + Hansen vector layers (same data as the EUDR screen).
+  - *Land cover* — share of the site in each ESA WorldCover class, sampled from the committed
+    `gee_landcover.png` thumbnail (all GEE thumbnails share one EPSG:4326 bbox recorded in
+    `gee_tiles.json`, so lng/lat maps linearly to a pixel; the WorldCover palette is matched
+    back to its class).
+  - *Fire activity* — active-fire detections inside the site, counted from the Oro-clipped
+    NASA FIRMS points (`fires.geojson`, rolling recent window).
+
+The remaining per-theme stats (topography, canopy height, carbon, climate, accessibility)
+still await the GEE backend and are shown under "More themes — available once the Earth Engine
+backend is connected".

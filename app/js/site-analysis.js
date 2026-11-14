@@ -98,6 +98,65 @@
     if (b && b.tiles && b.tiles[0]) esri = b.tiles[0];
   } catch (e) {}
 
+  // ---- committed-raster + point layers for the satellite themes ------------
+  // All GEE thumbnails share one EPSG:4326 bbox (data/gee_tiles.json), so we can
+  // sample them in the browser: map lng/lat -> pixel over the bbox. Used for the
+  // land-cover theme (ESA WorldCover palette -> class). Fires sample from points.
+  var RBBOX = null;                                   // [w,s,e,n] shared raster bbox
+  var LC = { ready: false, w: 0, h: 0, data: null };  // land-cover pixel buffer
+  var LC_CLASSES = [
+    { v: 10,  name: "Tree cover",    rgb: [0, 100, 0] },
+    { v: 20,  name: "Shrubland",     rgb: [255, 187, 34] },
+    { v: 30,  name: "Grassland",     rgb: [255, 255, 76] },
+    { v: 40,  name: "Cropland",      rgb: [240, 150, 255] },
+    { v: 50,  name: "Built-up",      rgb: [250, 0, 0] },
+    { v: 60,  name: "Bare / sparse", rgb: [180, 180, 180] },
+    { v: 70,  name: "Snow / ice",    rgb: [240, 240, 240] },
+    { v: 80,  name: "Water",         rgb: [0, 100, 200] },
+    { v: 90,  name: "Wetland",       rgb: [0, 150, 160] },
+    { v: 95,  name: "Mangroves",     rgb: [0, 207, 117] },
+    { v: 100, name: "Moss / lichen", rgb: [250, 230, 160] }
+  ];
+  function hexOf(rgb) { return "#" + rgb.map(function (v) { return ("0" + v.toString(16)).slice(-2); }).join(""); }
+  fetch("data/gee_tiles.json").then(function (r) { return r.json(); }).then(function (j) {
+    RBBOX = j.bbox; loadLandcover();
+  }).catch(function () {});
+  function loadLandcover() {
+    var im = new Image();
+    im.onload = function () {
+      var w = im.naturalWidth, h = im.naturalHeight;
+      try {
+        var cv = document.createElement("canvas"); cv.width = w; cv.height = h;
+        var cx = cv.getContext("2d"); cx.drawImage(im, 0, 0);
+        LC.data = cx.getImageData(0, 0, w, h).data; LC.w = w; LC.h = h; LC.ready = true;
+        if (aoiRing) analyse(aoiRing);
+      } catch (e) {}
+    };
+    im.src = "data/gee_landcover.png";
+  }
+  function lcClassAt(lng, lat) {
+    if (!LC.ready || !RBBOX) return null;
+    var px = Math.floor((lng - RBBOX[0]) / (RBBOX[2] - RBBOX[0]) * LC.w);
+    var py = Math.floor((RBBOX[3] - lat) / (RBBOX[3] - RBBOX[1]) * LC.h);
+    if (px < 0 || py < 0 || px >= LC.w || py >= LC.h) return null;
+    var i = (py * LC.w + px) * 4;
+    if (LC.data[i + 3] < 128) return null;            // transparent = no data
+    var r = LC.data[i], g = LC.data[i + 1], b = LC.data[i + 2], best = -1, bd = 1e9;
+    for (var c = 0; c < LC_CLASSES.length; c++) {
+      var p = LC_CLASSES[c].rgb, d = (r-p[0])*(r-p[0]) + (g-p[1])*(g-p[1]) + (b-p[2])*(b-p[2]);
+      if (d < bd) { bd = d; best = c; }
+    }
+    return bd <= 5000 ? best : null;                  // reject blended anti-alias edges
+  }
+
+  // Active-fire points (NASA FIRMS, already Oro-clipped) for the fire theme.
+  var fires = null, fireMeta = null;
+  fetch("data/fires.geojson").then(function (r) { return r.json(); }).then(function (gj) {
+    fires = (gj.features || []).map(function (f) { return f.geometry.coordinates; });
+    fireMeta = { days: gj.days, updated: gj.updated };
+    if (aoiRing) analyse(aoiRing);
+  }).catch(function () { fires = []; });
+
   function el(id) { return document.getElementById(id); }
 
   // ---- init map ------------------------------------------------------------
@@ -357,6 +416,7 @@
     var c = centroidOf(ring);
     // one grid-sampling pass: Oro Province + every protected area
     var bb = bboxOf(ring), N = 64, inAoi = 0, inOro = 0, inAnyPA = 0;
+    var lcTally = {}, lcN = 0;                    // land-cover class counts over the site
     paList.forEach(function (pa) { pa._c = 0; });
     for (var i = 0; i <= N; i++) {
       for (var j = 0; j <= N; j++) {
@@ -367,8 +427,11 @@
         var any = false;
         paList.forEach(function (pa) { if (pointInPolys(pt, pa.polys)) { pa._c++; any = true; } });
         if (any) inAnyPA++;
+        var lc = lcClassAt(pt[0], pt[1]);
+        if (lc !== null) { lcTally[lc] = (lcTally[lc] || 0) + 1; lcN++; }
       }
     }
+    var fireN = fires ? fires.filter(function (co) { return pointInRing(co, ring); }).length : null;
     var oroPct = inAoi ? inOro / inAoi : 0, anyPct = inAoi ? inAnyPA / inAoi : 0;
     var per = paList.map(function (pa) { return { name: pa.name, pct: inAoi ? pa._c / inAoi : 0 }; })
       .filter(function (p) { return p.pct > 0.005; }).sort(function (a, b) { return b.pct - a.pct; });
@@ -387,13 +450,16 @@
           }).join("") + "</ul></div>"
       : '<div class="sa-note"><b>Does not overlap any mapped protected area.</b></div>';
 
-    var pending = ["Forest cover & loss", "Land cover", "Canopy & carbon", "Fire history", "Climate", "Accessibility & population"]
+    var e = eudrScreen(ring, c);
+    var themes = themesBlock(e, lcTally, lcN, fireN, ha);
+
+    var pending = ["Topography (elevation, slope)", "Canopy height & carbon", "Climate (rainfall, temperature)", "Accessibility & population"]
       .map(function (t) { return "<li>" + t + "</li>"; }).join("");
 
     el("sa-report").innerHTML =
       '<div class="sa-tiles">' + tiles + "</div>" + breakdown +
-      eudrPanel(eudrScreen(ring, c)) +
-      '<div class="sa-pending"><div class="sa-pending-h">Satellite themes — available once Earth Engine is connected</div><ul>' +
+      eudrPanel(e) + themes +
+      '<div class="sa-pending"><div class="sa-pending-h">More themes — available once the Earth Engine backend is connected</div><ul>' +
         pending + "</ul></div>" +
       '<div class="sa-actions"><button id="sa-print" class="btn ghost">Print / Save as PDF</button></div>';
     el("sa-print").addEventListener("click", function () { window.print(); });
@@ -401,6 +467,41 @@
   function escapeHtml(s) { return (s || "").replace(/[&<>"]/g, function (c) {
     return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]; }); }
   function tile(v, l) { return '<div class="sa-tile"><div class="v">' + v + '</div><div class="l">' + l + "</div></div>"; }
+
+  // Real satellite themes computed from committed layers (no backend):
+  //  - Forest cover & loss  : from the EUDR vector layers (GFC2020 + Hansen)
+  //  - Land cover           : sampled from the ESA WorldCover thumbnail
+  //  - Fire activity         : counted from the Oro-clipped FIRMS points
+  function themesBlock(e, lcTally, lcN, fireN, plotHa) {
+    var out = "";
+    if (e && e.threeWay) {
+      var f2020 = e.standingHa + e.clearedHa, fPct = plotHa ? f2020 / plotHa * 100 : 0;
+      out += '<div class="sa-theme"><h4>🌳 Forest cover &amp; loss</h4>' +
+        '<div class="sa-kv"><span>Forest in 2020</span><b>' + fmt(f2020, 1) + ' ha · ' + pctStr(fPct) + '</b></div>' +
+        '<div class="sa-kv"><span>Cleared since 2020</span><b>' + fmt(e.clearedHa, 1) + ' ha · ' + pctStr(e.pct) + '</b></div>' +
+        '<div class="sa-src">JRC GFC2020 forest benchmark · Hansen tree-cover loss</div></div>';
+    }
+    if (lcN) {
+      var arr = Object.keys(lcTally).map(function (k) { return { c: +k, n: lcTally[k] }; })
+        .sort(function (a, b) { return b.n - a.n; }).slice(0, 6);
+      var rows = arr.map(function (o) {
+        var cl = LC_CLASSES[o.c], p = o.n / lcN * 100;
+        return '<div class="hbar"><div class="lbl">' + cl.name + '</div>' +
+          '<div class="track"><div class="fill" style="width:' + p.toFixed(1) + '%;background:' + hexOf(cl.rgb) + '"></div></div>' +
+          '<div class="val">' + pctStr(p) + '</div></div>';
+      }).join("");
+      out += '<div class="sa-theme"><h4>🗺️ Land cover</h4>' + rows +
+        '<div class="sa-src">ESA WorldCover 2021 (10 m) · share of site area</div></div>';
+    }
+    if (fireN !== null) {
+      var days = (fireMeta && fireMeta.days) || "recent";
+      out += '<div class="sa-theme"><h4>🔥 Fire activity</h4>' +
+        '<div class="sa-kv"><span>Active-fire detections</span><b>' + fireN + '</b></div>' +
+        '<div class="sa-src">NASA FIRMS · last ' + days + ' days' + (fireN === 0 ? ' · none within this site' : '') + '</div></div>';
+    }
+    if (!out) return "";
+    return '<div class="sa-themes"><div class="sa-themes-h">Site themes — from committed satellite layers</div>' + out + '</div>';
+  }
 
   // ---- wire controls -------------------------------------------------------
   el("mode-point").addEventListener("click", function () { setMode(mode === "point" ? null : "point"); });
