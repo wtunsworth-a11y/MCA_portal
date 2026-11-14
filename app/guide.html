@@ -1,0 +1,274 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <link rel="icon" href="img/favicon.svg" type="image/svg+xml" />
+  <title>Guide — Oro Data Portal</title>
+  <meta name="description" content="A plain-language guide to the Oro Data Portal: how to use the map, live monitoring, site analysis and the document archives — no technical background needed." />
+  <link rel="stylesheet" href="css/site.css" />
+  <style>
+    .guide-toc { display:flex; flex-wrap:wrap; gap:8px; margin:22px 0 0; }
+    .guide-toc a { background:var(--panel); border:1px solid var(--line); color:var(--ink); text-decoration:none;
+      font-size:13.5px; font-weight:600; padding:8px 14px; border-radius:999px; box-shadow:var(--shadow); }
+    .guide-toc a:hover { border-color:var(--canopy); color:var(--canopy); }
+    .gsec h2 { scroll-margin-top:72px; }
+    .gsec p, .gsec li { color:var(--muted); }
+    .gsec p.lead { color:var(--ink); }
+    .steps { display:grid; gap:12px; counter-reset:step; }
+    .step { display:grid; grid-template-columns:40px 1fr; gap:14px; align-items:start; background:var(--panel);
+      border:1px solid var(--line); border-radius:var(--radius); padding:16px 18px; box-shadow:var(--shadow); }
+    .step::before { counter-increment:step; content:counter(step); width:34px; height:34px; border-radius:50%;
+      display:grid; place-items:center; background:#e9f4ee; color:var(--canopy); font-weight:800; font-size:16px; }
+    .step h4 { margin:0 0 4px; font-size:16px; font-weight:800; }
+    .step p { margin:0; }
+    .lex { display:grid; gap:10px; }
+    .lex .row { display:grid; grid-template-columns:150px 1fr; gap:14px; align-items:start; }
+    .lex .row .term { font-weight:700; color:var(--ink); display:flex; align-items:center; gap:8px; }
+    .lex .row .dot { width:12px; height:12px; border-radius:50%; flex:none; margin-top:3px; }
+    @media (max-width:620px){ .lex .row { grid-template-columns:1fr; gap:2px; } }
+    @media print {
+      .nav, .guide-hero .cta-row, .no-print { display:none !important; }
+      body { font-size:12px; }
+      section.blk { padding:16px 0; border-bottom:1px solid #ddd; break-inside:avoid; }
+      .step, .card, .tier-box, .protect, .live-card { box-shadow:none; break-inside:avoid; }
+      a { color:inherit; text-decoration:none; }
+    }
+  </style>
+  <script src="js/cf-analytics.js"></script>
+  <script src="js/credits.js"></script>
+</head>
+<body>
+  <!-- NAV -->
+  <div class="nav">
+    <div class="wrap row">
+      <a class="brand" href="index.html"><span class="globe"></span> Oro Data Portal</a>
+      <nav class="links">
+        <a href="index.html">Home</a>
+        <a href="map.html">Map</a>
+        <a href="site.html">Site analysis</a>
+        <a href="index.html#live">Live data</a>
+        <a href="library.html">Archives</a>
+        <a href="guide.html" class="active">Guide</a>
+      </nav>
+      <span class="spacer"></span>
+      <a class="tier-chip" href="index.html#access">Public access</a>
+    </div>
+  </div>
+
+  <!-- HERO -->
+  <header class="hero guide-hero">
+    <div class="wrap">
+      <div class="eyebrow">Guide · How to use the portal</div>
+      <h1>A quick guide to the Oro Data Portal</h1>
+      <p class="lede">New here? This page walks you through everything the portal can do — in plain
+        language, with no technical background needed. It takes about five minutes to read.</p>
+      <div class="cta-row">
+        <a class="btn primary" href="Oro-Data-Portal-User-Guide.pdf" download>Download as PDF ↓</a>
+        <a class="btn ghost" href="map.html">Open the map →</a>
+      </div>
+      <nav class="guide-toc" aria-label="On this page">
+        <a href="#what">What it is</a>
+        <a href="#areas">The five areas</a>
+        <a href="#map">Using the map</a>
+        <a href="#live">Live monitoring</a>
+        <a href="#site">Analysing a site</a>
+        <a href="#archives">Document archives</a>
+        <a href="#access">Who sees what</a>
+        <a href="#data">Data &amp; limits</a>
+      </nav>
+    </div>
+  </header>
+
+  <!-- WHAT IT IS -->
+  <section class="blk gsec" id="what">
+    <div class="wrap">
+      <div class="sec-h"><div><h2>What is this portal?</h2></div></div>
+      <p class="lead">The Oro Data Portal is a single place to explore maps and information about the land,
+        forests, water and biodiversity of Oro (Northern) Province in Papua New Guinea — with a special focus
+        on the <b>Managalas Conservation Area</b>, one of the largest community-led conservation areas in the
+        Pacific.</p>
+      <p>It brings together free satellite data and the region's own records so that communities, landowners,
+        government staff, researchers and partners can see what is happening to the landscape and make
+        better-informed decisions. Everything on the public pages is open to anyone — no account needed.</p>
+      <div class="protect no-print"><span aria-hidden="true">🇪🇺</span>
+        <div>Funded by the European Union under the <b>EU-FCCB Nexus Programme in Papua New Guinea</b>.</div></div>
+    </div>
+  </section>
+
+  <!-- THE FIVE AREAS -->
+  <section class="blk gsec" id="areas">
+    <div class="wrap">
+      <div class="sec-h"><div><h2>Finding your way around</h2>
+        <p>The menu at the top has five areas. Here is what each one does.</p></div></div>
+      <div class="cards">
+        <a class="card" href="map.html"><div class="top"><span class="dot" style="background:var(--canopy)"></span>
+          <span class="nm">Map</span></div><div class="src">An interactive map of Oro. Switch layers on and off to see
+          forests, forest loss, protected areas, land cover and more.</div></a>
+        <a class="card" href="site.html"><div class="top"><span class="dot" style="background:var(--water)"></span>
+          <span class="nm">Site analysis</span></div><div class="src">Draw or upload any site and get an instant profile —
+          its size, what it overlaps, and an EUDR deforestation check.</div></a>
+        <a class="card" href="index.html#live"><div class="top"><span class="dot" style="background:var(--fire)"></span>
+          <span class="nm">Live data</span></div><div class="src">Up-to-date signals for the whole province: active fires,
+          forest-clearing alerts and climate conditions.</div></a>
+        <a class="card" href="library.html"><div class="top"><span class="dot" style="background:var(--amber)"></span>
+          <span class="nm">Archives</span></div><div class="src">A searchable library of historical documents about
+          Managalas and its partners — read inside the portal.</div></a>
+        <a class="card" href="index.html"><div class="top"><span class="dot" style="background:var(--radd)"></span>
+          <span class="nm">Home</span></div><div class="src">The front page: a tour of the datasets and the latest
+          live figures at a glance.</div></a>
+      </div>
+    </div>
+  </section>
+
+  <!-- USING THE MAP -->
+  <section class="blk gsec" id="map">
+    <div class="wrap">
+      <div class="sec-h"><div><h2>Using the map</h2>
+        <p>Open <a href="map.html">Map</a> and try these.</p></div></div>
+      <div class="steps">
+        <div class="step"><div><h4>Pick a background</h4><p>Use the <b>Basemap</b> dropdown (top-left) to switch between
+          satellite imagery and a plain map. Tap <b>⊕ Oro</b> to recentre on the province.</p></div></div>
+        <div class="step"><div><h4>Turn layers on and off</h4><p>The list on the left is grouped — Boundaries, Forest
+          change, Forest cover, Land cover and so on. Tick a box to show that layer; untick to hide it. You can show
+          several at once.</p></div></div>
+        <div class="step"><div><h4>Read the legend</h4><p>Each layer you switch on adds its colours to the legend so you
+          can tell what you are looking at. The small coloured squares next to each layer name are a quick key.</p></div></div>
+        <div class="step"><div><h4>Watch change over time</h4><p>Switch on <b>Deforestation timeline</b> and a slider appears
+          at the bottom of the map. Drag it, or press play, to watch where forest was cleared year by year.</p></div></div>
+      </div>
+      <h3 style="margin:26px 0 10px">What the main layers mean</h3>
+      <div class="lex">
+        <div class="row"><div class="term"><span class="dot" style="background:#e5484d"></span>Forest loss</div>
+          <div>Places where tree cover was removed (Hansen/UMD, 2001 onward). Red marks where forest was cleared.</div></div>
+        <div class="row"><div class="term"><span class="dot" style="background:#1b7837"></span>Forest 2020</div>
+          <div>The official EU benchmark map of what counted as forest at the end of 2020 (JRC GFC2020). It is the
+            reference for the EUDR deforestation rules.</div></div>
+        <div class="row"><div class="term"><span class="dot" style="background:#f4a823"></span>Clearing alerts</div>
+          <div>Recent, near-real-time signals that forest may have just been cleared (GLAD-L, with RADD radar as a
+            cross-check). Useful for spotting new activity.</div></div>
+        <div class="row"><div class="term"><span class="dot" style="background:#2f9160"></span>Protected areas</div>
+          <div>The Managalas Conservation Area and other protected areas in Oro.</div></div>
+        <div class="row"><div class="term"><span class="dot" style="background:#0064c8"></span>Land cover</div>
+          <div>What covers the ground — forest, cropland, grassland, built-up, water — from ESA WorldCover.</div></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- LIVE MONITORING -->
+  <section class="blk gsec" id="live">
+    <div class="wrap">
+      <div class="sec-h"><div><h2>Reading the live monitoring cards</h2>
+        <p>On the <a href="index.html#live">Home</a> page these cards refresh automatically. Here is how to read them.</p></div></div>
+      <div class="lex">
+        <div class="row"><div class="term">🔥 Active fires</div><div>Heat detected by satellites in the last few days
+          (NASA FIRMS), counted within Oro. A higher number means more burning — often garden or grassland fires.</div></div>
+        <div class="row"><div class="term">🟣 Clearing alerts</div><div>Likely forest-clearing events in the last 90 days
+          (GLAD-L). Each is an early warning to look closer, not a confirmed loss.</div></div>
+        <div class="row"><div class="term">🌳 Forest loss</div><div>The running total of tree-cover loss since 2001
+          (Hansen). Open the map's timeline slider to see where and when.</div></div>
+        <div class="row"><div class="term">🌧️ Climate &amp; fire risk</div><div>The Southern Oscillation Index (NOAA).
+          Strongly negative values signal El Niño — drier weather and higher fire risk for the region.</div></div>
+      </div>
+      <div class="protect" style="margin-top:18px"><span aria-hidden="true">🕒</span>
+        <div><b>How fresh is it?</b> Fire and clearing alerts update daily; the climate index monthly; the forest-loss
+          totals once a year when the global dataset is released. Each card shows the date of its latest data.</div></div>
+    </div>
+  </section>
+
+  <!-- ANALYSING A SITE -->
+  <section class="blk gsec" id="site">
+    <div class="wrap">
+      <div class="sec-h"><div><h2>Analysing a site, step by step</h2>
+        <p>The <a href="site.html">Site analysis</a> tool builds a short profile for any area you choose.</p></div></div>
+      <div class="steps">
+        <div class="step"><div><h4>Define your site</h4><p>Draw a polygon (click each corner, then <b>Finish</b>),
+          drop a point that becomes a circle, or upload a boundary file (GeoJSON or KML). It works for anything from a
+          half-hectare garden to a thousand-hectare concession.</p></div></div>
+        <div class="step"><div><h4>Read the basics</h4><p>You immediately see the site's <b>area</b>, whether it sits
+          inside <b>Oro Province</b>, and how much of it overlaps the <b>Managalas Conservation Area</b> or other
+          protected areas.</p></div></div>
+        <div class="step"><div><h4>Check the EUDR deforestation screen</h4><p>A coloured bar splits the site into three
+          parts: <b>standing forest</b> (green), <b>land that was already non-forest in 2020</b> (tan), and
+          <b>forest cleared since 2020</b> (red). The last one is what the EU deforestation rules care about. A green
+          verdict means none was cleared; amber and red flag a share to check.</p></div></div>
+        <div class="step"><div><h4>See the satellite themes</h4><p>Below that you get the site's <b>forest cover &amp;
+          loss</b>, its <b>land cover</b> broken down by type, and recent <b>fire activity</b> — each as a simple number
+          or bar. More themes (canopy height, carbon, climate) are being added.</p></div></div>
+        <div class="step"><div><h4>Save or share it</h4><p>Press <b>Print / Save as PDF</b> to keep a copy of the report.</p></div></div>
+      </div>
+      <div class="protect" style="margin-top:18px"><span aria-hidden="true">⚠️</span>
+        <div><b>A screening tool, not a legal ruling.</b> The EUDR check uses global satellite products to flag areas
+          worth a closer look. It is not an official or legal EUDR determination — always confirm on the ground and
+          through official channels before any sourcing decision. Nothing you draw or upload is saved or shared; it is
+          analysed in your browser only.</div></div>
+    </div>
+  </section>
+
+  <!-- ARCHIVES -->
+  <section class="blk gsec" id="archives">
+    <div class="wrap">
+      <div class="sec-h"><div><h2>Searching the document archives</h2>
+        <p>The <a href="library.html">Archives</a> hold scanned historical documents about Managalas and its partners.</p></div></div>
+      <div class="steps">
+        <div class="step"><div><h4>Search, don't browse</h4><p>Type a keyword — a place, a person, a species, a year —
+          into the search box. The portal searches the full text of the documents and lists the matches. There is no
+          bulk download, so the collection stays protected.</p></div></div>
+        <div class="step"><div><h4>Read inside the portal</h4><p>Open a result to read it page by page in the built-in
+          reader. You never leave the portal, and the file loads a page at a time so it works on slow connections.</p></div></div>
+        <div class="step"><div><h4>Some collections are catalogue-only</h4><p>A few archives (such as QABB and CSIRO) show
+          their titles and keywords so you know they exist, but the documents themselves are withheld until permission to
+          publish them is cleared.</p></div></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ACCESS -->
+  <section class="blk gsec" id="access">
+    <div class="wrap">
+      <div class="sec-h"><div><h2>Who can see what</h2>
+        <p>Most of the portal is open to everyone. A few richer or more sensitive layers sit behind a sign-in.</p></div></div>
+      <div class="tiers-grid">
+        <div class="tier-box"><h3>Public</h3><div class="who">No login</div>
+          <ul><li>Maps, forest change and land cover</li><li>Live fire, clearing and climate signals</li>
+            <li>Site analysis and the EUDR screen</li><li>The public document archive</li></ul></div>
+        <div class="tier-box"><h3>Registered</h3><div class="who">Free account</div>
+          <ul><li>Everything in Public</li><li>Higher-resolution imagery</li><li>Layer downloads and report subscriptions</li></ul></div>
+        <div class="tier-box"><h3>Partner</h3><div class="who">By agreement</div>
+          <ul><li>Everything in Registered</li><li>Sensitive datasets (e.g. precise species sites)</li>
+            <li>Restricted partner archives</li></ul></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- DATA & LIMITS -->
+  <section class="blk gsec" id="data">
+    <div class="wrap">
+      <div class="sec-h"><div><h2>About the data &amp; its limits</h2></div></div>
+      <p>The portal draws on trusted, free global datasets and the region's own records. The satellite layers are
+        updated automatically on a schedule, so figures change as new data arrives.</p>
+      <ul>
+        <li><b>It is a guide, not the last word.</b> Satellite data is powerful but imperfect — cloud, small clearings
+          and mapping limits mean figures are indicative. Check on the ground where decisions depend on it.</li>
+        <li><b>The EUDR screen is an indication only</b>, built on global products — not a legal determination.</li>
+        <li><b>Sensitive information is protected.</b> Precise locations of endangered species and unpublished
+          documents are withheld.</li>
+      </ul>
+      <p style="margin-top:14px">Main sources: WDPA · JRC (GFC2020, TMF) · Hansen/UMD · NASA FIRMS · GLAD-L · ESA
+        WorldCover · ETH canopy height · WorldClim · NOAA · WWF HydroSHEDS. Full credits are on the
+        <a href="credits.html">Credits</a> page.</p>
+      <div class="protect no-print" style="margin-top:12px"><span aria-hidden="true">✉️</span>
+        <div><b>Questions?</b> For access to restricted data, corrections, or help using the portal, contact the
+          Managalas Conservation Area team via the project partners listed on the <a href="credits.html">Credits</a> page.</div></div>
+    </div>
+  </section>
+
+  <footer class="site">
+    <div class="wrap row">
+      <div>Oro Data Portal · User guide · Phase 1 (public MVP)</div>
+      <div><a href="Oro-Data-Portal-User-Guide.pdf" download>Download this guide (PDF)</a></div>
+    </div>
+    <div class="wrap site-credits" id="siteCredits" data-set="full"></div>
+  </footer>
+</body>
+</html>
