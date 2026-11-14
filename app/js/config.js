@@ -40,7 +40,10 @@ window.PORTAL_CONFIG = {
     {
       id: "esri", name: "Satellite (Esri)", type: "raster", default: true,
       tiles: ["https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}"],
-      attribution: "Imagery © Esri, Maxar, Earthstar Geographics"
+      attribution: "Imagery © Esri, Maxar, Earthstar Geographics",
+      // PNG rainforest renders very dark — lift shadows and add a little contrast
+      // and saturation so the imagery is legible under the data overlays.
+      paint: { "raster-brightness-min": 0.16, "raster-contrast": 0.12, "raster-saturation": 0.22 }
     },
     {
       id: "topo_osm", name: "Topographic (OpenTopoMap)", type: "raster", default: false,

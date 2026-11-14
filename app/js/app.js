@@ -25,7 +25,8 @@
     if (!b.tiles || !b.tiles.length) return;  // e.g. the "No basemap" option
     sources[b.id] = { type: "raster", tiles: b.tiles, tileSize: 256, attribution: b.attribution };
     baseLayers.push({ id: "base-" + b.id, type: "raster", source: b.id,
-      layout: { visibility: b.id === defaultBase.id ? "visible" : "none" } });
+      layout: { visibility: b.id === defaultBase.id ? "visible" : "none" },
+      paint: b.paint || {} });   // e.g. brighten the dark satellite imagery
   });
 
   var map = new maplibregl.Map({
