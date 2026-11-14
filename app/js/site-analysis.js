@@ -119,7 +119,7 @@
   ];
   function hexOf(rgb) { return "#" + rgb.map(function (v) { return ("0" + v.toString(16)).slice(-2); }).join(""); }
   fetch("data/gee_tiles.json").then(function (r) { return r.json(); }).then(function (j) {
-    RBBOX = j.bbox; loadLandcover();
+    RBBOX = j.bbox; loadLandcover(); loadCanopy();
   }).catch(function () {});
   function loadLandcover() {
     var im = new Image();
@@ -147,6 +147,34 @@
       if (d < bd) { bd = d; best = c; }
     }
     return bd <= 5000 ? best : null;                  // reject blended anti-alias edges
+  }
+
+  // Canopy height (ETH 2020), grayscale-encoded: height ≈ luminance/255 * 40 m.
+  // The raster is published by a later GEE run; until then the load errors and the
+  // canopy theme simply stays in the "pending" list.
+  var CH = { ready: false, w: 0, h: 0, data: null };
+  function loadCanopy() {
+    var im = new Image();
+    im.onload = function () {
+      var w = im.naturalWidth, h = im.naturalHeight;
+      try {
+        var cv = document.createElement("canvas"); cv.width = w; cv.height = h;
+        var cx = cv.getContext("2d"); cx.drawImage(im, 0, 0);
+        CH.data = cx.getImageData(0, 0, w, h).data; CH.w = w; CH.h = h; CH.ready = true;
+        if (aoiRing) analyse(aoiRing);
+      } catch (e) {}
+    };
+    im.onerror = function () {};
+    im.src = "data/gee_canopy.png";
+  }
+  function chAt(lng, lat) {
+    if (!CH.ready || !RBBOX) return null;
+    var px = Math.floor((lng - RBBOX[0]) / (RBBOX[2] - RBBOX[0]) * CH.w);
+    var py = Math.floor((RBBOX[3] - lat) / (RBBOX[3] - RBBOX[1]) * CH.h);
+    if (px < 0 || py < 0 || px >= CH.w || py >= CH.h) return null;
+    var i = (py * CH.w + px) * 4;
+    if (CH.data[i + 3] < 128) return null;            // transparent = no data
+    return CH.data[i] / 255 * 40;                      // grayscale: R == encoded height
   }
 
   // Active-fire points (NASA FIRMS, already Oro-clipped) for the fire theme.
@@ -417,6 +445,7 @@
     // one grid-sampling pass: Oro Province + every protected area
     var bb = bboxOf(ring), N = 64, inAoi = 0, inOro = 0, inAnyPA = 0;
     var lcTally = {}, lcN = 0;                    // land-cover class counts over the site
+    var chSum = 0, chN = 0, chMax = 0;            // canopy-height mean/max over the site
     paList.forEach(function (pa) { pa._c = 0; });
     for (var i = 0; i <= N; i++) {
       for (var j = 0; j <= N; j++) {
@@ -429,9 +458,12 @@
         if (any) inAnyPA++;
         var lc = lcClassAt(pt[0], pt[1]);
         if (lc !== null) { lcTally[lc] = (lcTally[lc] || 0) + 1; lcN++; }
+        var hgt = chAt(pt[0], pt[1]);
+        if (hgt !== null) { chSum += hgt; chN++; if (hgt > chMax) chMax = hgt; }
       }
     }
     var fireN = fires ? fires.filter(function (co) { return pointInRing(co, ring); }).length : null;
+    var meanCh = chN ? chSum / chN : null;
     var oroPct = inAoi ? inOro / inAoi : 0, anyPct = inAoi ? inAnyPA / inAoi : 0;
     var per = paList.map(function (pa) { return { name: pa.name, pct: inAoi ? pa._c / inAoi : 0 }; })
       .filter(function (p) { return p.pct > 0.005; }).sort(function (a, b) { return b.pct - a.pct; });
@@ -451,10 +483,12 @@
       : '<div class="sa-note"><b>Does not overlap any mapped protected area.</b></div>';
 
     var e = eudrScreen(ring, c);
-    var themes = themesBlock(e, lcTally, lcN, fireN, ha);
+    var themes = themesBlock(e, lcTally, lcN, fireN, ha, meanCh, chMax);
 
-    var pending = ["Topography (elevation, slope)", "Canopy height & carbon", "Climate (rainfall, temperature)", "Accessibility & population"]
-      .map(function (t) { return "<li>" + t + "</li>"; }).join("");
+    var pend = ["Topography (elevation, slope)"];
+    if (meanCh === null) pend.push("Canopy height");
+    pend.push("Carbon & biomass", "Climate (rainfall, temperature)", "Accessibility & population");
+    var pending = pend.map(function (t) { return "<li>" + t + "</li>"; }).join("");
 
     el("sa-report").innerHTML =
       '<div class="sa-tiles">' + tiles + "</div>" + breakdown +
@@ -472,7 +506,7 @@
   //  - Forest cover & loss  : from the EUDR vector layers (GFC2020 + Hansen)
   //  - Land cover           : sampled from the ESA WorldCover thumbnail
   //  - Fire activity         : counted from the Oro-clipped FIRMS points
-  function themesBlock(e, lcTally, lcN, fireN, plotHa) {
+  function themesBlock(e, lcTally, lcN, fireN, plotHa, meanCh, chMax) {
     var out = "";
     if (e && e.threeWay) {
       var f2020 = e.standingHa + e.clearedHa, fPct = plotHa ? f2020 / plotHa * 100 : 0;
@@ -492,6 +526,12 @@
       }).join("");
       out += '<div class="sa-theme"><h4>🗺️ Land cover</h4>' + rows +
         '<div class="sa-src">ESA WorldCover 2021 (10 m) · share of site area</div></div>';
+    }
+    if (meanCh !== null) {
+      out += '<div class="sa-theme"><h4>🌲 Canopy height</h4>' +
+        '<div class="sa-kv"><span>Mean canopy height</span><b>' + fmt(meanCh, 1) + ' m</b></div>' +
+        '<div class="sa-kv"><span>Tallest sampled</span><b>' + fmt(chMax, 0) + ' m</b></div>' +
+        '<div class="sa-src">ETH Global Canopy Height 2020 (10 m)</div></div>';
     }
     if (fireN !== null) {
       var days = (fireMeta && fireMeta.days) || "recent";

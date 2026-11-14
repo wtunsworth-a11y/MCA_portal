@@ -198,6 +198,13 @@ def main():
                "f0f0f0", "0064c8", "0096a0", "00cf75", "fae6a0"]
         return wc.remap(cls, list(range(len(cls)))).visualize(min=0, max=len(cls) - 1, palette=pal)
 
+    def canopy():
+        # ETH Global Canopy Height 2020 (10 m). Rendered as a GRAYSCALE ramp so the
+        # client can decode height back from pixel luminance: height ≈ lum/255 * 40 m.
+        # (0..40 m covers PNG tropical canopy; masked ocean/no-data stays transparent.)
+        ch = ee.Image("users/nlang/ETH_GlobalCanopyHeight_2020_10m_v1").select(0)
+        return ch.updateMask(ch.gte(0)).visualize(min=0, max=40, palette=["000000", "ffffff"])
+
     # Diagnostic: ForTy class histogram (confirms the pixel-value encoding).
     try:
         forty_img = mosaic_of("projects/nature-trace/assets/forest_typology/forest_typology_2020_v1_0_classification").select(0)
@@ -211,7 +218,8 @@ def main():
                          ("defor_post2020", defor_post2020), ("gfc2020", gfc2020),
                          ("tmf_defor", tmf_defor), ("forty", forty),
                          ("radd_recent", radd_recent), ("glad_recent", glad_recent),
-                         ("worldclim_precip", worldclim_precip), ("landcover", landcover)]:
+                         ("worldclim_precip", worldclim_precip), ("landcover", landcover),
+                         ("canopy", canopy)]:
         try:
             url = fn().getThumbURL(thumb)
             png = "gee_%s.png" % key_name
