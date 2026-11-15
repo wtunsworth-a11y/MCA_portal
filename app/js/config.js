@@ -43,7 +43,7 @@ window.PORTAL_CONFIG = {
       attribution: "Imagery © Esri, Maxar, Earthstar Geographics",
       // PNG rainforest renders very dark — lift shadows and add a little contrast
       // and saturation so the imagery is legible under the data overlays.
-      paint: { "raster-brightness-min": 0.16, "raster-contrast": 0.12, "raster-saturation": 0.22 }
+      paint: { "raster-brightness-min": 0.30, "raster-contrast": 0.08, "raster-saturation": 0.26 }
     },
     {
       id: "topo_osm", name: "Topographic (OpenTopoMap)", type: "raster", default: false,

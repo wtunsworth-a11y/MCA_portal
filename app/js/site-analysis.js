@@ -192,7 +192,7 @@
     container: "sa-map",
     style: { version: 8, sources: { basemap: { type: "raster", tiles: [esri], tileSize: 256, attribution: "Imagery © Esri" } },
              layers: [{ id: "basemap", type: "raster", source: "basemap",
-               paint: { "raster-brightness-min": 0.16, "raster-contrast": 0.12, "raster-saturation": 0.22 } }] },
+               paint: { "raster-brightness-min": 0.30, "raster-contrast": 0.08, "raster-saturation": 0.26 } }] },
     center: [148.45, -9.1], zoom: 7.2, attributionControl: true
   });
   map.addControl(new maplibregl.NavigationControl({ showCompass: false }), "top-right");
