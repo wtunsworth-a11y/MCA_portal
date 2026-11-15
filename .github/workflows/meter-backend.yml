@@ -1,0 +1,30 @@
+name: Meter GEE backend cost
+
+# One-off metered spike for the proposed on-demand site-analysis backend.
+# Runs representative AOIs through the real per-theme Earth Engine compute and
+# reports actual EECU-seconds per report (see .github/scripts/meter_backend.py).
+# Results are printed to the job log between ===METER_JSON_START/END=== — nothing
+# is committed. Trigger manually from the Actions tab or via workflow_dispatch.
+
+on:
+  workflow_dispatch: {}
+
+permissions:
+  contents: read
+
+jobs:
+  meter:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Install Earth Engine API
+        run: pip install --quiet earthengine-api
+      - name: Run metered spike
+        env:
+          EE_SERVICE_ACCOUNT_KEY: ${{ secrets.EE_SERVICE_ACCOUNT_KEY }}
+          EE_PROJECT: orodataportal
+        run: python3 .github/scripts/meter_backend.py
