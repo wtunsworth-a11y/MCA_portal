@@ -1,0 +1,224 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Oro Data Portal — Purpose, Function & Rationale</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&display=swap');
+  :root{ --ground:#f6f3ea; --panel:#fff; --panel2:#eef3ec; --line:#e5e1d4; --ink:#233027;
+    --muted:#4f5d53; --faint:#8b978c; --canopy:#2f9160; --amber:#b5730a; --loss:#e5484d;
+    --sans:"Nunito","Segoe UI",system-ui,-apple-system,Roboto,sans-serif; }
+  *{ box-sizing:border-box; }
+  body{ font-family:var(--sans); color:var(--ink); background:var(--ground);
+    line-height:1.62; font-size:15.5px; margin:0; }
+  .wrap{ max-width:820px; margin:0 auto; padding:40px 28px 60px; }
+  h1{ font-size:30px; font-weight:800; letter-spacing:-.015em; line-height:1.12; margin:0 0 8px; }
+  .sub{ font-size:17px; color:var(--muted); margin:0 0 18px; }
+  .meta{ font-size:12.5px; color:var(--faint); border-top:1px solid var(--line);
+    border-bottom:1px solid var(--line); padding:10px 0; margin:0 0 26px; display:flex; gap:16px; flex-wrap:wrap; }
+  h2{ font-size:20px; font-weight:800; margin:34px 0 10px; letter-spacing:-.01em; }
+  h3{ font-size:15.5px; font-weight:800; margin:18px 0 6px; }
+  p{ margin:0 0 12px; } ul,ol{ margin:0 0 12px; padding-left:20px; } li{ margin:4px 0; }
+  a{ color:var(--amber); }
+  .eyebrow{ font-size:12px; font-weight:800; letter-spacing:.09em; text-transform:uppercase; color:var(--canopy); margin-bottom:10px; }
+  .callout{ background:var(--panel2); border:1px solid var(--line); border-left:4px solid var(--canopy);
+    border-radius:12px; padding:16px 18px; margin:16px 0; }
+  .callout h3{ margin:0 0 6px; }
+  .case{ background:var(--panel); border:1px solid var(--line); border-radius:14px; padding:16px 18px; margin:12px 0;
+    box-shadow:0 1px 2px rgba(30,50,40,.05),0 8px 22px rgba(30,50,40,.05); }
+  .case .t{ font-weight:800; color:var(--canopy); font-size:14.5px; margin-bottom:4px; }
+  table{ width:100%; border-collapse:collapse; font-size:13.8px; margin:12px 0; }
+  th,td{ text-align:left; padding:9px 11px; border-bottom:1px solid var(--line); vertical-align:top; }
+  th{ color:var(--muted); font-size:11.5px; text-transform:uppercase; letter-spacing:.03em; }
+  td:first-child{ font-weight:700; }
+  .refs{ font-size:12.5px; color:var(--muted); } .refs li{ margin:5px 0; word-break:break-word; }
+  .lead{ font-size:16.5px; color:var(--ink); }
+  @media print{ body{ background:#fff; font-size:11.5px; } .wrap{ padding:0; max-width:none; }
+    h2{ margin-top:20px; } .case,.callout{ box-shadow:none; break-inside:avoid; } a{ color:var(--ink); } }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="eyebrow">Rationale &amp; purpose · Oro (Northern) Province, PNG</div>
+  <h1>The Oro Data Portal</h1>
+  <p class="sub">Putting conservation and land-use data in the hands of provincial decision-makers — and why it fills a real gap.</p>
+  <div class="meta">
+    <span>Oro (Northern) Province, Papua New Guinea</span>
+    <span>·</span>
+    <span>Managalas &amp; Oro Province Component, EU-FCCB Nexus Programme</span>
+    <span>·</span>
+    <span>2026</span>
+  </div>
+
+  <div class="callout">
+    <h3>In one paragraph</h3>
+    <p style="margin:0">Decisions about Oro Province's forests, farms and conservation areas are being made with very
+      little current, accessible data. The information that <em>does</em> exist — satellite monitoring, land-cover
+      maps, historical records — is scattered, technical, and out of reach for the officers, landowners and
+      cooperatives who need it. The Oro Data Portal closes that gap: it brings free satellite data and the region's
+      own records together in one place, keeps them current automatically, and presents them so that a
+      non-specialist can find an answer in minutes. It turns data that already exists but goes unused into a
+      practical basis for provincial decisions.</p>
+  </div>
+
+  <h2>1. The problem: deciding without data</h2>
+  <p class="lead">Papua New Guinea has a well-documented data deficit, and it is sharpest exactly where decisions
+    about land and forests are made — at the provincial and local level.</p>
+  <p>The national picture is stark. The country's own Strategy for the Development of Statistics identifies data
+    gaps, low-quality data and poor data access as core weaknesses of the statistical system.<sup>[1]</sup> PNG's
+    2025 Voluntary National Review to the United Nations could measure only <b>87 of 169</b> Sustainable Development
+    Goal targets — the rest could not be assessed for want of data.<sup>[2]</sup> Even the population is uncertain:
+    modelled estimates have put it near 17 million against an official 9.4 million, a gap with direct consequences
+    for planning and resource allocation.<sup>[3]</sup></p>
+  <p>At the sub-national level the problem compounds. Analysts have found that lower-level development plans in PNG
+    are unlikely to rest on sound data, and that the data underlying existing plans has become outdated.<sup>[4]</sup>
+    Where provinces have piloted geospatial tools — mapping roads, schools and health posts with satellite imagery
+    and GPS — the result has been markedly better local planning, which shows both the demand and the
+    feasibility.<sup>[5]</sup> But these efforts are isolated; there is no standing, current, province-wide picture
+    that a decision-maker can simply open.</p>
+  <p>Oro Province feels this acutely because so much is at stake on its land. Oil palm is the province's principal
+    industry — Oro is the only province in PNG where it is the leading primary crop — grown by estates such as
+    Higaturu alongside thousands of smallholder blocks; cocoa is grown by nearly every household.<sup>[6]</sup>
+    These are expanding, forest-adjacent land uses. At the same time Oro holds the <b>Managalas Conservation
+    Area</b>, at roughly 360,000&nbsp;hectares the largest conservation area in the country and the only large
+    protected area gazetted in PNG since 2010.<sup>[7]</sup> Weighing agricultural expansion, livelihoods and
+    conservation against each other is a provincial decision — and today it is made largely blind.</p>
+
+  <h2>2. The decisions that need data</h2>
+  <p>The portal is built around the actual decisions people in and around Oro face. Four stand out.</p>
+  <h3>Land use &amp; agricultural expansion</h3>
+  <p>Where should new oil palm or cocoa go, and where should it not? Answering this needs to know what is still
+    forest, what is already cleared, what is protected, and what the terrain and soils allow — layered together for
+    a specific place.</p>
+  <h3>Conservation management of the Managalas Conservation Area</h3>
+  <p>Managers and landowner committees need to know where forest is being cleared <em>now</em>, not in a report two
+    years later, so limited ranger time can be targeted where it matters.</p>
+  <h3>EUDR market access — time-bound and high-stakes</h3>
+  <p>The EU Deforestation Regulation begins applying from <b>30 December 2026</b> (with later dates for small
+    enterprises), and it reaches straight into Oro's economy: cocoa, coffee and palm oil are all in scope.<sup>[8]</sup>
+    Buyers will require proof that a commodity did not come from land deforested after 2020, backed by the plot's
+    <b>geolocation</b> — a point for plots up to 4&nbsp;ha, a polygon for larger ones. PNG is rated low-risk, which
+    simplifies due diligence, but the burden still falls hardest on <b>smallholders</b>, much of whose coffee and
+    cocoa grows on plots that have never been formally surveyed; non-certified smallholders risk being shut out of
+    the EU market altogether.<sup>[9]</sup> Being able to check a plot against a deforestation baseline, for free,
+    before a buyer does, is now a direct livelihood question.</p>
+  <h3>Climate, disaster and service planning</h3>
+  <p>Fire risk rises sharply in El Niño years; active-fire and drought signals, and basic population and
+    accessibility layers, support preparedness and the siting of services.</p>
+
+  <h2>3. How the portal fills the gap</h2>
+  <p>The gap is not that the data does not exist — much of it does, freely, from satellites and global programmes.
+    The gap is that it is <b>scattered, technical, stale in the places people look, and invisible to non-specialists</b>.
+    The portal is designed precisely against those four barriers.</p>
+  <table>
+    <tr><th>The barrier</th><th>What the portal does</th></tr>
+    <tr><td>Scattered</td><td>Consolidates satellite monitoring, land-cover and forest maps, protected-area
+      boundaries and the region's own document archive into one place, framed on Oro Province.</td></tr>
+    <tr><td>Stale</td><td>Feeds refresh automatically on a schedule — fire and clearing alerts daily, climate
+      monthly — so the map reflects the latest data with no manual re-processing.</td></tr>
+    <tr><td>Technical</td><td>A <b>Site Analysis</b> tool lets anyone draw or upload a plot and get back plain
+      figures — area, forest cover, land cover, an EUDR deforestation screen — with no GIS software or skills.</td></tr>
+    <tr><td>Invisible</td><td>A friendly, low-bandwidth interface and a plain-language guide, usable on the slow,
+      intermittent connections common in the province.</td></tr>
+  </table>
+  <p>Crucially, it does this at <b>very low cost</b>. The portal is a lightweight access layer, not a data
+    warehouse: it leans on free global datasets and free hosting, and the one piece of paid infrastructure — the
+    on-demand analysis engine — is metered to run comfortably within a free tier at the province's expected usage.
+    Keeping it running does not depend on a continuing grant for servers.</p>
+
+  <h2>4. It is a proven model — brought to provincial scale</h2>
+  <p>The idea that an open geospatial portal can change real decisions is not speculative; it is established at
+    national scale and well evidenced. Through the World Resources Institute's Global Forest Watch and its national
+    Forest Atlases, governments have used accessible forest data to extend and strengthen Indonesia's moratorium on
+    new forest concessions, to calculate deforestation taxes in the Democratic Republic of the Congo, and — in
+    Cameroon — to let the forestry ministry make better-informed allocation decisions. Governments using these tools
+    to design or implement policy now manage over <b>400 million hectares</b> of forest; park rangers in Uganda use
+    the same alerts to target patrols rather than searching at random.<sup>[10]</sup></p>
+  <p>The Oro Data Portal applies this well-proven model where it has been missing: at the <b>provincial</b> scale,
+    tuned to one province's crops, conservation area and decisions, in the hands of the people who actually manage
+    the land — not a national ministry alone.</p>
+
+  <h2>5. Worked examples</h2>
+
+  <div class="case"><div class="t">A cocoa cooperative prepares for the EUDR deadline</div>
+    An officer uploads a member's garden boundary into Site Analysis. The tool returns the plot's area and an EUDR
+    screen showing the share that was standing forest in 2020 and any cleared since — a self-check, for free, before
+    an EU buyer's own due diligence, with time to act before December 2026.</div>
+
+  <div class="case"><div class="t">A provincial land-use officer reviews a proposed oil-palm expansion</div>
+    Before commenting on a development proposal, the officer opens the map over the site, switches on the 2020
+    forest benchmark and protected-area boundaries, and sees at a glance how much standing forest and how much of
+    the Managalas Conservation Area the proposal would touch — in minutes, without a GIS unit.</div>
+
+  <div class="case"><div class="t">Conservation managers target a ranger visit</div>
+    A clearing-alert layer flags recent forest loss inside the conservation area. Managers focus a patrol on that
+    location instead of covering ground at random — the same shift from random to targeted enforcement that rangers
+    report elsewhere.</div>
+
+  <div class="case"><div class="t">The programme reports on its own results</div>
+    For annual reporting, staff pull the province's forest-loss trend and conservation-area status directly from the
+    portal, turning monitoring that already runs into evidence of impact.</div>
+
+  <h2>6. Alignment with the EU-FCCB programme</h2>
+  <p>The portal is not a side activity; it is a direct instrument of the programme funding it. The EU Forestry,
+    Climate Change and Biodiversity (EU-FCCB) Nexus Programme (2023–2027, €54.7&nbsp;million) sets three strategic
+    objectives, and the portal serves all three.<sup>[11]</sup></p>
+  <table>
+    <tr><th>EU-FCCB objective</th><th>How the portal contributes</th></tr>
+    <tr><td>1 · Evidence-based FCCB policy, governance &amp; institutions</td><td>Puts current forest, land-cover
+      and conservation data in front of provincial decision-makers — the literal meaning of evidence-based.</td></tr>
+    <tr><td>2 · Knowledge &amp; awareness among the population</td><td>An open, plain-language portal and guide make
+      the state of the province's forests visible and understandable to communities, not just experts.</td></tr>
+    <tr><td>3 · Inclusive green investment &amp; deforestation-free livelihoods</td><td>The EUDR screening tool
+      helps smallholders keep access to the EU market — the programme's deforestation-free-livelihoods goal, made
+      concrete at plot level.</td></tr>
+  </table>
+  <p>The programme's Managalas &amp; Oro Province Component exists to enhance conservation while developing
+    livelihoods around the Managalas Conservation Area;<sup>[12]</sup> the portal is the shared evidence base that
+    both halves of that mission rely on.</p>
+
+  <h2>7. Honest limitations</h2>
+  <ul>
+    <li><b>A screening tool, not a legal ruling.</b> The EUDR check uses global satellite products to flag areas for
+      a closer look; it is not an official or legal EUDR determination, and field and official verification remain
+      necessary.</li>
+    <li><b>Satellite data has limits.</b> Cloud, small clearings and mapping resolution mean figures are indicative;
+      the portal is a guide to support judgement, not a replacement for it.</li>
+    <li><b>Connectivity.</b> The portal is built for low bandwidth, but reaching the most remote users still depends
+      on the province's improving connectivity.</li>
+    <li><b>It needs an owner.</b> The portal's value grows when a provincial institution adopts it, keeps the local
+      records current, and uses it in real processes. The technology is low-maintenance by design; the institutional
+      home is what makes it last.</li>
+  </ul>
+
+  <h2>8. Conclusion</h2>
+  <p>Oro Province is making consequential decisions about forests, farms and a nationally significant conservation
+    area, largely without the data those decisions deserve — even though much of that data already exists, unused.
+    The Oro Data Portal closes the distance between the data and the decision. It consolidates what is scattered,
+    keeps it current, makes it legible to non-specialists, and does so cheaply and durably. The model is proven at
+    national scale; the portal brings it to the province, and squarely serves the objectives of the programme that
+    funds it. The gap is real, it is costly, and this is a practical way to fill it.</p>
+
+  <h2>Sources</h2>
+  <ol class="refs">
+    <li>PNG Strategy for the Development of Statistics — <a href="https://png-data.sprep.org/system/files/PNGSDS%20Policy%20Vol%201.pdf">png-data.sprep.org</a></li>
+    <li>Papua New Guinea Voluntary National Review 2025, UN HLPF — <a href="https://hlpf.un.org/sites/default/files/vnrs/2025/VNR%202025%20Papua%20New%20Guinea%20Report.pdf">hlpf.un.org</a></li>
+    <li>WorldPop Project / PNG population estimates — <a href="https://en.wikipedia.org/wiki/WorldPop_Project">en.wikipedia.org/wiki/WorldPop_Project</a></li>
+    <li>Improving Urban Development in PNG (data underlying local plans), PNG NRI, 2017 — <a href="https://pngnri.org/images/Publications/DP151-201701-Leger-Improving-Urban-Development-in-Papua-New-Guinea_EnvironmentalAspects1.pdf">pngnri.org</a></li>
+    <li>Geospatial tools for decentralised rural development planning (Simbu) — <a href="https://pubs.sciepub.com/ajrd/6/3/1/index.html">pubs.sciepub.com</a></li>
+    <li>Oro Province business &amp; agriculture profile; oil palm &amp; cocoa — <a href="https://www.businessadvantagepng.com/oro-province-papua-new-guinea-business-guide/">businessadvantagepng.com</a>; <a href="https://en.wikipedia.org/wiki/Oro_Province">en.wikipedia.org/wiki/Oro_Province</a></li>
+    <li>Managalas, PNG's largest conservation area — Mongabay, 2017 — <a href="https://news.mongabay.com/2017/12/papua-new-guinea-gets-its-largest-ever-conservation-area/">news.mongabay.com</a></li>
+    <li>EUDR scope &amp; timing for PNG commodities — PNG Dept. of Agriculture &amp; Livestock — <a href="https://dal.gov.pg/news/png-agriculture-sectors-urged-to-prepare-for-eu-deforestation-regulation">dal.gov.pg</a></li>
+    <li>EUDR &amp; PNG smallholders (geolocation, market risk) — Fairtrade — <a href="https://www.fairtrade.net/en/get-involved/news/geolocation-data-project-advances-eudr-readiness-in-papua-new-guinea.html">fairtrade.net</a>; RSPO smallholder gap analysis — <a href="https://rspo.org/wp-content/uploads/Annex-4b-RSPO-RISS-EUDR-GapImpactAnalysis_Final-Report-for-Reference.pdf">rspo.org</a></li>
+    <li>Governments using Global Forest Watch / Forest Atlases to inform decisions — WRI — <a href="https://www.wri.org/outcomes/more-actors-use-global-forest-watch-improve-forest-management">wri.org</a></li>
+    <li>EU-FCCB Nexus Programme objectives, budget &amp; timeline — <a href="https://fccbpng.eu/">fccbpng.eu</a>; EU Delegation PNG — <a href="https://www.eeas.europa.eu/delegations/papua-new-guinea/european-union-forestry-climate-change-and-biodiversity-eu-fccb_en">eeas.europa.eu</a></li>
+    <li>Managalas &amp; Oro Province Component (MOPP), CIFOR-ICRAF — <a href="https://cifor-icraf.org/managalas-oro-province-project">cifor-icraf.org</a></li>
+  </ol>
+  <p class="refs" style="margin-top:14px;border-top:1px solid var(--line);padding-top:10px">Note: some PNG figures
+    (notably provincial population and the Managalas Conservation Area's exact extent) vary between sources and
+    census years; where they do, the variation is itself part of the data-gap this portal helps address. Figures
+    here are cited to illustrate the gap, not as definitive statistics.</p>
+</div>
+</body>
+</html>
