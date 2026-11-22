@@ -1,15 +1,15 @@
 {
-"updated": "2026-11-21T13:09:55Z",
+"updated": "2026-11-22T12:57:07Z",
 "window_days": 90,
 "source": "GLAD-L (UMD) Landsat alerts",
 "extent": "Oro Province",
 "status": "ok",
-"_conf26_hist": "{'conf26': {'0': 668491.3450980384, '2': 1650.1921568627452, '3': 1944.6117647058825}}",
-"data_latest": "2026-10-28",
+"_conf26_hist": "{'conf26': {'0': 668172.5960784305, '2': 1804.3176470588235, '3': 2109.2352941176473}}",
+"data_latest": "2026-11-05",
 "years": [
 2026
 ],
-"_confirmed_px": 78862,
-"events_gt2ha": 425,
-"area_ha": 6959.4
+"_confirmed_px": 82638,
+"events_gt2ha": 470,
+"area_ha": 7292.3
 }
